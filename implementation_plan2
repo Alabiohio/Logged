@@ -1,0 +1,67 @@
+# Phase 2 — Project Management Implementation Plan
+
+This plan details the implementation of Phase 2, which allows users to create and manage projects, and generate unique API keys for sending logs.
+
+## Goal
+
+Allow users to create and manage projects. Every project represents an application and receives a unique API key.
+
+## User Review Required
+
+> [!WARNING]
+> This phase includes database schema changes. A new migration will be created and applied. Please ensure you are okay with running `drizzle-kit push` or `generate/migrate` during the execution phase.
+
+## Open Questions
+
+> [!IMPORTANT]
+> 1. Are you using a specific UI library (like shadcn/ui) for components like Modals, Badges, and Inputs, or should I build them using standard HTML/CSS/Tailwind (from the codebase)?
+> 2. Is there a specific API key generation logic preferred, or should I use standard crypto functions (e.g., `lg_live_` + random bytes)?
+
+## Proposed Changes
+
+### Database
+
+#### [MODIFY] [schema.ts](file:///c:/Users/ohioa/Projects/React/logged/db/schema.ts)
+- Add `description`, `website`, and `environment` fields to the `projects` table.
+
+### API Routes
+
+#### [NEW] [route.ts](file:///c:/Users/ohioa/Projects/React/logged/app/api/projects/route.ts)
+- `GET /api/projects`: Return all projects for the authenticated user.
+- `POST /api/projects`: Create a new project, generate an API key, and store it.
+
+#### [NEW] [route.ts](file:///c:/Users/ohioa/Projects/React/logged/app/api/projects/[id]/route.ts)
+- `GET /api/projects/[id]`: Get details of a single project.
+- `PATCH /api/projects/[id]`: Update project details (name, description, website, environment).
+- `DELETE /api/projects/[id]`: Delete a project and its associated data.
+
+#### [NEW] [route.ts](file:///c:/Users/ohioa/Projects/React/logged/app/api/projects/[id]/regenerate-key/route.ts)
+- `POST /api/projects/[id]/regenerate-key`: Generate and return a new API key for the project.
+
+### UI Components & Pages
+
+#### [NEW] [page.tsx](file:///c:/Users/ohioa/Projects/React/logged/app/dashboard/projects/page.tsx)
+- The main Projects list page.
+
+#### [NEW] [page.tsx](file:///c:/Users/ohioa/Projects/React/logged/app/dashboard/projects/new/page.tsx)
+- The Create Project form page.
+
+#### [NEW] [page.tsx](file:///c:/Users/ohioa/Projects/React/logged/app/dashboard/projects/[id]/page.tsx)
+- The Project Overview page (dashboard for a specific project).
+
+#### [NEW] [ProjectCard.tsx](file:///c:/Users/ohioa/Projects/React/logged/components/ProjectCard.tsx)
+- Card component to display project info in the list.
+
+#### [NEW] [ApiKeyCard.tsx](file:///c:/Users/ohioa/Projects/React/logged/components/ApiKeyCard.tsx)
+- Component to handle displaying, copying, and regenerating the API key.
+
+## Verification Plan
+
+### Automated Tests
+- Check if `npm run build` or Next.js type checking passes without errors.
+
+### Manual Verification
+- Verify the DB migration is applied successfully.
+- Test creating a project and confirming the API key is generated and visible.
+- Verify editing and deleting projects works correctly.
+- Test regenerating the API key.

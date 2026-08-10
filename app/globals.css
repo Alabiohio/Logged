@@ -1,26 +1,223 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary */
+  --primary: #727D8F;
+  --primary-hover: #525D6D;
+  --primary-active: #424A55;
+  --primary-light: #FFFFFF;
+  --primary-soft: rgba(114, 125, 143, 0.12);
+
+  /* Accent 
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-active: #1E40AF;
+  --accent-light: #DBEAFE;
+  --accent-soft: rgba(59, 130, 246, 0.12);
+*/
+  /* Background */
+  --background: #F5F7FA;
+  --background-secondary: #EEF2F6;
+  --background-tertiary: #E7ECF2;
+
+  /* Glass Surfaces */
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-hover: rgba(255, 255, 255, 0.68);
+  --glass-active: rgba(255, 255, 255, 0.78);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.40);
+  --border-secondary: rgba(15, 23, 42, 0.08);
+
+  /* Text */
+  --text: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-disabled: #94A3B8;
+
+  /* Status Colors */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+  --debug: #8B5CF6;
+
+  /* Shadows */
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 30px;
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-light: var(--primary-light);
+  --color-primary-soft: var(--primary-soft);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+  --color-accent-light: var(--accent-light);
+  --color-accent-soft: var(--accent-soft);
+
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+
+  --color-glass: var(--glass);
+  --color-glass-hover: var(--glass-hover);
+  --color-glass-active: var(--glass-active);
+
+  --color-border: var(--border);
+  --color-border-secondary: var(--border-secondary);
+
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-debug: var(--debug);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root.dark {
+  /* Background */
+  --background: #0b0b0b;
+  --background-secondary: #1d1e1e;
+  --background-tertiary: #242527;
+
+  /* Glass Surfaces */
+  --glass: rgba(56, 55, 55, 0.25);
+  --glass-hover: rgba(15, 23, 42, 0.68);
+  --glass-active: rgba(15, 23, 42, 0.78);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-secondary: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --text: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-disabled: #475569;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Glass Utilities */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+}
+
+.glass-hover:hover {
+  background: var(--glass-hover);
+}
+
+.glass-active:active {
+  background: var(--glass-active);
+}
+
+.btn-primary {
+  background: var(--primary);
+
+  color: white;
+
+  border-radius: 999px;
+
+  transition: 0.25s ease;
+
+  box-shadow:
+    0 10px 30px rgba(16, 185, 129, .25);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,.45);
+
+  backdrop-filter: blur(24px);
+
+  border: 1px solid rgba(255,255,255,.45);
+
+  border-radius: 999px;
+
+  transition: .25s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,.65);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15,23,42,.15);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15,23,42,.3);
+}
+
+::selection {
+  background: #10b981;
+  color: white;
+}
+
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    #10b981,
+    #34d399
+  );
+
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.glow {
+  box-shadow:
+    0 0 60px rgba(16,185,129,.25);
 }

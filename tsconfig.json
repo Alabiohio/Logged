@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@logged/sdk": ["./packages/sdk/src"]
     }
   },
   "include": [

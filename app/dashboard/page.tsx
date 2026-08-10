@@ -1,0 +1,302 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+    FolderKanban,
+    FileText,
+    AlertTriangle,
+    AlertCircle,
+    ChevronRight,
+    Clock,
+    Activity,
+} from "lucide-react";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { StatCardSkeleton, LogRowSkeleton, ProjectCardSkeleton } from "@/components/dashboard/skeleton";
+
+type DashboardData = {
+    stats: {
+        projects: number;
+        logsToday: number;
+        errorsToday: number;
+        warningsToday: number;
+    };
+    recentLogs: {
+        id: string;
+        projectId: string;
+        level: string;
+        message: string;
+        environment: string | null;
+        createdAt: string;
+        projectName: string;
+    }[];
+    projects: {
+        id: string;
+        name: string;
+        description: string | null;
+        updatedAt: string;
+    }[];
+};
+
+function timeAgo(dateStr: string): string {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+}
+
+export default function DashboardPage() {
+    const [data, setData] = useState<DashboardData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        async function fetchDashboard() {
+            try {
+                const res = await fetch("/api/dashboard/stats");
+                if (res.ok) {
+                    setData(await res.json());
+                } else {
+                    setError(true);
+                }
+            } catch {
+                setError(true);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchDashboard();
+    }, []);
+
+    if (error) {
+        return (
+            <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10 text-error mb-4">
+                        <AlertCircle className="h-8 w-8" />
+                    </div>
+                    <h2 className="text-xl font-bold text-text">Something went wrong</h2>
+                    <p className="mt-2 text-text-secondary">
+                        We couldn&apos;t load your dashboard.
+                    </p>
+                    <button
+                        onClick={() => {
+                            setError(false);
+                            setLoading(true);
+                            fetch("/api/dashboard/stats")
+                                .then((r) => r.json())
+                                .then((d) => setData(d))
+                                .catch(() => setError(true))
+                                .finally(() => setLoading(false));
+                        }}
+                        className="mt-6 inline-flex items-center rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/20"
+                    >
+                        Try again
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+            {/* Header */}
+            <section className="flex flex-col gap-4 rounded-[var(--radius-lg)] bg-background-secondary/80 border border-border p-6 shadow-sm backdrop-blur-xl">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-text-secondary">
+                            Dashboard
+                        </p>
+                        <h1 className="mt-2 text-3xl font-black tracking-tight text-text">
+                            Welcome back
+                        </h1>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">
+                            Monitor project health, inspect live logs, and respond to issues
+                            from one central view.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Stats grid */}
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {loading ? (
+                        <>
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                        </>
+                    ) : (
+                        <>
+                            <StatCard
+                                label="Projects"
+                                value={data?.stats.projects ?? 0}
+                                icon={FolderKanban}
+                                iconColor="text-primary"
+                                iconBg="bg-primary/10"
+                            />
+                            <StatCard
+                                label="Logs Today"
+                                value={data?.stats.logsToday?.toLocaleString() ?? "0"}
+                                icon={FileText}
+                                iconColor="text-info"
+                                iconBg="bg-info/10"
+                            />
+                            <StatCard
+                                label="Errors Today"
+                                value={data?.stats.errorsToday ?? 0}
+                                icon={AlertTriangle}
+                                iconColor="text-error"
+                                iconBg="bg-error/10"
+                            />
+                            <StatCard
+                                label="Warnings"
+                                value={data?.stats.warningsToday ?? 0}
+                                icon={AlertCircle}
+                                iconColor="text-warning"
+                                iconBg="bg-warning/10"
+                            />
+                        </>
+                    )}
+                </div>
+            </section>
+
+            {/* No projects empty state */}
+            {!loading && data && data.stats.projects === 0 ? (
+                <EmptyState
+                    icon={FolderKanban}
+                    title="No projects yet"
+                    description="Create your first project and start monitoring your application."
+                    actionLabel="Create Project"
+                    actionHref="/dashboard/projects/new"
+                />
+            ) : (
+                <div className="grid gap-6 xl:grid-cols-[1.8fr_1fr]">
+                    {/* Recent Activity */}
+                    <section className="glass rounded-[var(--radius-lg)] p-6 shadow-sm">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-text-secondary">
+                                    Live activity
+                                </p>
+                                <h2 className="mt-2 text-2xl font-black text-text">
+                                    Recent logs
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 overflow-x-auto">
+                            {loading ? (
+                                <div>
+                                    {[...Array(5)].map((_, i) => (
+                                        <LogRowSkeleton key={i} />
+                                    ))}
+                                </div>
+                            ) : data && data.recentLogs.length > 0 ? (
+                                <table className="min-w-full text-left text-sm">
+                                    <thead>
+                                        <tr className="border-b border-border/50 text-text-secondary">
+                                            <th className="pb-4 font-semibold">Time</th>
+                                            <th className="pb-4 font-semibold">Level</th>
+                                            <th className="pb-4 font-semibold">Message</th>
+                                            <th className="pb-4 font-semibold">Project</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/30">
+                                        {data.recentLogs.map((log) => (
+                                            <tr
+                                                key={log.id}
+                                                className="hover:bg-white/10 transition-colors cursor-pointer"
+                                                onClick={() =>
+                                                    (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
+                                                }
+                                            >
+                                                <td className="py-4 text-text-muted font-mono whitespace-nowrap text-xs">
+                                                    {timeAgo(log.createdAt)}
+                                                </td>
+                                                <td className="py-4 pr-4">
+                                                    <LogLevelBadge level={log.level} />
+                                                </td>
+                                                <td className="py-4 text-text font-medium max-w-xs truncate">
+                                                    {log.message}
+                                                </td>
+                                                <td className="py-4 text-text-secondary whitespace-nowrap">
+                                                    {log.projectName}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-12 text-center">
+                                    <Clock className="h-10 w-10 text-text-muted/30 mb-3" />
+                                    <p className="text-sm text-text-muted">
+                                        No logs yet. Logs will appear here once your projects start sending data.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Recent Projects */}
+                    <aside className="space-y-6">
+                        <div className="glass rounded-[var(--radius-lg)] p-6 shadow-sm">
+                            <div className="flex items-center justify-between gap-3 mb-6">
+                                <div>
+                                    <p className="text-sm font-medium text-text-secondary">
+                                        Your applications
+                                    </p>
+                                    <h3 className="mt-2 text-xl font-black text-text">
+                                        Projects
+                                    </h3>
+                                </div>
+                                <FolderKanban className="h-5 w-5 text-primary" />
+                            </div>
+
+                            {loading ? (
+                                <div className="space-y-4">
+                                    <ProjectCardSkeleton />
+                                    <ProjectCardSkeleton />
+                                </div>
+                            ) : data && data.projects.length > 0 ? (
+                                <div className="space-y-3">
+                                    {data.projects.map((project) => (
+                                        <Link
+                                            key={project.id}
+                                            href={`/dashboard/projects/${project.id}`}
+                                            className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background p-4 transition hover:bg-glass-hover group"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="font-semibold text-text truncate group-hover:text-primary transition-colors">
+                                                    {project.name}
+                                                </p>
+                                                <p className="mt-1 text-xs text-text-muted flex items-center gap-1.5">
+                                                    <Activity className="h-3 w-3" />
+                                                    {timeAgo(project.updatedAt)}
+                                                </p>
+                                            </div>
+                                            <ChevronRight className="h-4 w-4 text-text-muted shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                                        </Link>
+                                    ))}
+
+                                    <Link
+                                        href="/dashboard/projects"
+                                        className="block text-center text-sm font-semibold text-primary hover:underline pt-2"
+                                    >
+                                        View all projects →
+                                    </Link>
+                                </div>
+                            ) : null}
+                        </div>
+                    </aside>
+                </div>
+            )}
+        </div>
+    );
+}

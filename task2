@@ -1,0 +1,10 @@
+- `[/]` Update `db/schema.ts` with new project fields
+- `[ ]` Run database migration (`drizzle-kit push` or generate/migrate)
+- `[ ]` Implement `GET /api/projects` and `POST /api/projects`
+- `[ ]` Implement `GET /api/projects/[id]`, `PATCH`, and `DELETE`
+- `[ ]` Implement `POST /api/projects/[id]/regenerate-key`
+- `[ ]` Build `ProjectCard` and `ApiKeyCard` components
+- `[ ]` Implement `/dashboard/projects` list page
+- `[ ]` Implement `/dashboard/projects/new` creation page
+- `[ ]` Implement `/dashboard/projects/[id]` overview page
+- `[ ]` Verify application functionality
