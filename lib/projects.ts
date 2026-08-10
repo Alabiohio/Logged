@@ -16,7 +16,7 @@ export class ProjectNotFoundError extends Error {
     }
 }
 
-export function projectOwnershipCondition(projectId: string, userId: string): SQL {
+export function projectOwnershipCondition(projectId: string, userId: string): SQL | undefined {
     return and(
         eq(projects.id, projectId),
         eq(projects.userId, userId)

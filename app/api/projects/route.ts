@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
+import { getProjectsForUser } from "@/lib/projects";
 
 export async function GET(req: Request) {
     const session = await auth.api.getSession({
