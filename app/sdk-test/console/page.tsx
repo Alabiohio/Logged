@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { Logged } from "@logged/sdk";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { LOGGED_BASE_URL } from "@/lib/site-config";
 
 const apiKey = process.env.NEXT_PUBLIC_LOGGED_API_KEY || "test_api_key";
 
 const logger = new Logged({
   apiKey,
   environment: "development",
-  baseUrl: "http://localhost:3000",
+  baseUrl: LOGGED_BASE_URL,
   debug: true,
 });
 

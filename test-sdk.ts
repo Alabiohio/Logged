@@ -1,11 +1,12 @@
 import { Logged } from "@logged/sdk";
 import dotenv from "dotenv";
+import { LOGGED_BASE_URL } from "./lib/site-config";
 
 dotenv.config({ path: ".env.local" });
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY || "test_api_key",
-  baseUrl: "http://localhost:3000",
+  baseUrl: LOGGED_BASE_URL,
   environment: "development",
   debug: true,
 });

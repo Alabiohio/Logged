@@ -33,10 +33,10 @@ export default function LoginPage() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <div className="w-full max-w-md space-y-8 rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
+            <div className="w-full max-w-md space-y-8 rounded-2xl glass p-8 shadow-2xl">
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Sign in to Logged</h2>
-                    <p className="mt-2 text-sm text-gray-400">
+                    <h2 className="text-3xl font-bold tracking-tight text-text">Sign in to Logged</h2>
+                    <p className="mt-2 text-sm text-text-secondary">
                         Welcome back! Please enter your details.
                     </p>
                 </div>
@@ -50,22 +50,22 @@ export default function LoginPage() {
                     
                     <div className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium text-gray-300">Email Address</label>
+                            <label className="text-sm font-medium text-text">Email Address</label>
                             <input
                                 type="email"
                                 required
-                                className="mt-2 block w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                                className="mt-2 block w-full rounded-lg border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-gray-300">Password</label>
+                            <label className="text-sm font-medium text-text">Password</label>
                             <input
                                 type="password"
                                 required
-                                className="mt-2 block w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                                className="mt-2 block w-full rounded-lg border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -82,9 +82,9 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                <p className="text-center text-sm text-gray-400">
+                <p className="text-center text-sm text-text-secondary">
                     Don't have an account?{" "}
-                    <Link href="/register" className="font-semibold text-primary hover:text-primary-light transition-colors">
+                    <Link href="/register" className="font-semibold text-primary hover:text-primary-hover transition-colors">
                         Sign up
                     </Link>
                 </p>

@@ -1,6 +1,9 @@
 import { LogPayload, LoggedConfig } from "./types";
 
-const DEFAULT_BASE_URL = "https://logged.site";
+const DEFAULT_BASE_URL =
+  typeof process !== "undefined" && process.env?.NEXT_PUBLIC_LOGGED_BASE_URL
+    ? process.env.NEXT_PUBLIC_LOGGED_BASE_URL
+    : "http://localhost:3000";
 
 export class Transport {
   private config: LoggedConfig;

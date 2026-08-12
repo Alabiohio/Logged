@@ -2,13 +2,13 @@
 
 export default function Hero() {
   return (
-    <section className="mx-auto flex min-h-[85vh] max-w-7xl flex-col items-center justify-center gap-20 px-6 lg:flex-row">
+    <section className="mx-auto flex min-h-[85vh] max-w-7xl flex-col items-center justify-center gap-12 px-6 py-16 pt-44 lg:flex-row lg:gap-20">
 
       {/* Left */}
 
-      <div className="max-w-2xl">
+      <div className="max-w-2xl text-center lg:text-left">
 
-        <h1 className="mt-8 text-6xl font-black leading-tight tracking-tight text-text lg:text-7xl">
+        <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight text-text sm:text-5xl lg:text-7xl">
 
           Monitor every log.
 
@@ -20,16 +20,16 @@ export default function Hero() {
 
         </h1>
 
-        <p className="mt-8 max-w-xl text-lg leading-8 text-text-secondary">
+        <p className="mt-6 max-w-xl text-base leading-8 text-text-secondary sm:text-lg mx-auto lg:mx-0">
 
           Collect logs from your websites, APIs, and applications in one
           beautiful dashboard. Search, monitor, and debug with confidence.
 
         </p>
 
-        <div className="mt-10 flex gap-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
 
-          <button className="rounded-full bg-primary px-7 py-4 font-semibold text-white shadow-xl shadow-lg transition hover:bg-primary-hover">
+          <button className="rounded-full bg-primary px-7 py-4 font-semibold text-white shadow-xl transition hover:bg-primary-hover">
 
             Start Free
 
@@ -47,9 +47,9 @@ export default function Hero() {
 
       {/* Right */}
 
-      <div className="relative">
+      <div className="relative w-full max-w-[430px] shrink-0">
 
-        <div className="w-[430px] rounded-[36px] border border-border bg-glass p-6 backdrop-blur-3xl shadow-2xl">
+        <div className="w-full rounded-[36px] border border-border bg-glass p-6 backdrop-blur-3xl shadow-2xl">
 
           <div className="mb-6 flex items-center justify-between">
 
@@ -111,21 +111,21 @@ function Log({
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-border bg-glass-hover p-4 backdrop-blur-xl">
 
-      <div className={`h-3 w-3 rounded-full ${color}`} />
+      <div className={`h-3 w-3 shrink-0 rounded-full ${color}`} />
 
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
 
         <p className="font-semibold text-text">
           {level}
         </p>
 
-        <p className="text-sm text-text-muted">
+        <p className="text-sm text-text-muted truncate">
           {message}
         </p>
 
       </div>
 
-      <span className="text-xs text-text-disabled">
+      <span className="shrink-0 text-xs text-text-disabled">
         now
       </span>
 

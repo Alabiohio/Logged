@@ -299,13 +299,13 @@ Body:
 Use a production default:
 
 ```ts
-const DEFAULT_BASE_URL = "https://logged.site";
+const DEFAULT_BASE_URL = "https://localhost:3000";
 ```
 
 Then construct:
 
 ```text
-https://logged.site/api/v1/logs
+https://localhost:3000/api/v1/logs
 ```
 
 During development:

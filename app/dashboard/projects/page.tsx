@@ -73,7 +73,7 @@ export default function ProjectsPage() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 text-center bg-glass/50">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 px-2 text-center bg-glass/50">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
             <Plus className="h-8 w-8" />
           </div>

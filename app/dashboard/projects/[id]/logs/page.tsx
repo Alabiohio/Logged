@@ -12,12 +12,15 @@ import { LogFilters } from "@/components/dashboard/log-filters";
 
 function formatTime(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString(undefined, {
+  const date = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const time = d.toLocaleTimeString(undefined, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     fractionalSecondDigits: 3,
+    hour12: false,
   });
+  return `${date}, ${time}`;
 }
 
 function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
@@ -26,32 +29,57 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
   return (
     <div className="border-b border-border/50 last:border-0 hover:bg-glass/50 transition-colors">
       <div 
-        className="flex items-center gap-4 py-3 px-4 cursor-pointer group"
+        className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 py-2.5 sm:px-4 cursor-pointer group"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="w-5 shrink-0 flex items-center justify-center text-text-muted group-hover:text-text transition-colors">
+        {/* Mobile layout — stacked card style */}
+        <div className="flex sm:hidden flex-col gap-1">
+          {/* Row 1: chevron + badge + env */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-4 shrink-0 flex items-center justify-center text-text-muted group-hover:text-text transition-colors">
+                {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+              </div>
+              <LogLevelBadge level={log.level} />
+            </div>
+            <span className="bg-background-tertiary px-1.5 py-0.5 rounded text-[10px] font-sans text-text-muted">
+              {log.environment || "N/A"}
+            </span>
+          </div>
+          {/* Row 2: message */}
+          <div className="pl-6 text-xs font-medium text-text line-clamp-2 break-all">
+            {log.message}
+          </div>
+          {/* Row 3: timestamp */}
+          <div className="pl-6 text-[10px] font-mono text-text-muted">
+            {formatTime(log.timestamp || log.createdAt)}
+          </div>
+        </div>
+
+        {/* Desktop Columns */}
+        <div className="hidden sm:flex w-5 shrink-0 items-center justify-center text-text-muted group-hover:text-text transition-colors">
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </div>
 
-        <div className="w-24 shrink-0 text-xs font-mono text-text-muted">
+        <div className="hidden sm:block w-44 shrink-0 text-xs font-mono text-text-muted">
           {formatTime(log.timestamp || log.createdAt)}
         </div>
         
-        <div className="w-24 shrink-0">
+        <div className="hidden sm:block w-24 shrink-0">
           <LogLevelBadge level={log.level} />
         </div>
         
-        <div className="flex-1 min-w-0 truncate font-medium text-sm text-text">
+        <div className="hidden sm:block flex-1 min-w-0 font-medium text-xs text-text sm:line-clamp-1 sm:truncate sm:break-normal">
           {log.message}
         </div>
         
-        <div className="w-24 shrink-0 text-right">
+        <div className="hidden sm:block w-24 shrink-0 text-right">
           <span className="text-xs text-text-muted bg-background-tertiary px-2 py-1 rounded">
             {log.environment || "N/A"}
           </span>
         </div>
 
-        <div className="w-8 shrink-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="hidden sm:flex w-8 shrink-0 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
            <button 
              onClick={(e) => { e.stopPropagation(); onClick(); }}
              className="p-1.5 hover:bg-background-tertiary rounded-md text-text-muted hover:text-text transition-colors"
@@ -65,7 +93,7 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
       {isExpanded && (
         <div className="pl-14 pr-4 pb-4 pt-1 bg-background-secondary/10">
            <div className="text-sm text-text space-y-2 font-mono whitespace-pre-wrap break-all bg-background-tertiary/50 p-3 rounded-lg border border-border/50">
-             <div className="font-semibold">{log.message}</div>
+             <div className="text-xs">{log.message}</div>
              {log.url && <div className="text-text-muted text-xs mt-2">URL: {log.url}</div>}
              {log.metadata && Object.keys(log.metadata).length > 0 && (
                <div className="text-text-muted text-xs mt-2 overflow-hidden text-ellipsis line-clamp-5">
@@ -240,53 +268,57 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
   };
 
   return (
-    <div className="space-y-4 flex flex-col h-[calc(100vh-theme(spacing.32))]">
+    <div className="space-y-4 flex flex-col h-[calc(100dvh-125px)] lg:h-[calc(100dvh-48px)]">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
+      <div className="flex flex-row items-center justify-between shrink-0">
         <div>
           <Link
             href={`/dashboard/projects/${projectId}`}
-            className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text transition-colors mb-2"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm text-text-secondary hover:text-text transition-colors mb-1 sm:mb-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Project
+            <span className="hidden sm:inline">Back to Project</span>
+            <span className="sm:hidden">Back</span>
           </Link>
-          <h1 className="text-2xl font-black text-text flex items-center gap-3">
-            <TerminalSquare className="h-6 w-6 text-primary" />
+          <h1 className="text-lg sm:text-2xl font-black text-text flex items-center gap-2 sm:gap-3">
+            <TerminalSquare className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             Log Explorer
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-3">
           {totalLogs > 0 && (
-            <span className="text-sm text-text-muted">
-              {totalLogs.toLocaleString()} {totalLogs === 1 ? "log" : "logs"}
+            <span className="text-xs sm:text-sm text-text-muted">
+              {totalLogs.toLocaleString()} <span className="hidden sm:inline">{totalLogs === 1 ? "log" : "logs"}</span>
             </span>
           )}
           <button
             onClick={() => fetchLogs(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-glass px-4 py-2 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-glass p-2 sm:px-4 sm:py-2 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover disabled:opacity-50"
+            title="Refresh"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Toolbar — Search + Filters */}
-      <div className="glass rounded-2xl p-4 space-y-4 shrink-0">
+      <div className="md:glass md:rounded-2xl md:p-4 space-y-4 shrink-0 group/toolbar">
         <div className="flex flex-col sm:flex-row gap-4">
           <LogSearch />
-          <LogFilters />
+          <div className="hidden sm:block group-focus-within/toolbar:block">
+            <LogFilters />
+          </div>
         </div>
         <ActiveFilterBadges />
       </div>
 
       {/* Main Content Area */}
-      <div className="glass rounded-2xl flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         {/* Table Header */}
-        <div className="flex items-center gap-4 py-3 px-4 border-b border-border/50 bg-background-secondary/50 text-xs font-semibold text-text-secondary uppercase tracking-wider shrink-0">
+        <div className="hidden sm:flex items-center gap-4 py-3 px-4 border-b border-border/50 bg-background-secondary/50 text-xs font-semibold text-text-secondary uppercase tracking-wider shrink-0">
           <div className="w-5 shrink-0"></div>
           <div className="w-24 shrink-0">Time</div>
           <div className="w-24 shrink-0">Level</div>

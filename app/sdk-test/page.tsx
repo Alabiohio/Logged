@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Logged } from "@logged/sdk";
+import { LOGGED_BASE_URL } from "@/lib/site-config";
 
 // Use NEXT_PUBLIC_LOGGED_API_KEY if available, or fallback to a string for testing
 const apiKey = process.env.NEXT_PUBLIC_LOGGED_API_KEY || "test_api_key";
@@ -10,7 +11,7 @@ const apiKey = process.env.NEXT_PUBLIC_LOGGED_API_KEY || "test_api_key";
 const logger = new Logged({
   apiKey,
   environment: "development",
-  baseUrl: "http://localhost:3000",
+  baseUrl: LOGGED_BASE_URL,
   debug: true,
 });
 

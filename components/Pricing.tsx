@@ -49,28 +49,28 @@ const plans = [
 
 export default function Pricing() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-32">
+    <section className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
 
       <div className="text-center">
 
-        <h2 className="mt-6 text-5xl font-black">
+        <h2 className="mt-6 text-3xl font-black sm:text-4xl lg:text-5xl">
           Simple pricing.
         </h2>
 
-        <p className="mx-auto mt-5 max-w-2xl text-lg text-text-muted">
+        <p className="mx-auto mt-5 max-w-2xl text-base text-text-muted sm:text-lg">
           Start for free and upgrade when your applications grow.
         </p>
 
       </div>
 
-      <div className="mt-20 grid gap-8 lg:grid-cols-3">
+      <div className="mt-16 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:mt-20 lg:grid-cols-3">
 
         {plans.map((plan) => (
           <div
             key={plan.name}
-            className={`glass relative p-8 ${
+            className={`glass relative p-7 sm:p-8 ${
               plan.highlighted
-                ? "border-2 border-primary scale-[1.03]"
+                ? "border-2 border-primary sm:scale-[1.03]"
                 : ""
             }`}
           >
@@ -87,7 +87,7 @@ export default function Pricing() {
             </p>
 
             <div className="mt-8 flex items-end gap-2">
-              <span className="text-5xl font-black">
+              <span className="text-4xl font-black sm:text-5xl">
                 {plan.price}
               </span>
 
@@ -117,7 +117,7 @@ export default function Pricing() {
                 >
                   <Check
                     size={18}
-                    className="text-primary"
+                    className="shrink-0 text-primary"
                   />
 
                   <span className="text-text-secondary">

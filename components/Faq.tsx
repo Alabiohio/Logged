@@ -30,42 +30,42 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-32">
+    <section className="mx-auto max-w-4xl px-6 py-20 lg:py-32">
 
       <div className="text-center">
 
-        <h2 className="mt-6 text-5xl font-black">
+        <h2 className="mt-6 text-3xl font-black sm:text-4xl lg:text-5xl">
           Frequently Asked Questions
         </h2>
 
       </div>
 
-      <div className="mt-16 space-y-4">
+      <div className="mt-12 space-y-4 sm:mt-16">
 
         {faqs.map((faq, index) => (
           <div
             key={faq.question}
-            className="glass overflow-hidden"
+            className="glass overflow-hidden rounded-3xl"
           >
             <button
               onClick={() =>
                 setOpen(open === index ? null : index)
               }
-              className="flex w-full items-center justify-between p-6 text-left"
+              className="flex w-full items-center justify-between p-5 text-left sm:p-6"
             >
-              <span className="font-semibold text-lg">
+              <span className="font-semibold text-base sm:text-lg pr-4">
                 {faq.question}
               </span>
 
               <ChevronDown
-                className={`transition ${
+                className={`shrink-0 transition ${
                   open === index ? "rotate-180" : ""
                 }`}
               />
             </button>
 
             {open === index && (
-              <div className="px-6 pb-6 text-text-muted leading-7">
+              <div className="px-5 pb-5 text-text-muted leading-7 sm:px-6 sm:pb-6">
                 {faq.answer}
               </div>
             )}

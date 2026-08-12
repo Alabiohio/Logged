@@ -24,7 +24,6 @@ export function Navbar({ openMenu }: { openMenu: () => void }) {
           <Menu className="h-5 w-5" />
         </button>
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-text-secondary">Dashboard</p>
           <h1 className="text-lg font-black text-text">{title}</h1>
         </div>
         <div className="h-11 w-11" />

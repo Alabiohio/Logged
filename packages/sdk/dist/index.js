@@ -25,7 +25,7 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/transport.ts
-var DEFAULT_BASE_URL = "https://logged.site";
+var DEFAULT_BASE_URL = "http://localhost:3000";
 var Transport = class {
   config;
   endpoint;

@@ -21,7 +21,6 @@ export default function Home() {
       <Hero />
       <DashboardPreview />
       <HowItWorks />
-      <Pricing />
       <FAQ />
       <CTA />
       <Footer />

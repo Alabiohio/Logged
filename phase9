@@ -238,7 +238,7 @@ Document:
 const logger = new Logged({
   apiKey: "...",
   environment: "production",
-  baseUrl: "https://logged.site",
+  baseUrl: "https://localhost:3000",
 });
 ```
 
@@ -591,7 +591,7 @@ Developers should be able to test Logged without installing the SDK.
 Example:
 
 ```bash
-curl -X POST https://logged.site/api/v1/logs \
+curl -X POST https://localhost:3000/api/v1/logs \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

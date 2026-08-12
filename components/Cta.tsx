@@ -4,11 +4,11 @@ import { ArrowRight } from "lucide-react";
 
 export default function CTA() {
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-32">
+    <section className="mx-auto max-w-6xl px-6 pb-20 lg:pb-32">
 
-      <div className="glass overflow-hidden rounded-[40px] p-16 text-center">
+      <div className="glass overflow-hidden rounded-[28px] px-6 py-14 text-center sm:rounded-[40px] sm:p-16">
 
-        <h2 className="mx-auto mt-8 max-w-3xl text-6xl font-black leading-tight">
+        <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-black leading-tight sm:mt-8 sm:text-5xl lg:text-6xl">
 
           Stop chasing logs.
 
@@ -18,13 +18,13 @@ export default function CTA() {
 
         </h2>
 
-        <p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-text-muted">
+        <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-text-muted sm:mt-8 sm:text-lg">
 
           Join developers building more reliable software with Logged.
 
         </p>
 
-        <button className="mt-10 inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 font-semibold text-white shadow-xl shadow-lg transition hover:bg-primary-hover">
+        <button className="mt-8 inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 font-semibold text-white shadow-xl transition hover:bg-primary-hover sm:mt-10">
 
           Start Free
 

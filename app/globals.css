@@ -134,19 +134,23 @@ body {
 }
 
 /* Glass Utilities */
-.glass {
+@utility glass {
   background: var(--glass);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border);
 }
 
-.glass-hover:hover {
-  background: var(--glass-hover);
+@utility glass-hover {
+  &:hover {
+    background: var(--glass-hover);
+  }
 }
 
-.glass-active:active {
-  background: var(--glass-active);
+@utility glass-active {
+  &:active {
+    background: var(--glass-active);
+  }
 }
 
 .btn-primary {

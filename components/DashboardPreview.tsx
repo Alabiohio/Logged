@@ -15,28 +15,28 @@ import {
 
 export default function DashboardPreview() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-32">
+    <section className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
 
       <div className="text-center">
 
-        <h2 className="mt-6 text-5xl font-black text-text">
+        <h2 className="mt-6 text-3xl font-black text-text sm:text-4xl lg:text-5xl">
           Everything in one place.
         </h2>
 
-        <p className="mx-auto mt-5 max-w-2xl text-lg text-text-muted">
+        <p className="mx-auto mt-5 max-w-2xl text-base text-text-muted sm:text-lg">
           Monitor projects, inspect logs, track errors and keep your
           applications healthy from a single dashboard.
         </p>
 
       </div>
 
-      <div className="glass mt-20 overflow-hidden p-0">
+      <div className="glass mt-16 overflow-hidden p-0">
 
-        <div className="grid lg:grid-cols-[260px_1fr]">
+        <div className="grid lg:grid-cols-[220px_1fr]">
 
-          {/* Sidebar */}
+          {/* Sidebar — hidden on mobile, shown on lg+ */}
 
-          <aside className="border-r border-border bg-white/25 p-6">
+          <aside className="hidden border-r border-border bg-white/25 p-6 lg:block">
 
             <h3 className="text-2xl font-black">
               Logged
@@ -70,31 +70,31 @@ export default function DashboardPreview() {
 
           {/* Main */}
 
-          <main className="p-8">
+          <main className="p-5 sm:p-8">
 
             {/* Header */}
 
-            <div className="flex flex-wrap items-center justify-between gap-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
 
               <div>
 
-                <h3 className="text-3xl font-black">
+                <h3 className="text-2xl font-black sm:text-3xl">
                   Dashboard
                 </h3>
 
-                <p className="mt-2 text-text-muted">
+                <p className="mt-2 text-sm text-text-muted sm:text-base">
                   Monitor your applications in real time.
                 </p>
 
               </div>
 
-              <div className="flex items-center gap-3 rounded-full border border-border bg-glass-hover px-5 py-3">
+              <div className="flex items-center gap-3 rounded-full border border-border bg-glass-hover px-4 py-2.5 sm:px-5 sm:py-3">
 
-                <Search size={18} />
+                <Search size={16} />
 
                 <input
                   placeholder="Search logs..."
-                  className="bg-transparent outline-none"
+                  className="bg-transparent text-sm outline-none w-28 sm:w-auto"
                 />
 
               </div>
@@ -103,7 +103,7 @@ export default function DashboardPreview() {
 
             {/* Stats */}
 
-            <div className="mt-10 grid gap-5 md:grid-cols-4">
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
 
               <Card
                 title="Logs Today"
@@ -133,9 +133,9 @@ export default function DashboardPreview() {
 
             {/* Logs */}
 
-            <div className="glass mt-8 p-0">
+            <div className="glass mt-6 sm:mt-8 p-0">
 
-              <div className="border-b border-border px-6 py-5">
+              <div className="border-b border-border px-5 py-4 sm:px-6 sm:py-5">
 
                 <h4 className="font-bold">
                   Recent Logs
@@ -209,18 +209,18 @@ function Card({
   color,
 }: any) {
   return (
-    <div className="glass p-6">
+    <div className="glass p-4 sm:p-6">
 
-      <p className="text-sm text-text-muted">
+      <p className="text-xs text-text-muted sm:text-sm">
         {title}
       </p>
 
-      <h3 className="mt-3 text-4xl font-black">
+      <h3 className="mt-2 text-2xl font-black sm:mt-3 sm:text-4xl">
         {value}
       </h3>
 
       <div
-        className={`mt-5 h-2 rounded-full bg-${color}-500`}
+        className={`mt-4 h-1.5 rounded-full bg-${color}-500 sm:mt-5 sm:h-2`}
       />
 
     </div>
@@ -234,21 +234,21 @@ function Log({
   color,
 }: any) {
   return (
-    <div className="flex items-center justify-between border-b border-border px-6 py-5">
+    <div className="flex items-center justify-between border-b border-border px-5 py-4 sm:px-6 sm:py-5">
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 min-w-0">
 
-        <div className={color}>
+        <div className={`${color} shrink-0`}>
           {icon}
         </div>
 
-        <div>
+        <div className="min-w-0">
 
-          <h5 className="font-semibold">
+          <h5 className="font-semibold text-sm sm:text-base">
             {level}
           </h5>
 
-          <p className="text-sm text-text-muted">
+          <p className="text-xs text-text-muted truncate sm:text-sm">
             {message}
           </p>
 
@@ -256,7 +256,7 @@ function Log({
 
       </div>
 
-      <span className="text-sm text-text-disabled">
+      <span className="shrink-0 text-xs text-text-disabled ml-3">
         just now
       </span>
 

@@ -76,7 +76,7 @@ export default function DashboardPage() {
 
     if (error) {
         return (
-            <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+            <div className="space-y-8 px-3 py-6 sm:px-3 lg:px-8">
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10 text-error mb-4">
                         <AlertCircle className="h-8 w-8" />
@@ -105,14 +105,11 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-8 px-1 py-6 sm:px-1 lg:px-8">
             {/* Header */}
-            <section className="flex flex-col gap-4 rounded-[var(--radius-lg)] bg-background-secondary/80 border border-border p-6 shadow-sm backdrop-blur-xl">
+            <section className="flex flex-col gap-4 py-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-text-secondary">
-                            Dashboard
-                        </p>
                         <h1 className="mt-2 text-3xl font-black tracking-tight text-text">
                             Welcome back
                         </h1>
@@ -179,12 +176,9 @@ export default function DashboardPage() {
             ) : (
                 <div className="grid gap-6 xl:grid-cols-[1.8fr_1fr]">
                     {/* Recent Activity */}
-                    <section className="glass rounded-[var(--radius-lg)] p-6 shadow-sm">
+                    <section className="glass rounded-[var(--radius-lg)] py-6 px-3 shadow-sm min-w-0">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p className="text-sm font-medium text-text-secondary">
-                                    Live activity
-                                </p>
                                 <h2 className="mt-2 text-2xl font-black text-text">
                                     Recent logs
                                 </h2>
@@ -199,40 +193,69 @@ export default function DashboardPage() {
                                     ))}
                                 </div>
                             ) : data && data.recentLogs.length > 0 ? (
-                                <table className="min-w-full text-left text-sm">
-                                    <thead>
-                                        <tr className="border-b border-border/50 text-text-secondary">
-                                            <th className="pb-4 font-semibold">Time</th>
-                                            <th className="pb-4 font-semibold">Level</th>
-                                            <th className="pb-4 font-semibold">Message</th>
-                                            <th className="pb-4 font-semibold">Project</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/30">
+                                <>
+                                    {/* Mobile card layout */}
+                                    <div className="sm:hidden divide-y divide-border/30">
                                         {data.recentLogs.map((log) => (
-                                            <tr
+                                            <div
                                                 key={log.id}
-                                                className="hover:bg-white/10 transition-colors cursor-pointer"
+                                                className="py-3 cursor-pointer hover:bg-white/5 transition-colors rounded-lg px-1"
                                                 onClick={() =>
                                                     (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
                                                 }
                                             >
-                                                <td className="py-4 text-text-muted font-mono whitespace-nowrap text-xs">
-                                                    {timeAgo(log.createdAt)}
-                                                </td>
-                                                <td className="py-4 pr-4">
+                                                <div className="flex items-center gap-2 mb-1.5">
                                                     <LogLevelBadge level={log.level} />
-                                                </td>
-                                                <td className="py-4 text-text font-medium max-w-xs truncate">
+                                                    <span className="text-xs text-text-muted font-mono ml-auto">
+                                                        {timeAgo(log.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-text font-medium truncate">
                                                     {log.message}
-                                                </td>
-                                                <td className="py-4 text-text-secondary whitespace-nowrap">
+                                                </p>
+                                                <p className="text-xs text-text-secondary mt-0.5">
                                                     {log.projectName}
-                                                </td>
-                                            </tr>
+                                                </p>
+                                            </div>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </div>
+
+                                    {/* Desktop table layout */}
+                                    <table className="hidden sm:table min-w-full text-left text-sm">
+                                        <thead>
+                                            <tr className="border-b border-border/50 text-text-secondary">
+                                                <th className="pb-4 pr-3 font-semibold">Time</th>
+                                                <th className="pb-4 pr-3 font-semibold">Level</th>
+                                                <th className="pb-4 pr-3 font-semibold">Message</th>
+                                                <th className="pb-4 font-semibold">Project</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/30">
+                                            {data.recentLogs.map((log) => (
+                                                <tr
+                                                    key={log.id}
+                                                    className="hover:bg-white/10 transition-colors cursor-pointer"
+                                                    onClick={() =>
+                                                        (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
+                                                    }
+                                                >
+                                                    <td className="py-4 pr-3 text-text-muted font-mono whitespace-nowrap text-xs">
+                                                        {timeAgo(log.createdAt)}
+                                                    </td>
+                                                    <td className="py-4 pr-3">
+                                                        <LogLevelBadge level={log.level} />
+                                                    </td>
+                                                    <td className="py-4 pr-3 text-text font-medium max-w-xs truncate">
+                                                        {log.message}
+                                                    </td>
+                                                    <td className="py-4 text-text-secondary whitespace-nowrap">
+                                                        {log.projectName}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <Clock className="h-10 w-10 text-text-muted/30 mb-3" />
@@ -245,13 +268,10 @@ export default function DashboardPage() {
                     </section>
 
                     {/* Recent Projects */}
-                    <aside className="space-y-6">
+                    <aside className="space-y-6 min-w-0">
                         <div className="glass rounded-[var(--radius-lg)] p-6 shadow-sm">
                             <div className="flex items-center justify-between gap-3 mb-6">
                                 <div>
-                                    <p className="text-sm font-medium text-text-secondary">
-                                        Your applications
-                                    </p>
                                     <h3 className="mt-2 text-xl font-black text-text">
                                         Projects
                                     </h3>

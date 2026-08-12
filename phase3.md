@@ -94,7 +94,7 @@ POST /api/v1/logs
 Example:
 
 ```bash
-curl -X POST https://logged.site/api/v1/logs \
+curl -X POST https://localhost:3000/api/v1/logs \
   -H "Authorization: Bearer lg_live_xxxxx" \
   -H "Content-Type: application/json" \
   -d '{
@@ -650,7 +650,7 @@ Before moving to Phase 4, test:
 Phase 3 is complete when you can take a completely separate application and run:
 
 ```ts
-fetch("https://logged.site/api/v1/logs", {
+fetch("https://localhost:3000/api/v1/logs", {
   method: "POST",
 
   headers: {
