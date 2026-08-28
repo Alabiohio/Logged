@@ -180,9 +180,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: "Failed to store logs." }, { status: 500, headers: corsHeaders() });
         }
 
-        for (const log of normalized) {
+        for (let i = 0; i < normalized.length; i++) {
+            const log = normalized[i];
             if (log.level === "error") {
-                void maybeSendErrorAlert(project, log.level, log.message, log.id);
+                void maybeSendErrorAlert(project, log.level, log.message, ids[i]);
             }
         }
 
