@@ -360,7 +360,6 @@ The SDK configuration should continue to control the environment:
 ```ts
 const logger = new Logged({
   apiKey: "...",
-  environment: "production",
 });
 ```
 
@@ -885,7 +884,6 @@ initialize it:
 ```ts
 const logger = new Logged({
   apiKey: "...",
-  environment: "production",
 });
 ```
 

@@ -74,7 +74,6 @@ Support configuration such as:
 ```ts
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
-  environment: "production",
 });
 ```
 
@@ -456,7 +455,6 @@ If supplied during initialization:
 ```ts
 const logger = new Logged({
   apiKey: "...",
-  environment: "production",
 });
 ```
 
@@ -651,7 +649,6 @@ import { Logged } from "@logged/sdk";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
-  environment: "development",
 });
 
 logger.info("Test application started");

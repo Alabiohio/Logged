@@ -4,6 +4,10 @@ import { validateLog, validateBatch } from "@/lib/logs/validate";
 import { normalizeLog, normalizeBatch } from "@/lib/logs/normalize";
 import { ingestLog, ingestBatch } from "@/lib/logs/ingest";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { db } from "@/lib/db";
+import { userPreferences, users, projects } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { sendErrorAlertEmail } from "@/lib/email";
 
 // ------------------------------------------------------------------
 // Constants
@@ -24,6 +28,54 @@ function corsHeaders(): Record<string, string> {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
+}
+
+async function maybeSendErrorAlert(project: typeof projects.$inferSelect, level: string, message: string, logId: string) {
+    if (level !== "error") return;
+
+    try {
+        const [projectOwner, preferences] = await Promise.all([
+            db.query.users.findFirst({
+                where: eq(users.id, project.userId),
+                columns: { id: true, name: true, email: true },
+            }),
+            db.query.userPreferences.findFirst({
+                where: eq(userPreferences.userId, project.userId),
+            }),
+        ]);
+
+        if (!projectOwner?.email) {
+            console.log("No project owner email found for project:", project.id);
+            return;
+        }
+
+        const emailNotificationsEnabled = preferences?.emailNotifications ?? true;
+        const errorAlertsEnabled = preferences?.errorAlerts ?? true;
+
+        if (!emailNotificationsEnabled || !errorAlertsEnabled) {
+            console.log("Error alerts disabled for user:", project.userId, {
+                emailNotifications: emailNotificationsEnabled,
+                errorAlerts: errorAlertsEnabled,
+            });
+            return;
+        }
+
+        const logUrl = `${process.env.APP_URL || "http://localhost:3000"}/dashboard/projects/${project.id}/logs`;
+
+        console.log("Sending error alert email to:", projectOwner.email, "for project:", project.name);
+
+        await sendErrorAlertEmail({
+            to: projectOwner.email,
+            userName: projectOwner.name || "User",
+            projectName: project.name,
+            errorMessage: message,
+            logUrl,
+        });
+
+        console.log("Error alert email sent successfully to:", projectOwner.email);
+    } catch (error) {
+        console.error("Failed to send error alert email:", error);
+    }
 }
 
 // ------------------------------------------------------------------
@@ -125,7 +177,13 @@ export async function POST(request: NextRequest) {
         const ids = await ingestBatch(normalized).catch(() => null);
 
         if (!ids) {
-            return errorResponse(500, "INTERNAL_ERROR", "Failed to store logs.");
+            return NextResponse.json({ success: false, error: "Failed to store logs." }, { status: 500, headers: corsHeaders() });
+        }
+
+        for (const log of normalized) {
+            if (log.level === "error") {
+                void maybeSendErrorAlert(project, log.level, log.message, log.id);
+            }
         }
 
         return NextResponse.json(
@@ -144,12 +202,14 @@ export async function POST(request: NextRequest) {
         const id = await ingestLog(normalized).catch(() => null);
 
         if (!id) {
-            return errorResponse(500, "INTERNAL_ERROR", "Failed to store log.");
+            return NextResponse.json({ success: false, error: "Failed to store log." }, { status: 500, headers: corsHeaders() });
         }
+
+        void maybeSendErrorAlert(project, normalized.level, normalized.message, id);
 
         return NextResponse.json(
             { success: true, id },
-            { status: 201, headers: { ...corsHeaders(), ...rlHeaders } }
+            { status: 201, headers: corsHeaders() }
         );
     }
 }

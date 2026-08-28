@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import Image from "next/image";
 
 const navLinks = [
   { label: "Features", href: "#" },
@@ -24,9 +25,10 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="text-xl font-black tracking-tight text-text sm:text-2xl"
+          className="relative flex items-center group shrink-0"
         >
-          Logged
+          <Image src="/logo/logo.png" alt="Oheo logo" width={1000} height={20} className="relative w-9 h-9 object-contain" />
+          <span className="text-xl font-black tracking-tight text-text-secondary sm:text-2xl ml-2">Logged</span>
         </Link>
 
         {/* Desktop nav links */}
@@ -89,7 +91,7 @@ export default function Navbar() {
           {/* Action buttons */}
           <div className="flex flex-col gap-3">
             <Link
-              href="/sign-in"
+              href="/login"
               onClick={() => setOpen(false)}
               className="w-full rounded-full border border-border bg-black/10 py-3 text-center text-sm font-medium text-text-secondary transition hover:bg-glass"
             >
@@ -97,7 +99,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/sign-up"
+              href="/register"
               onClick={() => setOpen(false)}
               className="w-full rounded-full bg-primary py-3 text-center text-sm font-semibold text-white shadow-lg transition hover:bg-primary-hover"
             >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 
@@ -10,25 +10,41 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [unverified, setUnverified] = useState(false);
+    const [resent, setResent] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectPath = searchParams.get("redirect");
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-        
+        setUnverified(false);
+
         const { data, error } = await authClient.signIn.email({
             email,
             password,
         });
 
         if (error) {
-            setError(error.message || "An error occurred during login");
+            if (error.message?.toLowerCase().includes("verify") || error.message?.toLowerCase().includes("unverified")) {
+                setUnverified(true);
+            } else {
+                setError(error.message || "An error occurred during login");
+            }
             setLoading(false);
             return;
         }
 
-        router.push("/dashboard");
+        router.push(redirectPath || "/dashboard");
+    };
+
+    const handleResendVerification = async () => {
+        setLoading(true);
+        await authClient.sendVerificationEmail({ email });
+        setResent(true);
+        setLoading(false);
     };
 
     return (
@@ -41,13 +57,36 @@ export default function LoginPage() {
                     </p>
                 </div>
 
+                {unverified && !resent && (
+                    <div className="rounded-2xl border border-warning/20 bg-warning/10 p-4 space-y-3">
+                        <p className="text-sm text-warning font-medium">
+                            Your email is not verified.
+                        </p>
+                        <button
+                            onClick={handleResendVerification}
+                            disabled={loading}
+                            className="text-sm font-semibold text-primary hover:underline"
+                        >
+                            Resend verification email
+                        </button>
+                    </div>
+                )}
+
+                {resent && (
+                    <div className="rounded-2xl border border-success/20 bg-success/10 p-4">
+                        <p className="text-sm text-success font-medium">
+                            Verification email sent! Check your inbox.
+                        </p>
+                    </div>
+                )}
+
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     {error && (
                         <div className="rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20">
                             {error}
                         </div>
                     )}
-                    
+
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-medium text-text">Email Address</label>
@@ -83,7 +122,7 @@ export default function LoginPage() {
                 </form>
 
                 <p className="text-center text-sm text-text-secondary">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link href="/register" className="font-semibold text-primary hover:text-primary-hover transition-colors">
                         Sign up
                     </Link>

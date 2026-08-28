@@ -7,7 +7,6 @@ dotenv.config({ path: ".env.local" });
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY || "test_api_key",
   baseUrl: LOGGED_BASE_URL,
-  environment: "development",
   debug: true,
 });
 

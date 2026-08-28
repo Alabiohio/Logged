@@ -177,7 +177,6 @@ import { Logged } from "@logged/sdk";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
-  environment: "production",
 });
 ```
 
@@ -237,7 +236,6 @@ Document:
 ```ts
 const logger = new Logged({
   apiKey: "...",
-  environment: "production",
   baseUrl: "https://localhost:3000",
 });
 ```
@@ -448,7 +446,6 @@ import { Logged } from "@logged/sdk";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,
-  environment: "production",
 });
 
 export function LoggedProvider() {
@@ -517,7 +514,6 @@ Example:
 
   const logger = new Logged({
     apiKey: "YOUR_API_KEY",
-    environment: "production"
   });
 
   logger.auto();

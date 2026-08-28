@@ -18,6 +18,7 @@ import {
     Clock,
     ChevronRight,
     AlertCircle,
+    ShieldX,
 } from "lucide-react";
 import { ApiKeyCard } from "@/components/ApiKeyCard";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
@@ -72,6 +73,7 @@ export default function ProjectOverviewPage() {
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+    const [forbidden, setForbidden] = useState(false);
 
     // Edit state
     const [editing, setEditing] = useState(false);
@@ -93,6 +95,10 @@ export default function ProjectOverviewPage() {
                 const res = await fetch(`/api/projects/${projectId}`);
                 if (res.status === 404) {
                     setNotFound(true);
+                    return;
+                }
+                if (res.status === 403) {
+                    setForbidden(true);
                     return;
                 }
                 if (res.ok) {
@@ -167,6 +173,26 @@ export default function ProjectOverviewPage() {
                         <LogRowSkeleton key={i} />
                     ))}
                 </div>
+            </div>
+        );
+    }
+
+    if (forbidden) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10 mb-4">
+                    <ShieldX className="h-8 w-8 text-error" />
+                </div>
+                <h2 className="text-xl font-bold text-text">Access Denied</h2>
+                <p className="mt-2 max-w-sm text-text-secondary">
+                    You do not have permission to view this project. It belongs to another account.
+                </p>
+                <Link
+                    href="/dashboard/projects"
+                    className="mt-4 text-sm text-primary hover:underline"
+                >
+                    Back to Projects
+                </Link>
             </div>
         );
     }

@@ -53,7 +53,6 @@ Create a consistent format for every incoming log.
     plan: "pro"
   },
 
-  environment: "production",
 
   source: "server",
 
@@ -664,7 +663,6 @@ fetch("https://localhost:3000/api/v1/logs", {
     metadata: {
       userId: "123",
     },
-    environment: "production",
   }),
 });
 ```

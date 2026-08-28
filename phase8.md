@@ -23,7 +23,6 @@ import { Logged } from "@logged/sdk";
 
 const logger = new Logged({
   apiKey: "...",
-  environment: "production",
 });
 
 logger.interceptConsole();
@@ -976,7 +975,6 @@ Phase 8 is complete when a developer can do:
 ```ts
 const logger = new Logged({
   apiKey: "...",
-  environment: "production",
 });
 
 logger.interceptConsole();

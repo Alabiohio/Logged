@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import {
     authorizeProjectAccess,
     ProjectNotFoundError,
+    ProjectForbiddenError,
     UnauthorizedProjectAccessError,
 } from "@/lib/projects";
 
@@ -25,10 +26,13 @@ export async function GET(
     try {
         await authorizeProjectAccess(session, id);
     } catch (error) {
-        if (error instanceof Error && error.name === "UnauthorizedProjectAccessError") {
+        if (error instanceof UnauthorizedProjectAccessError) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-        if (error instanceof Error && error.name === "ProjectNotFoundError") {
+        if (error instanceof ProjectForbiddenError) {
+            return NextResponse.json({ error: "You do not have permission to access this project" }, { status: 403 });
+        }
+        if (error instanceof ProjectNotFoundError) {
             return NextResponse.json({ error: "Project not found" }, { status: 404 });
         }
         throw error;

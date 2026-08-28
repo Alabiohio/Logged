@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -11,13 +12,14 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [emailSent, setEmailSent] = useState(false);
     const router = useRouter();
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-        
+
         const { data, error } = await authClient.signUp.email({
             email,
             password,
@@ -30,8 +32,33 @@ export default function RegisterPage() {
             return;
         }
 
-        router.push("/dashboard");
+        setEmailSent(true);
     };
+
+    if (emailSent) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-background p-4">
+                <div className="w-full max-w-md space-y-6 rounded-2xl glass p-8 shadow-2xl text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mx-auto">
+                        <Mail className="h-8 w-8 text-primary" />
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight text-text">
+                        Check your email
+                    </h2>
+                    <p className="text-sm text-text-secondary">
+                        We sent a verification link to <span className="font-medium text-text">{email}</span>.
+                        Click the link to verify your account.
+                    </p>
+                    <Link
+                        href="/login"
+                        className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition-all"
+                    >
+                        Go to Sign In
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -49,7 +76,7 @@ export default function RegisterPage() {
                             {error}
                         </div>
                     )}
-                    
+
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-medium text-text">Name</label>

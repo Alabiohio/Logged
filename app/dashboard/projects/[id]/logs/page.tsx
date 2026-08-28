@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, use, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ArrowLeft, RefreshCw, Clock, TerminalSquare, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, Clock, TerminalSquare, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX } from "lucide-react";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { LogDetailsDrawer, LogRecord } from "@/components/dashboard/log-details-drawer";
 import { LogRowSkeleton } from "@/components/dashboard/skeleton";
@@ -177,6 +177,8 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
 
   const [logs, setLogs] = useState<LogRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [forbidden, setForbidden] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogRecord | null>(null);
@@ -214,6 +216,14 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
 
     try {
       const res = await fetch(`/api/projects/${projectId}/logs?${buildQuery()}`);
+      if (res.status === 403) {
+        setForbidden(true);
+        return;
+      }
+      if (res.status === 404) {
+        setNotFound(true);
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setLogs(data.logs);
@@ -266,6 +276,40 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
   const clearAllFilters = () => {
     router.replace(pathname);
   };
+
+  if (forbidden) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10 mb-4">
+          <ShieldX className="h-8 w-8 text-error" />
+        </div>
+        <h2 className="text-xl font-bold text-text">Access Denied</h2>
+        <p className="mt-2 max-w-sm text-text-secondary">
+          You do not have permission to view this project. It belongs to another account.
+        </p>
+        <Link
+          href="/dashboard/projects"
+          className="mt-4 text-sm text-primary hover:underline"
+        >
+          Back to Projects
+        </Link>
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <h2 className="text-xl font-bold text-text">Project not found</h2>
+        <Link
+          href="/dashboard/projects"
+          className="mt-4 text-sm text-primary hover:underline"
+        >
+          Back to Projects
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 flex flex-col h-[calc(100dvh-125px)] lg:h-[calc(100dvh-48px)]">

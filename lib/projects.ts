@@ -16,6 +16,13 @@ export class ProjectNotFoundError extends Error {
     }
 }
 
+export class ProjectForbiddenError extends Error {
+    constructor() {
+        super("You do not have permission to access this project");
+        this.name = "ProjectForbiddenError";
+    }
+}
+
 export function projectOwnershipCondition(projectId: string, userId: string): SQL | undefined {
     return and(
         eq(projects.id, projectId),
@@ -36,6 +43,14 @@ export async function getProjectsForUser(userId: string) {
         .where(eq(projects.userId, userId));
 }
 
+export async function projectExists(projectId: string): Promise<boolean> {
+    const project = await db.query.projects.findFirst({
+        where: eq(projects.id, projectId),
+        columns: { id: true },
+    });
+    return project !== null;
+}
+
 export async function authorizeProjectAccess(
     session: { user?: { id: string } } | null,
     projectId: string
@@ -44,11 +59,17 @@ export async function authorizeProjectAccess(
         throw new UnauthorizedProjectAccessError();
     }
 
-    const project = await getProjectForUser(projectId, session.user.id);
+    const owned = await getProjectForUser(projectId, session.user.id);
 
-    if (!project) {
-        throw new ProjectNotFoundError();
+    if (owned) {
+        return owned;
     }
 
-    return project;
+    const exists = await projectExists(projectId);
+
+    if (exists) {
+        throw new ProjectForbiddenError();
+    }
+
+    throw new ProjectNotFoundError();
 }

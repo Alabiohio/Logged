@@ -46,6 +46,15 @@ export const verifications = pgTable("verification", {
 	updatedAt: timestamp("updated_at")
 });
 
+export const userPreferences = pgTable("user_preferences", {
+    userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+    emailNotifications: boolean("email_notifications").notNull().default(true),
+    errorAlerts: boolean("error_alerts").notNull().default(true),
+    weeklyDigest: boolean("weekly_digest").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
 export const projects = pgTable("project", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull().references(() => users.id),

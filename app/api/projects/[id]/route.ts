@@ -8,6 +8,7 @@ import {
     authorizeProjectAccess,
     projectOwnershipCondition,
     ProjectNotFoundError,
+    ProjectForbiddenError,
     UnauthorizedProjectAccessError,
 } from "@/lib/projects";
 
@@ -29,6 +30,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         } catch (error) {
             if (error instanceof UnauthorizedProjectAccessError) {
                 return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
+            if (error instanceof ProjectForbiddenError) {
+                return NextResponse.json({ error: "You do not have permission to access this project" }, { status: 403 });
             }
             if (error instanceof ProjectNotFoundError) {
                 return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -135,6 +139,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             if (error instanceof UnauthorizedProjectAccessError) {
                 return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
             }
+            if (error instanceof ProjectForbiddenError) {
+                return NextResponse.json({ error: "You do not have permission to access this project" }, { status: 403 });
+            }
             if (error instanceof ProjectNotFoundError) {
                 return NextResponse.json({ error: "Project not found" }, { status: 404 });
             }
@@ -175,6 +182,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         } catch (error) {
             if (error instanceof UnauthorizedProjectAccessError) {
                 return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
+            if (error instanceof ProjectForbiddenError) {
+                return NextResponse.json({ error: "You do not have permission to access this project" }, { status: 403 });
             }
             if (error instanceof ProjectNotFoundError) {
                 return NextResponse.json({ error: "Project not found" }, { status: 404 });

@@ -10,7 +10,6 @@ const apiKey = process.env.NEXT_PUBLIC_LOGGED_API_KEY || "test_api_key";
 
 const logger = new Logged({
   apiKey,
-  environment: "development",
   baseUrl: LOGGED_BASE_URL,
   debug: true,
 });
