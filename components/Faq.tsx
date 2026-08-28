@@ -34,7 +34,7 @@ export default function FAQ() {
 
       <div className="text-center">
 
-        <h2 className="mt-6 text-3xl font-black sm:text-4xl lg:text-5xl">
+        <h2 className="mt-6 text-3xl font-hero font-black sm:text-4xl lg:text-5xl">
           Frequently Asked Questions
         </h2>
 

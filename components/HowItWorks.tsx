@@ -41,7 +41,7 @@ export default function HowItWorks() {
 
       <div className="text-center">
 
-        <h2 className="mt-6 text-3xl font-black text-text sm:text-4xl lg:text-5xl">
+        <h2 className="mt-6 text-3xl font-hero font-black text-text sm:text-4xl lg:text-5xl">
           Get started in minutes.
         </h2>
 

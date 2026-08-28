@@ -2,13 +2,13 @@
 
 export default function Hero() {
   return (
-    <section className="mx-auto flex min-h-[85vh] max-w-7xl flex-col items-center justify-center gap-12 px-6 py-16 pt-44 lg:flex-row lg:gap-20">
+    <section className="mx-auto flex min-h-[85vh] max-w-8xl flex-col items-center justify-center gap-12 px-2 py-16 pt-44 lg:flex-row lg:gap-20">
 
       {/* Left */}
 
-      <div className="max-w-2xl text-center lg:text-left">
+      <div className="max-w-3xl text-center lg:text-left">
 
-        <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight text-text sm:text-5xl lg:text-7xl">
+        <h1 className="mt-4 text-4xl font-hero font-black leading-tight tracking-tight text-text sm:text-5xl lg:text-7xl">
 
           Monitor every log.
 
@@ -20,7 +20,7 @@ export default function Hero() {
 
         </h1>
 
-        <p className="mt-6 max-w-xl text-base leading-8 text-text-secondary sm:text-lg mx-auto lg:mx-0">
+        <p className="mt-6 max-w-xl text-base !font-console leading-8 text-text-secondary sm:text-lg mx-auto lg:mx-0">
 
           Collect logs from your websites, APIs, and applications in one
           beautiful dashboard. Search, monitor, and debug with confidence.

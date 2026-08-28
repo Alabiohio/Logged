@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inconsolata, Orbitron, PT_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inconsolata = Inconsolata({
+  variable: "--font-inconsolata",
+  subsets: ["latin"], 
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"], 
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const ptSans = PT_Sans({
+  variable: "--font-pt-sans",
+  subsets: ["latin"], 
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -30,6 +38,10 @@ export const metadata: Metadata = {
     "Logged",
   ],
   applicationName: "Logged",
+  icons: {
+    icon: "/logo/logo.png",
+    apple: "/logo/logo.png",
+  },
   openGraph: {
     title: "Logged | Error Monitoring for Modern Apps",
     description:
@@ -54,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inconsolata.variable} ${orbitron.variable} ${ptSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

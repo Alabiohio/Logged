@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Navbar } from "@/components/dashboard/navbar";
 import { authClient } from "@/lib/auth-client";
-import { Loader2, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
+import LogoLoading from "@/components/LogoLoading";
 import Link from "next/link";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -39,10 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (sessionLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3 text-text-muted">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm">Loading...</p>
-        </div>
+         <LogoLoading className="w-32 h-32" />
       </div>
     );
   }

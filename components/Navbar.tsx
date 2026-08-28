@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-import Image from "next/image";
+import LogoLoading from "./LogoLoading";
 
 const navLinks = [
   { label: "Features", href: "#" },
@@ -27,7 +27,7 @@ export default function Navbar() {
           href="/"
           className="relative flex items-center group shrink-0"
         >
-          <Image src="/logo/logo.png" alt="Oheo logo" width={1000} height={20} className="relative w-9 h-9 object-contain" />
+          <LogoLoading className="relative w-9 h-9" />
           <span className="text-xl font-black tracking-tight text-text-secondary sm:text-2xl ml-2">Logged</span>
         </Link>
 

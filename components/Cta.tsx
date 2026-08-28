@@ -8,14 +8,19 @@ export default function CTA() {
 
       <div className="glass overflow-hidden rounded-[28px] px-6 py-14 text-center sm:rounded-[40px] sm:p-16">
 
-        <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-black leading-tight sm:mt-8 sm:text-5xl lg:text-6xl">
+        <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-hero leading-tight sm:mt-8 sm:text-5xl lg:text-6xl">
+          <span className="font-normal">Stop</span>
+          <span className="font-normal"> chasing</span>
+          <span className="font-semibold"> logs</span>
 
-          Stop chasing logs.
+           .
 
           <br />
+          <span className="font-bold"> Start</span>
+          <span className="font-extrabold"> Understanding</span>
+          <span className="font-black"> them.</span>
 
-          Start understanding them.
-
+           
         </h2>
 
         <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-text-muted sm:mt-8 sm:text-lg">
