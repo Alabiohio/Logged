@@ -169,33 +169,6 @@ export default function Footer() {
             © {new Date().getFullYear()} Logged, Inc. All rights reserved.
           </p>
 
-          {/* Status badge */}
-          <Link
-            href="#"
-            className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium transition-all duration-200"
-            style={{
-              background: "rgba(16,185,129,.08)",
-              border: "1px solid rgba(16,185,129,.2)",
-              color: "#10B981",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(16,185,129,.15)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(16,185,129,.08)";
-            }}
-          >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{
-                background: "#10B981",
-                boxShadow: "0 0 6px #10B981",
-                animation: "pulse 2s infinite",
-              }}
-            />
-            All systems operational
-          </Link>
-
           <div className="flex items-center gap-4">
               <Link
                 href="/privacy"
