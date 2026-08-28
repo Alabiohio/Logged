@@ -2,8 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/weekly-digest",
-      "schedule": "0 8 * * 1",
-      "timezone": "UTC"
+      "schedule": "0 8 * * 1"
     }
   ]
 }
