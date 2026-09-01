@@ -55,7 +55,7 @@ export function Sidebar({
         <div className="flex-1 overflow-y-auto py-6 px-3">
           <nav className="space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
               return (
                 <Link
                   key={item.name}
@@ -115,7 +115,7 @@ export function Sidebar({
 
             <nav className="space-y-2 px-2 flex-1">
               {navigation.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
                 return (
                   <Link
                     key={item.name}

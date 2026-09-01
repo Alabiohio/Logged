@@ -1,12 +1,44 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { db } from "@/lib/db";
+import { sql } from "drizzle-orm";
 
 export const metadata = {
   title: "Status | Logged",
   description: "Logged system status and uptime information.",
 };
 
-export default function StatusPage() {
+export const revalidate = 60; // Check every 60 seconds
+
+async function checkDatabase() {
+  try {
+    await db.execute(sql`SELECT 1`);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export default async function StatusPage() {
+  const isDbOperational = await checkDatabase();
+
+  const getStatusBadge = (isOperational: boolean) => {
+    if (isOperational) {
+      return (
+        <span className="flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-500">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+          Operational
+        </span>
+      );
+    }
+    return (
+      <span className="flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-500">
+        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+        Degraded
+      </span>
+    );
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
       <div className="absolute inset-0 -z-10">
@@ -34,10 +66,7 @@ export default function StatusPage() {
                   Log ingestion and REST API endpoints
                 </p>
               </div>
-              <span className="flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                Operational
-              </span>
+              {getStatusBadge(isDbOperational)}
             </div>
           </div>
 
@@ -49,10 +78,7 @@ export default function StatusPage() {
                   Web dashboard and log viewer
                 </p>
               </div>
-              <span className="flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                Operational
-              </span>
+              {getStatusBadge(isDbOperational)}
             </div>
           </div>
 
@@ -64,10 +90,7 @@ export default function StatusPage() {
                   JavaScript, TypeScript, Node.js, and browser SDKs
                 </p>
               </div>
-              <span className="flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                Operational
-              </span>
+              {getStatusBadge(true)}
             </div>
           </div>
         </div>

@@ -25,11 +25,11 @@ export default function ApiReferencePage() {
           Send logs directly to Logged using our REST API.
         </p>
 
-        <div className="mt-12 space-y-8 text-sm leading-7 text-text-secondary">
+        <div className="mt-12 space-y-12 text-sm leading-7 text-text-secondary">
           <section>
             <h2 className="text-xl font-bold text-text">Base URL</h2>
             <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
-              https://api.logged.dev/v1
+              https://logged.oheo.site/api/v1
             </pre>
           </section>
 
@@ -44,40 +44,83 @@ export default function ApiReferencePage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-text">Send Logs</h2>
+            <h2 className="text-xl font-bold text-text">Send a Single Log</h2>
             <p className="mt-4">
-              POST /logs - Send log entries to Logged for storage and analysis.
+              <span className="font-mono font-bold text-text">POST /logs</span> - Send a single log entry to Logged.
             </p>
+            <p className="mt-2 text-text-muted">
+              Supported fields:
+            </p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-text-muted">
+              <li><code className="text-text">level</code> (required): One of <code className="text-text">log, debug, info, success, warn, error</code>.</li>
+              <li><code className="text-text">message</code> (required): The log message string (max 10KB).</li>
+              <li><code className="text-text">metadata</code> (optional): A JSON object with custom data (max 50KB).</li>
+              <li><code className="text-text">source</code> (optional): One of <code className="text-text">server, client, edge</code>.</li>
+              <li><code className="text-text">url, pathname, stack, timestamp</code> (optional strings).</li>
+            </ul>
             <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
-{`curl -X POST https://api.logged.dev/v1/logs \\
+{`curl -X POST https://logged.oheo.site/api/v1/logs \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "level": "error",
-    "message": "Something went wrong",
-    "service": "my-app",
-    "timestamp": "2026-08-28T19:00:00Z"
+    "message": "Failed to connect to database",
+    "source": "server",
+    "metadata": { "userId": "123", "retryCount": 3 }
   }'`}
+            </pre>
+            <p className="mt-4 font-bold text-text">Response</p>
+            <pre className="mt-2 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+{`{
+  "success": true,
+  "id": "log_abc123"
+}`}
             </pre>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-text">Response</h2>
+            <h2 className="text-xl font-bold text-text">Send Batch Logs</h2>
+            <p className="mt-4">
+              <span className="font-mono font-bold text-text">POST /logs</span> - Send multiple log entries in a single request.
+            </p>
+            <p className="mt-2 text-text-muted">
+              Provide an object with a <code className="text-text">logs</code> array. Maximum of 100 logs per batch.
+            </p>
             <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+{`curl -X POST https://logged.oheo.site/api/v1/logs \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "logs": [
+      {
+        "level": "info",
+        "message": "User login successful"
+      },
+      {
+        "level": "error",
+        "message": "Payment processing failed"
+      }
+    ]
+  }'`}
+            </pre>
+            <p className="mt-4 font-bold text-text">Response</p>
+            <pre className="mt-2 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
 {`{
-  "id": "log_123abc",
-  "status": "accepted",
-  "timestamp": "2026-08-28T19:00:00Z"
+  "success": true,
+  "accepted": 2,
+  "rejected": 0
 }`}
             </pre>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-text">Error Codes</h2>
+            <p className="mt-2 text-text-muted">Max request body size is 100 KB.</p>
             <ul className="mt-4 list-disc space-y-2 pl-5">
-              <li><span className="font-mono text-text">400</span> - Bad Request</li>
-              <li><span className="font-mono text-text">401</span> - Unauthorized</li>
-              <li><span className="font-mono text-text">429</span> - Rate Limited</li>
+              <li><span className="font-mono text-text">400</span> - Bad Request (e.g., <code className="text-text">INVALID_JSON</code>, <code className="text-text">INVALID_LOG</code>)</li>
+              <li><span className="font-mono text-text">401</span> - Unauthorized (<code className="text-text">INVALID_API_KEY</code>)</li>
+              <li><span className="font-mono text-text">413</span> - Payload Too Large (Request body exceeds 100 KB limit)</li>
+              <li><span className="font-mono text-text">429</span> - Rate Limited (<code className="text-text">RATE_LIMITED</code>)</li>
               <li><span className="font-mono text-text">500</span> - Server Error</li>
             </ul>
           </section>
