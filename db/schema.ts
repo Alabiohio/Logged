@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -51,6 +51,7 @@ export const userPreferences = pgTable("user_preferences", {
     emailNotifications: boolean("email_notifications").notNull().default(true),
     errorAlerts: boolean("error_alerts").notNull().default(true),
     weeklyDigest: boolean("weekly_digest").notNull().default(false),
+    logRetentionDays: integer("log_retention_days").notNull().default(90),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 });

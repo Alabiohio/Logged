@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { userPreferences, users } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { userPreferences } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -24,6 +24,7 @@ export async function GET() {
                 emailNotifications: true,
                 errorAlerts: true,
                 weeklyDigest: false,
+                logRetentionDays: 90,
             },
         });
     } catch (error) {
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { emailNotifications, errorAlerts, weeklyDigest } = body;
+        const { emailNotifications, errorAlerts, weeklyDigest, logRetentionDays } = body;
 
         await db
             .insert(userPreferences)
@@ -55,13 +56,15 @@ export async function POST(request: Request) {
                 emailNotifications: emailNotifications ?? true,
                 errorAlerts: errorAlerts ?? true,
                 weeklyDigest: weeklyDigest ?? false,
+                logRetentionDays: logRetentionDays ?? 90,
             })
             .onConflictDoUpdate({
                 target: userPreferences.userId,
                 set: {
-                    emailNotifications: emailNotifications ?? true,
-                    errorAlerts: errorAlerts ?? true,
-                    weeklyDigest: weeklyDigest ?? false,
+                    ...(emailNotifications !== undefined && { emailNotifications }),
+                    ...(errorAlerts !== undefined && { errorAlerts }),
+                    ...(weeklyDigest !== undefined && { weeklyDigest }),
+                    ...(logRetentionDays !== undefined && { logRetentionDays }),
                     updatedAt: new Date(),
                 },
             });
