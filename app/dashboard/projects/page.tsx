@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { ProjectCard } from "@/components/ProjectCard";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -32,19 +33,26 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-text">Projects</h1>
           <p className="text-text-secondary mt-1">Manage your applications and their API keys.</p>
         </div>
-        <Link
-          href="/dashboard/projects/new"
-          className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-primary-hover active:scale-95"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          New Project
-        </Link>
+        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+          <Link
+            href="/dashboard/projects/new"
+            className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-hover"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            New Project
+          </Link>
+        </motion.div>
       </div>
 
       <div className="flex items-center gap-4">
@@ -67,13 +75,37 @@ export default function ProjectsPage() {
           ))}
         </div>
       ) : filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: {},
+            show: {
+              transition: { staggerChildren: 0.08 },
+            },
+          }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <motion.div
+              key={project.id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0 },
+              }}
+              whileHover={{ y: -4 }}
+              transition={{ type: "spring", stiffness: 350, damping: 20 }}
+            >
+              <ProjectCard project={project} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 px-2 text-center bg-glass/50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 px-2 text-center bg-glass/50"
+        >
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
             <Plus className="h-8 w-8" />
           </div>
@@ -89,8 +121,9 @@ export default function ProjectsPage() {
               Create Project
             </Link>
           )}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
+

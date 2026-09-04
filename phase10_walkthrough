@@ -1,0 +1,74 @@
+# Walkthrough - Phase 10: Public npm Release of `@logged/sdk`
+
+We have completed the preparation, packaging, build optimization, documentation, type checking, and tarball verification for **`@logged/sdk`**!
+
+---
+
+## 💡 Accomplished Changes
+
+### 1. SDK Package Configuration
+- Updated [package.json](file:///c:/Users/ohioa/Projects/React/logged/packages/sdk/package.json) with:
+  - Scoped package name: `@logged/sdk`
+  - Exact version: `0.1.0`
+  - Dual module exports: ESM (`./dist/index.mjs`), CommonJS (`./dist/index.js`), and TypeScript definitions (`./dist/index.d.ts` & `index.d.mts`).
+  - Standard `exports` field.
+  - Manifest filter `files: ["dist", "README.md", "LICENSE"]`.
+  - Added build, typecheck, dev, and `prepublishOnly` scripts.
+  - Metadata keywords & license declaration.
+
+### 2. Documentation & Licensing
+- Created [README.md](file:///c:/Users/ohioa/Projects/React/logged/packages/sdk/README.md) containing:
+  - Quickstart guide for initializing `Logged`.
+  - Usage examples for structured logging (`logger.info`, `logger.error`, `logger.warn`, `logger.success`).
+  - Exception capture (`logger.capture`).
+  - Auto-capture (`logger.auto()`) and console interception (`logger.interceptConsole()`).
+  - Options table & TypeScript typings reference.
+- Created [LICENSE](file:///c:/Users/ohioa/Projects/React/logged/packages/sdk/LICENSE) containing the MIT License terms.
+
+---
+
+## ⚡ Verification & Testing Results
+
+1. **Type Checking**:
+   - Ran `npm run typecheck` in `packages/sdk`.
+   - **Result**: Passed with zero TypeScript errors.
+
+2. **Bundle Build**:
+   - Ran `npm run build` in `packages/sdk` using `tsup`.
+   - **Result**: Successfully outputted `dist/index.js`, `dist/index.mjs`, `dist/index.d.ts`, `dist/index.d.mts`.
+
+3. **npm Package Tarball Verification**:
+   - Ran `npm pack` in `packages/sdk`.
+   - **Result**: Generated `logged-sdk-0.1.0.tgz` (7 total files, 6.2 kB packed / 30.2 kB unpacked):
+     * `LICENSE`
+     * `README.md`
+     * `dist/index.d.mts`
+     * `dist/index.d.ts`
+     * `dist/index.js`
+     * `dist/index.mjs`
+     * `package.json`
+
+---
+
+## 🚀 Publishing Checklist (Step-by-step for User)
+
+When you are ready to publish `@logged/sdk` publicly to npm:
+
+1. **Log in to npm**:
+   ```bash
+   npm login
+   ```
+2. **Verify logged-in account**:
+   ```bash
+   npm whoami
+   ```
+3. **Publish to npm**:
+   ```bash
+   cd packages/sdk
+   npm publish --access public
+   ```
+4. **Tag Git Release**:
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```

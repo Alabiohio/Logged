@@ -75,9 +75,26 @@ function LoginForm() {
 
     const handleResendVerification = async () => {
         setLoadingMethod("resend");
-        await authClient.sendVerificationEmail({ email });
-        setResent(true);
-        setLoadingMethod(null);
+        setError(null);
+        try {
+            const response = await fetch("/api/auth/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            const result = await response.json().catch(() => null);
+            if (!response.ok) {
+                setError(result?.error || "Unable to resend the verification email. Please try again.");
+                return;
+            }
+
+            setResent(true);
+        } catch {
+            setError("Unable to resend the verification email. Please check your connection and try again.");
+        } finally {
+            setLoadingMethod(null);
+        }
     };
 
     const handleGoogleSignIn = async () => {

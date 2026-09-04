@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const links = {
   Product: [
@@ -53,7 +54,11 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer
+    <motion.footer
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
       style={{
         background: "var(--glass)",
         backdropFilter: "blur(24px)",
@@ -71,10 +76,8 @@ export default function Footer() {
       />
 
       <div className="mx-auto max-w-7xl px-6 pt-16 pb-10">
-
         {/* Top section: brand left, links right */}
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
-
           {/* Brand column */}
           <div className="max-w-xs">
             <span
@@ -170,24 +173,24 @@ export default function Footer() {
           </p>
 
           <div className="flex items-center gap-4">
-              <Link
-                href="/privacy"
-                className="text-xs transition-colors duration-150"
-                style={{ color: "var(--text-disabled)" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-disabled)"; }}
-              >
-                Privacy
-              </Link>
-              <Link
-                href="/terms"
-                className="text-xs transition-colors duration-150"
-                style={{ color: "var(--text-disabled)" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-disabled)"; }}
-              >
-                Terms
-              </Link>
+            <Link
+              href="/privacy"
+              className="text-xs transition-colors duration-150"
+              style={{ color: "var(--text-disabled)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-disabled)"; }}
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-xs transition-colors duration-150"
+              style={{ color: "var(--text-disabled)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-disabled)"; }}
+            >
+              Terms
+            </Link>
             <Link
               href="#"
               className="text-xs transition-colors duration-150"
@@ -199,8 +202,7 @@ export default function Footer() {
             </Link>
           </div>
         </div>
-
       </div>
-    </footer>
+    </motion.footer>
   );
 }

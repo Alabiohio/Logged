@@ -25,7 +25,7 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/transport.ts
-var DEFAULT_BASE_URL = "http://localhost:3000";
+var DEFAULT_BASE_URL = typeof process !== "undefined" && process.env?.NEXT_PUBLIC_LOGGED_BASE_URL ? process.env.NEXT_PUBLIC_LOGGED_BASE_URL : "http://localhost:3000";
 var Transport = class {
   config;
   endpoint;
@@ -224,11 +224,128 @@ function setupAutoCapture(logger) {
   };
 }
 
+// src/utils/serialize.ts
+function serialize(value, seen = /* @__PURE__ */ new WeakSet()) {
+  if (value === null || typeof value !== "object") {
+    if (typeof value === "function") {
+      return `[Function: ${value.name || "anonymous"}]`;
+    }
+    if (value === void 0) {
+      return "[undefined]";
+    }
+    return value;
+  }
+  if (value instanceof Error) {
+    return {
+      message: value.message,
+      name: value.name,
+      stack: value.stack
+    };
+  }
+  if (seen.has(value)) {
+    return "[Circular]";
+  }
+  seen.add(value);
+  if (Array.isArray(value)) {
+    return value.map((item) => serialize(item, seen));
+  }
+  const serializedObject = {};
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      try {
+        serializedObject[key] = serialize(value[key], seen);
+      } catch (err) {
+        serializedObject[key] = "[Unserializable]";
+      }
+    }
+  }
+  return serializedObject;
+}
+function safeSerializeArgs(args) {
+  return args.map((arg) => serialize(arg));
+}
+
+// src/browser/console.ts
+var CONSOLE_METHODS = ["log", "info", "warn", "error"];
+var LEVEL_MAP = {
+  log: "log",
+  info: "info",
+  warn: "warn",
+  error: "error"
+};
+function setupConsoleCapture(logger) {
+  if (typeof window === "undefined" || typeof console === "undefined") {
+    return () => {
+    };
+  }
+  const filter = new DuplicateFilter();
+  const originalConsole = {
+    log: console.log,
+    info: console.info,
+    warn: console.warn,
+    error: console.error
+  };
+  const handleCapture = (method, args) => {
+    try {
+      if (args.length === 0) return;
+      const level = LEVEL_MAP[method];
+      const serializedArgs = safeSerializeArgs(args);
+      let message = "Console log";
+      let stack;
+      const firstArg = args[0];
+      if (typeof firstArg === "string") {
+        message = firstArg;
+      } else if (firstArg instanceof Error) {
+        message = firstArg.message;
+        stack = firstArg.stack;
+      }
+      const context = getBrowserContext();
+      const fingerprint = generateErrorFingerprint(
+        `${level}:${message}`,
+        stack,
+        context.pathname
+      );
+      if (filter.shouldFilter(fingerprint)) {
+        return;
+      }
+      const payload = {
+        level,
+        message,
+        stack,
+        ...context
+      };
+      const metadata = {
+        consoleArguments: serializedArgs
+      };
+      if (firstArg instanceof Error && firstArg.name) {
+        metadata.errorName = firstArg.name;
+      }
+      logger.transport.send({ ...payload, metadata });
+    } catch (e) {
+      if (logger.config?.debug) {
+        originalConsole.error("[Logged SDK] Error capturing console event:", e);
+      }
+    }
+  };
+  CONSOLE_METHODS.forEach((method) => {
+    console[method] = function(...args) {
+      handleCapture(method, args);
+      originalConsole[method].apply(console, args);
+    };
+  });
+  return () => {
+    CONSOLE_METHODS.forEach((method) => {
+      console[method] = originalConsole[method];
+    });
+  };
+}
+
 // src/logger.ts
 var Logged = class {
   config;
   transport;
   cleanupAutoCapture;
+  cleanupConsoleCapture;
   constructor(config) {
     if (!config.apiKey) {
       console.warn("[Logged SDK] Missing apiKey. Logs will not be sent.");
@@ -307,6 +424,18 @@ var Logged = class {
     if (this.cleanupAutoCapture) {
       this.cleanupAutoCapture();
       this.cleanupAutoCapture = void 0;
+    }
+  }
+  interceptConsole() {
+    if (this.cleanupConsoleCapture) {
+      return;
+    }
+    this.cleanupConsoleCapture = setupConsoleCapture(this);
+  }
+  stopConsoleInterception() {
+    if (this.cleanupConsoleCapture) {
+      this.cleanupConsoleCapture();
+      this.cleanupConsoleCapture = void 0;
     }
   }
 };

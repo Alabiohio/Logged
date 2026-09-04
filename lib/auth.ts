@@ -53,18 +53,20 @@ export const auth = betterAuth({
     },
     emailVerification: {
         expiresIn: 60 * 60 * 24,
+        sendOnSignUp: false,
         autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url }) => {
-            try {
-                const verifyUrl = new URL(url);
-                const token = verifyUrl.searchParams.get("token");
-                const customUrl = `${APP_URL}/verify-email?token=${token}`;
+            const token = new URL(url).searchParams.get("token");
+            if (!token) {
+                throw new Error("Verification URL did not include a token");
+            }
 
-                const result = await resend.emails.send({
-                    from: "Logged <noreply@info.oheo.site>",
-                    to: user.email,
-                    subject: "Verify your email address",
-                    html: `
+            const customUrl = `${APP_URL}/verify-email?token=${token}`;
+            const result = await resend.emails.send({
+                from: "Logged <noreply@info.oheo.site>",
+                to: user.email,
+                subject: "Verify your email address",
+                html: `
                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
                             <img src="${APP_URL}/logo/logo.png" alt="Logged" width="120" style="display: block; margin-bottom: 24px;" />
                             <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 16px;">Welcome to <span class="color: #727D8F">Logged<span/></h1>
@@ -78,12 +80,13 @@ export const auth = betterAuth({
                                 If you didn't create an account, you can safely ignore this email.
                             </p>
                         </div>
-                    `,
-                });
-                console.log("Verification email sent:", result);
-            } catch (error) {
-                console.error("Failed to send verification email:", error);
-                throw error;
+                `,
+            });
+
+            if (result.error) {
+                throw new Error(
+                    `Resend rejected the verification email: ${result.error.message}`,
+                );
             }
         },
     },

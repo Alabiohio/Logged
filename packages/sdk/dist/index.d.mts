@@ -26,6 +26,7 @@ declare class Logged {
     private config;
     private transport;
     private cleanupAutoCapture?;
+    private cleanupConsoleCapture?;
     constructor(config: LoggedConfig);
     private send;
     log(message: string, metadata?: LogMetadata): void;
@@ -37,6 +38,8 @@ declare class Logged {
     capture(error: unknown, metadata?: LogMetadata): void;
     auto(): void;
     stopAutoCapture(): void;
+    interceptConsole(): void;
+    stopConsoleInterception(): void;
 }
 
 export { type LogLevel, type LogMetadata, type LogPayload, Logged, type LoggedConfig };

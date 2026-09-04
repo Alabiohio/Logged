@@ -15,6 +15,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { StatCardSkeleton, LogRowSkeleton, ProjectCardSkeleton } from "@/components/dashboard/skeleton";
+import { motion } from "framer-motion";
 
 type DashboardData = {
     stats: {
@@ -76,7 +77,11 @@ export default function DashboardPage() {
 
     if (error) {
         return (
-            <div className="space-y-8 px-3 py-6 sm:px-3 lg:px-8">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-8 px-3 py-6 sm:px-3 lg:px-8"
+            >
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10 text-error mb-4">
                         <AlertCircle className="h-8 w-8" />
@@ -100,15 +105,25 @@ export default function DashboardPage() {
                         Try again
                     </button>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     return (
-        <div className="space-y-8 px-1 py-6 sm:px-1 lg:px-8">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-8 px-1 py-6 sm:px-1 lg:px-8"
+        >
             {/* Header */}
             <section className="flex flex-col gap-4 py-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div>
                         <h1 className="mt-2 text-3xl font-black tracking-tight text-text">
                             Welcome back
@@ -118,10 +133,20 @@ export default function DashboardPage() {
                             from one central view.
                         </p>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Stats grid */}
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <motion.div
+                    initial="hidden"
+                    animate="show"
+                    variants={{
+                        hidden: {},
+                        show: {
+                            transition: { staggerChildren: 0.08 },
+                        },
+                    }}
+                    className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+                >
                     {loading ? (
                         <>
                             <StatCardSkeleton />
@@ -131,37 +156,45 @@ export default function DashboardPage() {
                         </>
                     ) : (
                         <>
-                            <StatCard
-                                label="Projects"
-                                value={data?.stats.projects ?? 0}
-                                icon={FolderKanban}
-                                iconColor="text-primary"
-                                iconBg="bg-primary/10"
-                            />
-                            <StatCard
-                                label="Logs Today"
-                                value={data?.stats.logsToday?.toLocaleString() ?? "0"}
-                                icon={FileText}
-                                iconColor="text-info"
-                                iconBg="bg-info/10"
-                            />
-                            <StatCard
-                                label="Errors Today"
-                                value={data?.stats.errorsToday ?? 0}
-                                icon={AlertTriangle}
-                                iconColor="text-error"
-                                iconBg="bg-error/10"
-                            />
-                            <StatCard
-                                label="Warnings"
-                                value={data?.stats.warningsToday ?? 0}
-                                icon={AlertCircle}
-                                iconColor="text-warning"
-                                iconBg="bg-warning/10"
-                            />
+                            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+                                <StatCard
+                                    label="Projects"
+                                    value={data?.stats.projects ?? 0}
+                                    icon={FolderKanban}
+                                    iconColor="text-primary"
+                                    iconBg="bg-primary/10"
+                                />
+                            </motion.div>
+                            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+                                <StatCard
+                                    label="Logs Today"
+                                    value={data?.stats.logsToday?.toLocaleString() ?? "0"}
+                                    icon={FileText}
+                                    iconColor="text-info"
+                                    iconBg="bg-info/10"
+                                />
+                            </motion.div>
+                            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+                                <StatCard
+                                    label="Errors Today"
+                                    value={data?.stats.errorsToday ?? 0}
+                                    icon={AlertTriangle}
+                                    iconColor="text-error"
+                                    iconBg="bg-error/10"
+                                />
+                            </motion.div>
+                            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+                                <StatCard
+                                    label="Warnings"
+                                    value={data?.stats.warningsToday ?? 0}
+                                    icon={AlertCircle}
+                                    iconColor="text-warning"
+                                    iconBg="bg-warning/10"
+                                />
+                            </motion.div>
                         </>
                     )}
-                </div>
+                </motion.div>
             </section>
 
             {/* No projects empty state */}
@@ -176,7 +209,12 @@ export default function DashboardPage() {
             ) : (
                 <div className="grid gap-6 xl:grid-cols-[1.8fr_1fr]">
                     {/* Recent Activity */}
-                    <section className="glass rounded-[var(--radius-lg)] py-6 px-3 shadow-sm min-w-0">
+                    <motion.section
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="glass rounded-[var(--radius-lg)] py-6 px-3 shadow-sm min-w-0"
+                    >
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 className="mt-2 text-2xl font-black text-text">
@@ -197,8 +235,9 @@ export default function DashboardPage() {
                                     {/* Mobile card layout */}
                                     <div className="sm:hidden divide-y divide-border/30">
                                         {data.recentLogs.map((log) => (
-                                            <div
+                                            <motion.div
                                                 key={log.id}
+                                                whileHover={{ x: 4 }}
                                                 className="py-3 cursor-pointer hover:bg-white/5 transition-colors rounded-lg px-1"
                                                 onClick={() =>
                                                     (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
@@ -216,7 +255,7 @@ export default function DashboardPage() {
                                                 <p className="text-xs text-text-secondary mt-0.5">
                                                     {log.projectName}
                                                 </p>
-                                            </div>
+                                            </motion.div>
                                         ))}
                                     </div>
 
@@ -232,9 +271,10 @@ export default function DashboardPage() {
                                         </thead>
                                         <tbody className="divide-y divide-border/30">
                                             {data.recentLogs.map((log) => (
-                                                <tr
+                                                <motion.tr
                                                     key={log.id}
-                                                    className="hover:bg-white/10 transition-colors cursor-pointer"
+                                                    whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
+                                                    className="transition-colors cursor-pointer"
                                                     onClick={() =>
                                                         (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
                                                     }
@@ -251,7 +291,7 @@ export default function DashboardPage() {
                                                     <td className="py-4 text-text-secondary whitespace-nowrap">
                                                         {log.projectName}
                                                     </td>
-                                                </tr>
+                                                </motion.tr>
                                             ))}
                                         </tbody>
                                     </table>
@@ -265,10 +305,15 @@ export default function DashboardPage() {
                                 </div>
                             )}
                         </div>
-                    </section>
+                    </motion.section>
 
                     {/* Recent Projects */}
-                    <aside className="space-y-6 min-w-0">
+                    <motion.aside
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                        className="space-y-6 min-w-0"
+                    >
                         <div className="glass rounded-[var(--radius-lg)] p-6 shadow-sm">
                             <div className="flex items-center justify-between gap-3 mb-6">
                                 <div>
@@ -287,22 +332,27 @@ export default function DashboardPage() {
                             ) : data && data.projects.length > 0 ? (
                                 <div className="space-y-3">
                                     {data.projects.map((project) => (
-                                        <Link
+                                        <motion.div
                                             key={project.id}
-                                            href={`/dashboard/projects/${project.id}`}
-                                            className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background p-4 transition hover:bg-glass-hover group"
+                                            whileHover={{ x: 4, scale: 1.01 }}
+                                            transition={{ type: "spring", stiffness: 400 }}
                                         >
-                                            <div className="min-w-0">
-                                                <p className="font-semibold text-text truncate group-hover:text-primary transition-colors">
-                                                    {project.name}
-                                                </p>
-                                                <p className="mt-1 text-xs text-text-muted flex items-center gap-1.5">
-                                                    <Activity className="h-3 w-3" />
-                                                    {timeAgo(project.updatedAt)}
-                                                </p>
-                                            </div>
-                                            <ChevronRight className="h-4 w-4 text-text-muted shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-                                        </Link>
+                                            <Link
+                                                href={`/dashboard/projects/${project.id}`}
+                                                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background p-4 transition hover:bg-glass-hover group"
+                                            >
+                                                <div className="min-w-0">
+                                                    <p className="font-semibold text-text truncate group-hover:text-primary transition-colors">
+                                                        {project.name}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-text-muted flex items-center gap-1.5">
+                                                        <Activity className="h-3 w-3" />
+                                                        {timeAgo(project.updatedAt)}
+                                                    </p>
+                                                </div>
+                                                <ChevronRight className="h-4 w-4 text-text-muted shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                                            </Link>
+                                        </motion.div>
                                     ))}
 
                                     <Link
@@ -314,9 +364,10 @@ export default function DashboardPage() {
                                 </div>
                             ) : null}
                         </div>
-                    </aside>
+                    </motion.aside>
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 }
+

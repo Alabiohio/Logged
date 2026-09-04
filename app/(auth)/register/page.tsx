@@ -6,6 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { GoogleSignInButton } from "@/components/ui/GoogleSignInButton";
+import { motion } from "framer-motion";
 
 type LoadingMethod = "google" | "github" | "email" | null;
 
@@ -16,7 +17,6 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [loadingMethod, setLoadingMethod] = useState<LoadingMethod>(null);
     const [emailSent, setEmailSent] = useState(false);
-    const [isResentLink, setIsResentLink] = useState(false);
     const router = useRouter();
 
     const isBusy = loadingMethod !== null;
@@ -26,34 +26,37 @@ export default function RegisterPage() {
         setError(null);
         setLoadingMethod("email");
 
-        const { data, error } = await authClient.signUp.email({
+        const { error } = await authClient.signUp.email({
             email,
             password,
             name,
         });
 
         if (error) {
-            // If user already exists (e.g. registered before but unverified), resend verification link
-            try {
-                const resendRes = await authClient.sendVerificationEmail({ email });
-                if (!resendRes.error) {
-                    setIsResentLink(true);
-                    setEmailSent(true);
-                    setLoadingMethod(null);
-                    return;
-                }
-            } catch {
-                // Ignore resend error and show original error
-            }
-
             setError(error.message || "An error occurred during registration");
             setLoadingMethod(null);
             return;
         }
 
-        setIsResentLink(false);
-        setEmailSent(true);
-        setLoadingMethod(null);
+        try {
+            const res = await fetch("/api/auth/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const resData = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                setError(resData?.error || "Unable to send the verification email. Please try again.");
+                return;
+            }
+
+            setEmailSent(true);
+        } catch {
+            setError("Unable to send the verification email. Please check your connection and try again.");
+        } finally {
+            setLoadingMethod(null);
+        }
     };
 
     const handleGoogleSignUp = async () => {
@@ -107,23 +110,25 @@ export default function RegisterPage() {
     if (emailSent) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background p-4">
-                <div className="w-full max-w-md space-y-6 rounded-2xl glass p-8 shadow-2xl text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-full max-w-md space-y-6 rounded-2xl glass p-8 shadow-2xl text-center"
+                >
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                        className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mx-auto"
+                    >
                         <Mail className="h-8 w-8 text-primary" />
-                    </div>
+                    </motion.div>
                     <h2 className="text-2xl font-bold tracking-tight text-text">
                         Check your email
                     </h2>
                     <p className="text-sm text-text-secondary">
-                        {isResentLink ? (
-                            <>
-                                An account with <span className="font-medium text-text">{email}</span> already exists but is not verified yet. We sent a new verification link to your inbox.
-                            </>
-                        ) : (
-                            <>
-                                We sent a verification link to <span className="font-medium text-text">{email}</span>. Click the link to verify your account.
-                            </>
-                        )}
+                        We sent a verification link to <span className="font-medium text-text">{email}</span>. Click the link to verify your account.
                     </p>
                     <Link
                         href="/login"
@@ -131,14 +136,19 @@ export default function RegisterPage() {
                     >
                         Go to Sign In
                     </Link>
-                </div>
+                </motion.div>
             </div>
         );
     }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <div className="w-full max-w-md space-y-8 rounded-2xl glass p-8 shadow-2xl">
+            <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] as const }}
+                className="w-full max-w-md space-y-8 rounded-2xl glass p-8 shadow-2xl"
+            >
                 <div className="text-center">
                     <h2 className="text-3xl font-bold tracking-tight text-text">Create an account</h2>
                     <p className="mt-2 text-sm text-text-secondary">
@@ -176,9 +186,13 @@ export default function RegisterPage() {
 
                 <form className="mt-8 space-y-6" onSubmit={handleRegister}>
                     {error && (
-                        <div className="rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20">
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20"
+                        >
                             {error}
-                        </div>
+                        </motion.div>
                     )}
 
                     <div className="space-y-4">
@@ -224,13 +238,15 @@ export default function RegisterPage() {
                         By continuing, you agree to our <Link href="/terms" className="font-medium text-primary hover:underline">Terms of Service</Link> and <Link href="/privacy" className="font-medium text-primary hover:underline">Privacy Policy</Link>.
                     </p>
 
-                    <button
+                    <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                         type="submit"
                         disabled={isBusy}
                         className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loadingMethod === "email" ? "Creating account..." : "Sign Up"}
-                    </button>
+                    </motion.button>
                 </form>
 
                 <p className="text-center text-sm text-text-secondary">
@@ -239,7 +255,7 @@ export default function RegisterPage() {
                         Sign in
                     </Link>
                 </p>
-            </div>
+            </motion.div>
         </div>
     );
 }
