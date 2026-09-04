@@ -62,6 +62,14 @@ function LoginForm() {
             return;
         }
 
+        if (data?.user) {
+            const u = data.user as Record<string, unknown>;
+            if (!u.username || (typeof u.username === "string" && u.username.trim() === "")) {
+                router.push("/set-username");
+                return;
+            }
+        }
+
         router.push(redirectPath || "/dashboard");
     };
 
@@ -78,7 +86,7 @@ function LoginForm() {
 
         const { data, error } = await authClient.signIn.social({
             provider: "google",
-            callbackURL: "/dashboard",
+            callbackURL: "/set-username",
             errorCallbackURL: "/login",
         });
 
@@ -93,7 +101,7 @@ function LoginForm() {
             return;
         }
 
-        router.push("/dashboard");
+        router.push("/set-username");
         setLoadingMethod(null);
     };
 
@@ -103,7 +111,7 @@ function LoginForm() {
 
         const { data, error } = await authClient.signIn.social({
             provider: "github",
-            callbackURL: "/dashboard",
+            callbackURL: "/set-username",
             errorCallbackURL: "/login",
         });
 
@@ -118,7 +126,7 @@ function LoginForm() {
             return;
         }
 
-        router.push("/dashboard");
+        router.push("/set-username");
         setLoadingMethod(null);
     };
 

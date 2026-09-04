@@ -16,14 +16,15 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [loadingMethod, setLoadingMethod] = useState<LoadingMethod>(null);
     const [emailSent, setEmailSent] = useState(false);
+    const [isResentLink, setIsResentLink] = useState(false);
     const router = useRouter();
 
     const isBusy = loadingMethod !== null;
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoadingMethod("email");
         setError(null);
+        setLoadingMethod("email");
 
         const { data, error } = await authClient.signUp.email({
             email,
@@ -32,24 +33,27 @@ export default function RegisterPage() {
         });
 
         if (error) {
+            // If user already exists (e.g. registered before but unverified), resend verification link
+            try {
+                const resendRes = await authClient.sendVerificationEmail({ email });
+                if (!resendRes.error) {
+                    setIsResentLink(true);
+                    setEmailSent(true);
+                    setLoadingMethod(null);
+                    return;
+                }
+            } catch {
+                // Ignore resend error and show original error
+            }
+
             setError(error.message || "An error occurred during registration");
             setLoadingMethod(null);
             return;
         }
 
-        if (data?.user && data.token === null) {
-            try {
-                await authClient.sendVerificationEmail({ email });
-            } catch (resendError) {
-                console.error("Failed to resend verification email for existing unverified user:", resendError);
-            }
-
-            setEmailSent(true);
-            setLoadingMethod(null);
-            return;
-        }
-
+        setIsResentLink(false);
         setEmailSent(true);
+        setLoadingMethod(null);
     };
 
     const handleGoogleSignUp = async () => {
@@ -58,7 +62,7 @@ export default function RegisterPage() {
 
         const { data, error } = await authClient.signIn.social({
             provider: "google",
-            callbackURL: "/dashboard",
+            callbackURL: "/set-username",
         });
 
         if (error) {
@@ -72,7 +76,7 @@ export default function RegisterPage() {
             return;
         }
 
-        router.push("/dashboard");
+        router.push("/set-username");
         setLoadingMethod(null);
     };
 
@@ -82,7 +86,7 @@ export default function RegisterPage() {
 
         const { data, error } = await authClient.signIn.social({
             provider: "github",
-            callbackURL: "/dashboard",
+            callbackURL: "/set-username",
         });
 
         if (error) {
@@ -96,7 +100,7 @@ export default function RegisterPage() {
             return;
         }
 
-        router.push("/dashboard");
+        router.push("/set-username");
         setLoadingMethod(null);
     };
 
@@ -111,8 +115,15 @@ export default function RegisterPage() {
                         Check your email
                     </h2>
                     <p className="text-sm text-text-secondary">
-                        We sent a verification link to <span className="font-medium text-text">{email}</span>.
-                        Click the link to verify your account.
+                        {isResentLink ? (
+                            <>
+                                An account with <span className="font-medium text-text">{email}</span> already exists but is not verified yet. We sent a new verification link to your inbox.
+                            </>
+                        ) : (
+                            <>
+                                We sent a verification link to <span className="font-medium text-text">{email}</span>. Click the link to verify your account.
+                            </>
+                        )}
                     </p>
                     <Link
                         href="/login"
@@ -232,3 +243,4 @@ export default function RegisterPage() {
         </div>
     );
 }
+

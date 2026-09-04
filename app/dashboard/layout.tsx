@@ -16,8 +16,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { data: session, isPending: sessionLoading } = authClient.useSession();
 
   useEffect(() => {
-    if (!sessionLoading && !session?.user) {
-      router.push("/login");
+    if (!sessionLoading) {
+      if (!session?.user) {
+        router.push("/login");
+      } else {
+        const currentUser = session.user as { username?: string };
+        if (!currentUser.username || currentUser.username.trim() === "") {
+          router.push("/set-username");
+        }
+      }
     }
   }, [session, sessionLoading, router]);
 

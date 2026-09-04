@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { username } from "better-auth/plugins";
 import { db } from "./db";
 import { APP_URL } from "./site-config";
 import * as schema from "./../db/schema";
@@ -17,6 +18,24 @@ export const auth = betterAuth({
             verification: schema.verifications
         }
     }),
+    user: {
+        deleteUser: {
+            enabled: true,
+        },
+        additionalFields: {
+            username: {
+                type: "string",
+                required: false,
+            },
+            displayUsername: {
+                type: "string",
+                required: false,
+            },
+        },
+    },
+    plugins: [
+        username()
+    ],
     baseURL: APP_URL,
     socialProviders: {
         google: {
@@ -34,6 +53,7 @@ export const auth = betterAuth({
     },
     emailVerification: {
         expiresIn: 60 * 60 * 24,
+        autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url }) => {
             try {
                 const verifyUrl = new URL(url);

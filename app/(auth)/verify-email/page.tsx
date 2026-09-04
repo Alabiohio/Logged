@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 function VerifyEmailContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const token = searchParams.get("token");
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
@@ -24,11 +25,14 @@ function VerifyEmailContent() {
                 setStatus("error");
             } else {
                 setStatus("success");
+                setTimeout(() => {
+                    router.push("/set-username");
+                }, 1500);
             }
         }
 
         verify();
-    }, [token]);
+    }, [token, router]);
 
     return (
         <div className="w-full max-w-md space-y-6 rounded-2xl glass p-8 shadow-2xl text-center">
@@ -55,13 +59,13 @@ function VerifyEmailContent() {
                         Email verified
                     </h2>
                     <p className="text-sm text-text-secondary">
-                        Your email has been verified successfully. You can now sign in.
+                        Your email has been verified. You are now logged in! Redirecting to dashboard...
                     </p>
                     <Link
-                        href="/login"
+                        href="/dashboard"
                         className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition-all"
                     >
-                        Continue to Sign In
+                        Go to Dashboard
                     </Link>
                 </>
             )}

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderKanban, Settings, FileText, LogOut, Code, Activity, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Settings, FileText, LogOut, Code, Activity, X, ChevronLeft, ChevronRight, ChevronDown, User, Palette, Bell, Shield, Monitor, Database, TriangleAlert, Sun, Moon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export function Sidebar({
   mobileOpen,
@@ -20,6 +21,8 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(true);
+  const { theme, setTheme } = useTheme();
 
   const navigation = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -77,7 +80,29 @@ export function Sidebar({
           </nav>
         </div>
 
-        <div className="border-t border-border p-4 shrink-0">
+        <div className="border-t border-border p-4 shrink-0 flex flex-col gap-2">
+          <div className={`flex gap-1 p-1 rounded-2xl border border-border bg-background-secondary/50 ${isCollapsed ? "flex-col" : "items-center"}`}>
+            {(["light", "system", "dark"] as const).map((t) => {
+                const icons = { light: Sun, system: Monitor, dark: Moon };
+                const Icon = icons[t];
+                const active = theme === t;
+                return (
+                    <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTheme(t)}
+                        title={t.charAt(0).toUpperCase() + t.slice(1)}
+                        className={`flex flex-1 items-center justify-center rounded-xl p-2 transition-all ${
+                            active
+                                ? "bg-primary/10 text-primary"
+                                : "text-text-secondary hover:bg-glass hover:text-text"
+                        }`}
+                    >
+                        <Icon className="h-4 w-4" />
+                    </button>
+                );
+            })}
+          </div>
           <button
             onClick={handleSignOut}
             title={isCollapsed ? "Sign Out" : undefined}
@@ -116,26 +141,87 @@ export function Sidebar({
             <nav className="space-y-2 px-2 flex-1">
               {navigation.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+              const isSettings = item.name === "Settings";
+              
                 return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={closeMenu}
-                    className={`group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-text-secondary hover:bg-glass hover:text-text"
-                      }`}
-                  >
-                    <item.icon
-                      className={`h-5 w-5 flex-shrink-0 ${isActive ? "text-primary" : "text-text-secondary group-hover:text-text"}`}
-                    />
-                    {item.name}
-                  </Link>
+                  <div key={item.name} className="flex flex-col">
+                    <div className="flex items-center">
+                      <Link
+                        href={item.href}
+                        onClick={closeMenu}
+                        className={`group flex flex-1 items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-text-secondary hover:bg-glass hover:text-text"
+                          }`}
+                      >
+                        <item.icon
+                          className={`h-5 w-5 flex-shrink-0 ${isActive ? "text-primary" : "text-text-secondary group-hover:text-text"}`}
+                        />
+                        {item.name}
+                      </Link>
+                      {isSettings && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setSettingsExpanded(!settingsExpanded);
+                          }}
+                          className="p-2 ml-2 text-text-secondary hover:text-text focus:outline-none lg:hidden"
+                        >
+                          {settingsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </button>
+                      )}
+                    </div>
+                    
+                    {isSettings && isActive && settingsExpanded && (
+                      <div className="ml-12 mt-1 mb-2 flex flex-col gap-1 lg:hidden">
+                        {[
+                          { id: "profile", label: "Profile", icon: User },
+                          { id: "notifications", label: "Notifications", icon: Bell },
+                          { id: "security", label: "Security", icon: Shield },
+                          { id: "security-sessions", label: "Active Sessions", icon: Monitor, parent: "security" },
+                          { id: "account", label: "Account", icon: Database },
+                          { id: "danger", label: "Danger", icon: TriangleAlert },
+                        ].map((section) => (
+                          <Link
+                            key={section.id}
+                            href={`/dashboard/settings#${section.id}`}
+                            onClick={closeMenu}
+                            className={`flex items-center gap-2 py-1.5 text-sm transition-colors hover:text-text ${section.parent ? "ml-4 text-text-muted text-xs" : "text-text-secondary"}`}
+                          >
+                            <section.icon className="h-4 w-4" />
+                            {section.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </nav>
 
-            <div className="border-t border-border pt-4 shrink-0">
+            <div className="border-t border-border p-4 shrink-0 flex flex-col gap-2">
+              <div className="flex gap-1 p-1 rounded-2xl border border-border bg-background-secondary/50 items-center">
+                {(["light", "system", "dark"] as const).map((t) => {
+                    const icons = { light: Sun, system: Monitor, dark: Moon };
+                    const Icon = icons[t];
+                    const active = theme === t;
+                    return (
+                        <button
+                            key={t}
+                            type="button"
+                            onClick={() => setTheme(t)}
+                            title={t.charAt(0).toUpperCase() + t.slice(1)}
+                            className={`flex flex-1 items-center justify-center rounded-xl p-2 transition-all ${
+                                active
+                                    ? "bg-primary/10 text-primary"
+                                    : "text-text-secondary hover:bg-glass hover:text-text"
+                            }`}
+                        >
+                            <Icon className="h-4 w-4" />
+                        </button>
+                    );
+                })}
+              </div>
               <button
                 onClick={() => {
                   closeMenu();
