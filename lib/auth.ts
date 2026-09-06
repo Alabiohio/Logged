@@ -50,6 +50,35 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
+        sendResetPassword: async ({ user, url, token }) => {
+            const resetUrl = `${APP_URL}/reset-password?token=${token}`;
+            const result = await resend.emails.send({
+                from: "Logged <noreply@info.oheo.site>",
+                to: user.email,
+                subject: "Reset your Logged password",
+                html: `
+                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+                            <img src="${APP_URL}/logo/logo.png" alt="Logged" width="120" style="display: block; margin-bottom: 24px;" />
+                            <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 16px;">Reset your password</h1>
+                            <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+                                We received a request to reset your password for your Logged account. Click the button below to set a new password.
+                            </p>
+                            <a href="${resetUrl}" style="display: inline-block; background: #727D8F; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;">
+                                Reset Password
+                            </a>
+                            <p style="color: #888; font-size: 13px; margin-top: 24px;">
+                                If you didn't request a password reset, you can safely ignore this email. The link is valid for 1 hour.
+                            </p>
+                        </div>
+                `,
+            });
+
+            if (result.error) {
+                throw new Error(
+                    `Resend rejected the reset password email: ${result.error.message}`,
+                );
+            }
+        },
     },
     emailVerification: {
         expiresIn: 60 * 60 * 24,

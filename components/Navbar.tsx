@@ -9,9 +9,8 @@ import { authClient } from "@/lib/auth-client";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
-  { label: "Features", href: "#" },
-  { label: "Pricing", href: "#" },
-  { label: "Docs", href: "#" },
+  { label: "Features", href: "/features" },
+  { label: "Docs", href: "/docs" },
   { label: "Blog", href: "#" },
 ];
 
