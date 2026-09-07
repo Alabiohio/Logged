@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback, use, Suspense } from "react";
+import { useEffect, useState, useCallback, use, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ArrowLeft, RefreshCw, Clock, TerminalSquare, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX } from "lucide-react";
+import { ArrowLeft, RefreshCw, Clock, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX, Search, X, SlidersHorizontal } from "@/components/icons/ios";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { LogDetailsDrawer, LogRecord } from "@/components/dashboard/log-details-drawer";
 import { LogRowSkeleton } from "@/components/dashboard/skeleton";
@@ -28,7 +28,7 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
 
   return (
     <div className="border-b border-border/50 last:border-0 hover:bg-glass/50 transition-colors">
-      <div 
+      <div
         className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 py-2.5 sm:px-4 cursor-pointer group"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -64,15 +64,15 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
         <div className="hidden sm:block w-44 shrink-0 text-xs font-mono text-text-muted">
           {formatTime(log.timestamp || log.createdAt)}
         </div>
-        
+
         <div className="hidden sm:block w-24 shrink-0">
           <LogLevelBadge level={log.level} />
         </div>
-        
+
         <div className="hidden sm:block flex-1 min-w-0 font-medium text-xs text-text sm:line-clamp-1 sm:truncate sm:break-normal">
           {log.message}
         </div>
-        
+
         <div className="hidden sm:block w-24 shrink-0 text-right">
           <span className="text-xs text-text-muted bg-background-tertiary px-2 py-1 rounded">
             {log.environment || "N/A"}
@@ -80,40 +80,40 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
         </div>
 
         <div className="hidden sm:flex w-8 shrink-0 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-           <button 
-             onClick={(e) => { e.stopPropagation(); onClick(); }}
-             className="p-1.5 hover:bg-background-tertiary rounded-md text-text-muted hover:text-text transition-colors"
-             title="Open full details"
-           >
-             <Maximize2 className="h-4 w-4" />
-           </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className="p-1.5 hover:bg-background-tertiary rounded-md text-text-muted hover:text-text transition-colors"
+            title="Open full details"
+          >
+            <Maximize2 className="h-4 w-4" />
+          </button>
         </div>
       </div>
-      
+
       {isExpanded && (
         <div className="pl-14 pr-4 pb-4 pt-1 bg-background-secondary/10">
-           <div className="text-sm text-text space-y-2 font-mono whitespace-pre-wrap break-all bg-background-tertiary/50 p-3 rounded-lg border border-border/50">
-             <div className="text-xs">{log.message}</div>
-             {log.url && <div className="text-text-muted text-xs mt-2">URL: {log.url}</div>}
-             {log.metadata && Object.keys(log.metadata).length > 0 && (
-               <div className="text-text-muted text-xs mt-2 overflow-hidden text-ellipsis line-clamp-5">
-                 {JSON.stringify(log.metadata, null, 2)}
-               </div>
-             )}
-             {log.stack && (
-               <div className="text-text-muted text-xs mt-2 line-clamp-3 opacity-70">
-                 {log.stack}
-               </div>
-             )}
-           </div>
-           <div className="mt-3 flex justify-end">
-             <button
-                onClick={(e) => { e.stopPropagation(); onClick(); }}
-                className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg border border-primary/20 transition-colors"
-             >
-               View full details
-             </button>
-           </div>
+          <div className="text-sm text-text space-y-2 font-mono whitespace-pre-wrap break-all bg-background-tertiary/50 p-3 rounded-lg border border-border/50">
+            <div className="text-xs">{log.message}</div>
+            {log.url && <div className="text-text-muted text-xs mt-2">URL: {log.url}</div>}
+            {log.metadata && Object.keys(log.metadata).length > 0 && (
+              <div className="text-text-muted text-xs mt-2 overflow-hidden text-ellipsis line-clamp-5">
+                {JSON.stringify(log.metadata, null, 2)}
+              </div>
+            )}
+            {log.stack && (
+              <div className="text-text-muted text-xs mt-2 line-clamp-3 opacity-70">
+                {log.stack}
+              </div>
+            )}
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              onClick={(e) => { e.stopPropagation(); onClick(); }}
+              className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg border border-primary/20 transition-colors"
+            >
+              View full details
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -182,6 +182,12 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogRecord | null>(null);
+
+  // Scroll-collapse state
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const logsListRef = useRef<HTMLDivElement>(null);
 
   // Cursor pagination state
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -264,6 +270,15 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
     fetchLogs();
   }, [fetchLogs]);
 
+  // Scroll listener on the logs list container
+  useEffect(() => {
+    const el = logsListRef.current;
+    if (!el) return;
+    const onScroll = () => setIsScrolled(el.scrollTop > 8);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
   // Determine if any filters are active (for empty state logic)
   const hasActiveFilters = !!(
     searchParams.get("search") ||
@@ -312,55 +327,173 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="space-y-4 flex flex-col h-[calc(100dvh-125px)] lg:h-[calc(100dvh-48px)]">
-      {/* Header */}
-      <div className="flex flex-row items-center justify-between shrink-0">
-        <div>
-          <Link
-            href={`/dashboard/projects/${projectId}`}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm text-text-secondary hover:text-text transition-colors mb-1 sm:mb-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back to Project</span>
-            <span className="sm:hidden">Back</span>
-          </Link>
-          <h1 className="text-lg sm:text-2xl font-black text-text flex items-center gap-2 sm:gap-3">
-            <TerminalSquare className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            Log Explorer
-          </h1>
+    <div className="-mx-3 -my-3 sm:-mx-4 sm:-my-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 flex flex-col h-[calc(100dvh-76px)] lg:flex-1">
+
+      {/* ── Expanded header (visible when not scrolled) ── */}
+      <div
+        className="shrink-0 transition-all duration-300 ease-in-out"
+        style={{
+          maxHeight: isScrolled ? "0px" : "500px",
+          opacity: isScrolled ? 0 : 1,
+          overflow: isScrolled ? "hidden" : "visible",
+          marginBottom: isScrolled ? 0 : undefined,
+        }}
+      >
+        {/* Title row */}
+        <div className="flex flex-row items-center justify-between mb-4 md:pt-8">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href={`/dashboard/projects/${projectId}`}
+              className="inline-flex items-center justify-center text-text-secondary hover:text-text transition-colors p-1 -ml-1 rounded-lg hover:bg-glass"
+              title="Back to Project"
+            >
+              <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+            </Link>
+            <h1 className="text-lg sm:text-2xl font-black text-text">
+              Log Explorer
+            </h1>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-3">
+            {totalLogs > 0 && (
+              <span className="text-xs sm:text-sm text-text-muted">
+                {totalLogs.toLocaleString()} <span className="hidden sm:inline">{totalLogs === 1 ? "log" : "logs"}</span>
+              </span>
+            )}
+            <button
+              onClick={() => fetchLogs(true)}
+              disabled={refreshing}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-glass p-2 sm:px-4 sm:py-2 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-3">
-          {totalLogs > 0 && (
-            <span className="text-xs sm:text-sm text-text-muted">
-              {totalLogs.toLocaleString()} <span className="hidden sm:inline">{totalLogs === 1 ? "log" : "logs"}</span>
+        {/* Toolbar — Search + Filters */}
+        <div className="md:glass md:rounded-2xl md:p-4 space-y-4 group/toolbar">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <LogSearch />
+            <div className="hidden sm:block group-focus-within/toolbar:block">
+              <LogFilters />
+            </div>
+          </div>
+          <ActiveFilterBadges />
+        </div>
+      </div>
+
+      {/* ── Compact sticky bar (visible when scrolled) ── */}
+      <div
+        className="shrink-0 transition-all duration-300 ease-in-out"
+        style={{
+          maxHeight: isScrolled ? (filtersOpen ? "400px" : "60px") : "0px",
+          opacity: isScrolled ? 1 : 0,
+          overflow: isScrolled ? "visible" : "hidden",
+        }}
+      >
+        <div className="flex items-center gap-2 py-2">
+          {/* Back */}
+          <Link
+            href={`/dashboard/projects/${projectId}`}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs text-text-secondary hover:text-text hover:bg-glass-hover transition-all"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+
+          {/* Inline search — expands when searchOpen */}
+          <div
+            className="flex items-center gap-2 flex-1 transition-all duration-300"
+            style={{ maxWidth: searchOpen ? "100%" : undefined }}
+          >
+            {searchOpen ? (
+              <div className="flex items-center gap-2 flex-1 glass rounded-xl px-3 py-2 border border-border">
+                <Search className="h-4 w-4 text-text-muted shrink-0" />
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="Search logs…"
+                  defaultValue={searchParams.get("search") ?? ""}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const params = new URLSearchParams(searchParams.toString());
+                      const v = (e.target as HTMLInputElement).value.trim();
+                      if (v) params.set("search", v); else params.delete("search");
+                      params.delete("cursor");
+                      router.replace(`${pathname}?${params.toString()}`);
+                      setSearchOpen(false);
+                    }
+                    if (e.key === "Escape") setSearchOpen(false);
+                  }}
+                  className="flex-1 bg-transparent text-sm text-text outline-none placeholder:text-text-muted"
+                />
+                <button onClick={() => setSearchOpen(false)} className="text-text-muted hover:text-text transition-colors">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="inline-flex items-center justify-center p-2 rounded-xl border border-border bg-glass text-text-muted hover:text-text hover:bg-glass-hover transition-all"
+                title="Search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Spacer */}
+          {!searchOpen && <div className="flex-1" />}
+
+          {/* Log count */}
+          {!searchOpen && totalLogs > 0 && (
+            <span className="text-xs text-text-muted hidden sm:inline">
+              {totalLogs.toLocaleString()} {totalLogs === 1 ? "log" : "logs"}
             </span>
           )}
+
+          {/* Filter toggle */}
+          {!searchOpen && (
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`relative inline-flex items-center justify-center p-2 rounded-xl border transition-all ${filtersOpen
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-glass text-text-muted hover:text-text hover:bg-glass-hover"
+                }`}
+              title="Filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              {hasActiveFilters && (
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary" />
+              )}
+            </button>
+          )}
+
+          {/* Refresh */}
           <button
             onClick={() => fetchLogs(true)}
             disabled={refreshing}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-glass p-2 sm:px-4 sm:py-2 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover disabled:opacity-50"
+            className="inline-flex items-center justify-center p-2 rounded-xl border border-border bg-glass text-text-secondary hover:bg-glass-hover transition-all disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
-      </div>
 
-      {/* Toolbar — Search + Filters */}
-      <div className="md:glass md:rounded-2xl md:p-4 space-y-4 shrink-0 group/toolbar">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <LogSearch />
-          <div className="hidden sm:block group-focus-within/toolbar:block">
+        {/* Collapsible filter panel */}
+        <div
+          className="transition-all duration-300 ease-in-out"
+          style={{ maxHeight: filtersOpen ? "400px" : "0px", opacity: filtersOpen ? 1 : 0, overflow: "hidden" }}
+        >
+          <div className="pb-2">
             <LogFilters />
           </div>
         </div>
-        <ActiveFilterBadges />
       </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden mt-4">
         {/* Table Header */}
         <div className="hidden sm:flex items-center gap-4 py-3 px-4 border-b border-border/50 bg-background-secondary/50 text-xs font-semibold text-text-secondary uppercase tracking-wider shrink-0">
           <div className="w-5 shrink-0"></div>
@@ -372,7 +505,7 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
         </div>
 
         {/* Logs List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" ref={logsListRef}>
           {loading ? (
             <div>
               {[...Array(10)].map((_, i) => (

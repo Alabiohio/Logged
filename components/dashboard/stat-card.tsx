@@ -21,24 +21,24 @@ export function StatCard({
 }: StatCardProps) {
     return (
         <div className="glass rounded-[var(--radius-lg)] p-5 shadow-sm space-y-3">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center justify-between gap-4">
+                <div>
+                    <p className="text-2xl font-black text-text">{value}</p>
+                    <p className="text-sm text-text-secondary">{label}</p>
+                </div>
                 <div
-                    className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${iconBg} ${iconColor}`}
+                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconBg} ${iconColor}`}
                 >
                     <Icon className="h-5 w-5" />
                 </div>
-                {trend && (
-                    <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${trendClass}`}
-                    >
-                        {trend}
-                    </span>
-                )}
             </div>
-            <div>
-                <p className="text-2xl font-black text-text">{value}</p>
-                <p className="text-sm text-text-secondary">{label}</p>
-            </div>
+            {trend && (
+                <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${trendClass}`}
+                >
+                    {trend}
+                </span>
+            )}
         </div>
     );
 }

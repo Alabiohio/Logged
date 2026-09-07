@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { projects } from "@/db/schema";
-import { and, eq, type SQL } from "drizzle-orm";
+import { projects, logs } from "@/db/schema";
+import { and, eq, sql, type SQL } from "drizzle-orm";
 
 export class UnauthorizedProjectAccessError extends Error {
     constructor() {
@@ -38,9 +38,20 @@ export async function getProjectForUser(projectId: string, userId: string) {
 
 export async function getProjectsForUser(userId: string) {
     return db
-        .select()
+        .select({
+            id: projects.id,
+            userId: projects.userId,
+            name: projects.name,
+            description: projects.description,
+            website: projects.website,
+            createdAt: projects.createdAt,
+            updatedAt: projects.updatedAt,
+            logCount: sql<number>`cast(count(${logs.id}) as integer)`,
+        })
         .from(projects)
-        .where(eq(projects.userId, userId));
+        .leftJoin(logs, eq(projects.id, logs.projectId))
+        .where(eq(projects.userId, userId))
+        .groupBy(projects.id);
 }
 
 export async function projectExists(projectId: string): Promise<boolean> {

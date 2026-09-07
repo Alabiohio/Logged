@@ -16,12 +16,14 @@ interface ProjectCardProps {
     id: string;
     name: string;
     description: string | null;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    logCount?: number;
   };
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const logCount = project.logCount ?? 0;
   return (
     <Link
       href={`/dashboard/projects/${project.id}`}
@@ -49,7 +51,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <Activity className="h-4 w-4" />
-            <span>0 Logs</span>
+            <span>{logCount.toLocaleString()} {logCount === 1 ? "Log" : "Logs"}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <Clock className="h-4 w-4" />
