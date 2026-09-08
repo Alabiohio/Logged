@@ -9,7 +9,7 @@ type CodeBlockProps = {
   showLineNumbers?: boolean;
 };
 
-export function CodeBlock({ code, language = "typescript", showLineNumbers = false }: CodeBlockProps) {
+export function CodeBlock({ code, language = "typescript" }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -18,10 +18,8 @@ export function CodeBlock({ code, language = "typescript", showLineNumbers = fal
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const lines = code.split("\n");
-
   return (
-    <div className="group relative my-6 rounded-2xl border border-border bg-background-secondary overflow-hidden">
+    <div className="group relative my-6 rounded-2xl border border-border bg-background-secondary overflow-hidden w-full min-w-0 max-w-full">
       <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-background-tertiary/50">
         <span className="text-xs font-medium text-text-muted">{language}</span>
         <button
@@ -42,21 +40,8 @@ export function CodeBlock({ code, language = "typescript", showLineNumbers = fal
         </button>
       </div>
       <div className="overflow-x-auto p-4">
-        <pre className="font-mono text-sm leading-relaxed text-text">
-          <code>
-            {showLineNumbers ? (
-              lines.map((line, i) => (
-                <div key={i} className="flex">
-                  <span className="w-8 shrink-0 select-none text-right text-text-muted/50 mr-4">
-                    {i + 1}
-                  </span>
-                  <span>{line || "\n"}</span>
-                </div>
-              ))
-            ) : (
-              code
-            )}
-          </code>
+        <pre className="font-mono text-sm leading-relaxed text-text whitespace-pre overflow-x-auto">
+          <code>{code}</code>
         </pre>
       </div>
     </div>

@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
+
+export const metadata: Metadata = {
+  title: "JavaScript Example | Logged",
+  description:
+    "Use Logged from plain JavaScript or TypeScript without a framework.",
+};
 
 export default function JavaScriptExamplePage() {
   return (
@@ -11,7 +18,7 @@ export default function JavaScriptExamplePage() {
           href="/docs/examples"
           className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text transition"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" strokeWidth={4} />
           Back to Examples
         </Link>
         <h1 className="text-3xl font-black tracking-tight text-text sm:text-4xl">

@@ -3,7 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { Cardio } from "ldrs/react";
+import "ldrs/react/Cardio.css";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -39,7 +41,7 @@ export default function NewProjectPage() {
           return;
         }
 
-        router.push(`/dashboard/projects/${data.id}`);
+        router.push(`/dashboard/projects/${data.id}`)
       } catch (err) {
         setError("Failed to create project. Please try again.");
       }
@@ -47,13 +49,13 @@ export default function NewProjectPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="w-full max-w-4xl mx-auto space-y-8">
       <div>
         <Link
           href="/dashboard/projects"
           className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        >  
+          <ChevronLeft className="h-4 w-4" strokeWidth={4} />
           Back to Projects
         </Link>
         <h1 className="text-3xl font-black text-text">Create Project</h1>
@@ -134,10 +136,13 @@ export default function NewProjectPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover active:scale-95 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover active:scale-95 disabled:opacity-60"
           >
-            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isPending ? "Creating…" : "Create Project"}
+            {isPending ? (
+              <Cardio size="42" color="white" speed="1.5" stroke="4" bgOpacity="0.1" />
+            ) : (
+              "Create Project"
+            )}
           </button>
         </div>
       </form>

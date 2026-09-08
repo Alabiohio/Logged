@@ -5,7 +5,7 @@ import {
   KeyRound,
   Code2,
   Activity,
-  ArrowRight,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -105,7 +105,7 @@ export default function HowItWorks() {
               </motion.div>
 
               {index !== steps.length - 1 && (
-                <ArrowRight
+                <ChevronRight
                   className="absolute -right-7 top-1/2 hidden -translate-y-1/2 text-text-disabled lg:block"
                   size={28}
                 />

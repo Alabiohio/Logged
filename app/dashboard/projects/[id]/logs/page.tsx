@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback, use, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ArrowLeft, RefreshCw, Clock, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX, Search, X, SlidersHorizontal } from "@/components/icons/ios";
+import { ChevronLeft, RefreshCw, Clock, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX, Search, X, SlidersHorizontal } from "@/components/icons/ios";
+import { Cardio } from "ldrs/react";
+import "ldrs/react/Cardio.css";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { LogDetailsDrawer, LogRecord } from "@/components/dashboard/log-details-drawer";
 import { LogRowSkeleton } from "@/components/dashboard/skeleton";
@@ -58,7 +60,7 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
 
         {/* Desktop Columns */}
         <div className="hidden sm:flex w-5 shrink-0 items-center justify-center text-text-muted group-hover:text-text transition-colors">
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" strokeWidth={4} />}
         </div>
 
         <div className="hidden sm:block w-44 shrink-0 text-xs font-mono text-text-muted">
@@ -347,7 +349,7 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
               className="inline-flex items-center justify-center text-text-secondary hover:text-text transition-colors p-1 -ml-1 rounded-lg hover:bg-glass"
               title="Back to Project"
             >
-              <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
             </Link>
             <h1 className="text-lg sm:text-2xl font-black text-text">
               Log Explorer
@@ -399,7 +401,7 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
             href={`/dashboard/projects/${projectId}`}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-xs text-text-secondary hover:text-text hover:bg-glass-hover transition-all"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" />
           </Link>
 
           {/* Inline search — expands when searchOpen */}
@@ -458,8 +460,8 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
             <button
               onClick={() => setFiltersOpen((v) => !v)}
               className={`relative inline-flex items-center justify-center p-2 rounded-xl border transition-all ${filtersOpen
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-glass text-text-muted hover:text-text hover:bg-glass-hover"
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-glass text-text-muted hover:text-text hover:bg-glass-hover"
                 }`}
               title="Filters"
             >
@@ -551,13 +553,10 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
                   <button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-text-secondary bg-glass hover:bg-glass-hover border border-border rounded-xl transition-all disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-text-secondary bg-glass hover:bg-glass-hover border border-border rounded-xl transition-all disabled:opacity-50"
                   >
                     {loadingMore ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
+                      <Cardio size="42" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
                     ) : (
                       <>Load more</>
                     )}

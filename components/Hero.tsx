@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Hero() {
   const containerVariants = {
@@ -51,11 +52,14 @@ export default function Hero() {
       >
         <motion.h1
           variants={itemVariants}
-          className="mt-4 text-4xl font-hero font-black leading-tight tracking-tight text-text sm:text-5xl lg:text-7xl"
+          className="mt-4 text-5xl font-hero font-black leading-tight tracking-tight text-text sm:text-5xl lg:text-7xl"
         >
-          Monitor every log.
+          <span className="font-normal">Monitor</span>
+          <span className="font-bold"> every</span>
+          <span className="font-extrabold"> log.</span>
           <br />
-          <span className="text-primary">Fix issues faster.</span>
+          <span className="font-extrabold text-primary">Fix issues</span>
+          <span className="font-black text-primary"> faster.</span>
         </motion.h1>
 
         <motion.p
@@ -70,23 +74,31 @@ export default function Hero() {
           variants={itemVariants}
           className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start"
         >
-          <motion.button
+          <motion.div
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="rounded-full bg-primary px-7 py-4 font-semibold text-white shadow-xl shadow-primary/20 transition hover:bg-primary-hover"
           >
-            Start Free
-          </motion.button>
+            <Link
+              href="/dashboard"
+              className="inline-block rounded-full bg-primary px-7 py-4 font-semibold text-white shadow-xl shadow-primary/20 transition hover:bg-primary-hover"
+            >
+              Start Free
+            </Link>
+          </motion.div>
 
-          <motion.button
+          <motion.div
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="rounded-full border border-border bg-glass px-7 py-4 font-medium backdrop-blur-xl transition hover:bg-glass-hover"
           >
-            Documentation
-          </motion.button>
+            <Link
+              href="/docs"
+              className="inline-block rounded-full border border-border bg-glass px-7 py-4 font-medium backdrop-blur-xl transition hover:bg-glass-hover"
+            >
+              Documentation
+            </Link>
+          </motion.div>
         </motion.div>
       </motion.div>
 

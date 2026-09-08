@@ -4,22 +4,11 @@ import { useEffect, useState, useTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    ArrowLeft,
-    AlertTriangle,
-    Info,
-    Bug,
-    CheckCircle2,
-    FileText,
-    Pencil,
-    Trash2,
-    Loader2,
-    Globe,
-    Calendar,
-    Clock,
-    ChevronRight,
-    AlertCircle,
-    ShieldX,
+    Settings, Trash2, Key, RefreshCw, Plus, Check, Copy, AlertTriangle, ChevronLeft,
+    Clock, Activity, FileText, Layers, Shield, Sparkles, User, ExternalLink, X, Search, ChevronRight, SlidersHorizontal, Loader2,
 } from "lucide-react";
+import { Cardio } from "ldrs/react";
+import "ldrs/react/Cardio.css";
 import { ApiKeyCard } from "@/components/ApiKeyCard";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -249,7 +238,7 @@ export default function ProjectOverviewPage() {
                 href="/dashboard/projects"
                 className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text transition-colors"
             >
-                <ArrowLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" strokeWidth={4} />
                 All Projects
             </Link>
 
@@ -393,7 +382,7 @@ export default function ProjectOverviewPage() {
                                 className="inline-flex items-center gap-1 text-sm font-semibold text-error hover:underline"
                             >
                                 View details
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="h-4 w-4" strokeWidth={4} />
                             </Link>
                         </div>
                     ) : (
@@ -543,12 +532,13 @@ export default function ProjectOverviewPage() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
                                 >
-                                    {saving && (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    {saving ? (
+                                        <Cardio size="42" color="white" speed="1.5" stroke="4" bgOpacity="0.1" />
+                                    ) : (
+                                        "Save Changes"
                                     )}
-                                    Save Changes
                                 </button>
                             </div>
                         </form>
@@ -606,12 +596,13 @@ export default function ProjectOverviewPage() {
                                 disabled={
                                     deleteInput !== project.name || deleting
                                 }
-                                className="inline-flex items-center gap-2 rounded-2xl bg-error px-5 py-2 text-sm font-semibold text-white disabled:opacity-40 hover:bg-red-600 transition"
+                                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-error px-5 py-2 text-sm font-semibold text-white disabled:opacity-40 hover:bg-red-600 transition"
                             >
-                                {deleting && (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                {deleting ? (
+                                    <Cardio size="42" color="white" speed="1.5" stroke="4" bgOpacity="0.1" />
+                                ) : (
+                                    "Delete Project"
                                 )}
-                                Delete Project
                             </button>
                         </div>
                     </div>

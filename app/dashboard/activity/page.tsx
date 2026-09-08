@@ -11,6 +11,8 @@ import {
     ChevronRight,
     Loader2,
 } from "lucide-react";
+import { Cardio } from "ldrs/react";
+import "ldrs/react/Cardio.css";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { LogFilters } from "@/components/dashboard/log-filters";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -317,10 +319,13 @@ export default function ActivityPage() {
                             <button
                                 onClick={handleLoadMore}
                                 disabled={loadingMore}
-                                className="inline-flex items-center gap-2 rounded-xl border border-border bg-glass px-6 py-3 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover hover:text-text disabled:opacity-50"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-glass px-6 py-3 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover hover:text-text disabled:opacity-50"
                             >
-                                {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
-                                {loadingMore ? "Loading..." : "Load More"}
+                                {loadingMore ? (
+                                    <Cardio size="42" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
+                                ) : (
+                                    "Load More"
+                                )}
                             </button>
                         </div>
                     )}

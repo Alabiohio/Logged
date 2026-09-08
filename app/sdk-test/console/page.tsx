@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Logged } from "@oheoco/logged";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { LOGGED_BASE_URL } from "@/lib/site-config";
 
 const apiKey = process.env.NEXT_PUBLIC_LOGGED_API_KEY || "test_api_key";
@@ -69,15 +69,15 @@ export default function ConsoleTestPage() {
   return (
     <div className="p-8 font-sans max-w-lg mx-auto space-y-6">
       <Link
-          href="/sdk-test"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+        href="/sdk-test"
+        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
       >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Auto Tests
+        <ChevronLeft className="h-4 w-4" strokeWidth={4} />
+        Back to Auto Tests
       </Link>
-      
+
       <h1 className="text-2xl font-bold mb-6">Console Capture Test</h1>
-      
+
       <div className="flex flex-col gap-4">
         <button
           onClick={handleSimpleLog}
@@ -113,7 +113,7 @@ export default function ConsoleTestPage() {
         >
           console.log (Circular Object)
         </button>
-        
+
         <button
           onClick={handleSpam}
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium"

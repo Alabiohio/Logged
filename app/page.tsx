@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import DashboardPreview from "@/components/DashboardPreview";
@@ -6,6 +7,14 @@ import Pricing from "@/components/Pricing";
 import FAQ from "@/components/Faq";
 import Footer from "@/components/Footer";
 import CTA from "@/components/Cta";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Logged | Error Monitoring for Modern Apps",
+  },
+  description:
+    "Track errors, inspect logs, and understand product issues in real time with Logged.",
+};
 
 export default function Home() {
   return (

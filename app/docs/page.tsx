@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText, Code, Zap, Shield, ArrowRight } from "lucide-react";
+import { FileText, Code, Zap, Shield, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+
+export const metadata: Metadata = {
+  title: "Documentation | Logged",
+  description:
+    "Learn how to integrate Logged into your application with SDKs, REST API, and examples.",
+};
 
 export default function DocsPage() {
   return (
@@ -42,11 +49,11 @@ export default function DocsPage() {
             </p>
             <ul className="mt-4 space-y-2 text-sm text-text-muted">
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Installation
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Quick Start
               </li>
             </ul>
@@ -64,19 +71,19 @@ export default function DocsPage() {
             </p>
             <ul className="mt-4 space-y-2 text-sm text-text-muted">
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Logger
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Capture Errors
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Browser Auto Capture
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Console Capture
               </li>
             </ul>
@@ -94,15 +101,15 @@ export default function DocsPage() {
             </p>
             <ul className="mt-4 space-y-2 text-sm text-text-muted">
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 POST /api/v1/logs
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Authentication
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Request / Response
               </li>
             </ul>
@@ -120,15 +127,15 @@ export default function DocsPage() {
             </p>
             <ul className="mt-4 space-y-2 text-sm text-text-muted">
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 Next.js
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 React
               </li>
               <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
+                <ChevronRight className="h-4 w-4 text-primary" />
                 JavaScript
               </li>
             </ul>

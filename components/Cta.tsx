@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CTA() {
@@ -35,7 +35,7 @@ export default function CTA() {
           className="mt-8 inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 font-semibold text-white shadow-xl shadow-primary/20 transition hover:bg-primary-hover sm:mt-10"
         >
           Start Free
-          <ArrowRight size={18} />
+          <ChevronRight size={18} />
         </motion.button>
       </motion.div>
     </section>

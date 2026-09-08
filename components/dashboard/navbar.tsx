@@ -6,7 +6,7 @@ import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
 export function Navbar({ openMenu }: { openMenu: () => void }) {
   return (
     <div className="shrink-0 bg-background/80 px-4 py-3 shadow-sm backdrop-blur-xl z-30 relative">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 max-w-7xl mx-auto w-full">
         <button
           type="button"
           onClick={openMenu}

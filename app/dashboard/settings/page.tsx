@@ -5,7 +5,10 @@ import {
     User, Shield, Bell, Globe, Save, Loader2, AlertCircle, CheckCircle2,
     Monitor, Smartphone, Laptop, Trash2, LogOut, Link2, Clock,
     Sun, Moon, Palette, Database, TriangleAlert, Key, Copy, Check,
+    Lock, KeyRound, Tablet, HelpCircle, X, Mail, ExternalLink, RefreshCw, Eye, EyeOff, Plus, AlertTriangle
 } from "lucide-react";
+import { Cardio } from "ldrs/react";
+import "ldrs/react/Cardio.css";
 import { authClient } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -117,8 +120,11 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
                         disabled={input !== "delete" || loading}
                         className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-error px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-red-600 active:scale-95 disabled:opacity-40"
                     >
-                        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                        Delete Forever
+                        {loading ? (
+                            <Cardio size="42" color="white" speed="1.5" stroke="4" bgOpacity="0.1" />
+                        ) : (
+                            "Delete Forever"
+                        )}
                     </button>
                 </div>
             </div>
@@ -478,11 +484,16 @@ export default function SettingsPage() {
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-hover active:scale-95 disabled:opacity-50"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-hover active:scale-95 disabled:opacity-50"
                             >
-                                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                                <Save className="h-4 w-4" />
-                                Save Changes
+                                {saving ? (
+                                    <Cardio size="42" color="white" speed="1.5" stroke="4" bgOpacity="0.1" />
+                                ) : (
+                                    <>
+                                        <Save className="h-4 w-4" />
+                                        Save Changes
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -622,7 +633,7 @@ export default function SettingsPage() {
                                     className="inline-flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-xs font-semibold text-warning transition-all hover:bg-warning/20 disabled:opacity-50"
                                 >
                                     {revokeAllLoading ? (
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        <Cardio size="36" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
                                     ) : (
                                         <LogOut className="h-3.5 w-3.5" />
                                     )}
@@ -685,7 +696,7 @@ export default function SettingsPage() {
                                                             className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-error/20 bg-error/5 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/15 disabled:opacity-50"
                                                         >
                                                             {revokingToken === s.token ? (
-                                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                                                <Cardio size="36" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
                                                             ) : (
                                                                 <LogOut className="h-3 w-3" />
                                                             )}
@@ -815,7 +826,7 @@ export default function SettingsPage() {
                                 className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning transition-all hover:bg-warning/20 disabled:opacity-40"
                             >
                                 {revokeAllLoading ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <Cardio size="42" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
                                 ) : (
                                     <LogOut className="h-4 w-4" />
                                 )}

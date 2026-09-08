@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Code, Zap, Bug, Monitor, Terminal } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
+
+export const metadata: Metadata = {
+  title: "SDK | Logged",
+  description:
+    "Learn how to use the @oheoco/logged SDK to send logs, capture errors, and intercept console output.",
+};
 
 export default function SdkPage() {
   return (

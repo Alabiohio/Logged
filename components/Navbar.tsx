@@ -11,7 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 const navLinks = [
   { label: "Features", href: "/features" },
   { label: "Docs", href: "/docs" },
-  { label: "Blog", href: "#" },
+  { label: "API Reference", href: "/api-reference" },
+  { label: "Changelog", href: "/changelog" },
 ];
 
 export default function Navbar() {

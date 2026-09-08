@@ -8,6 +8,7 @@ interface GoogleSignInButtonProps {
     disabled?: boolean;
     label?: string;
     isLoading?: boolean;
+    className?: string;
 }
 
 export function GoogleSignInButton({
@@ -15,6 +16,7 @@ export function GoogleSignInButton({
     disabled = false,
     label = "Continue with Google",
     isLoading = false,
+    className,
 }: GoogleSignInButtonProps) {
     return (
         <button
@@ -22,7 +24,7 @@ export function GoogleSignInButton({
             onClick={onClick}
             disabled={disabled}
             id="google-sign-in-btn"
-            className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm font-medium text-text transition-all hover:bg-background hover:border-primary/40 hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className={className || "flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background-secondary px-4 py-3 text-sm font-medium text-text transition-all hover:bg-background hover:border-primary/40 hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"}
         >
             {isLoading ? (
                 <Cardio size="52" color="currentColor" speed="1.5" stroke="5" bgOpacity="0.1" />

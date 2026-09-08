@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { User, AlertCircle, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { User, AlertCircle, ChevronRight, ShieldCheck, LogOut } from "lucide-react";
+import LogoLoading from "@/components/LogoLoading";
+import { Cardio } from "ldrs/react";
+import "ldrs/react/Cardio.css";
 
 export default function SetUsernamePage() {
     const { data: sessionData, isPending: sessionLoading } = authClient.useSession();
@@ -40,6 +43,11 @@ export default function SetUsernamePage() {
             }
         }
     }, [sessionData, sessionLoading, initialized, router]);
+
+    const handleSignOut = async () => {
+        await authClient.signOut();
+        router.push("/login");
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,10 +95,7 @@ export default function SetUsernamePage() {
     if (sessionLoading || !initialized) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background p-4">
-                <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-sm font-medium text-text-secondary">Checking account status...</p>
-                </div>
+                <LogoLoading className="w-32 h-32" />
             </div>
         );
     }
@@ -101,10 +106,10 @@ export default function SetUsernamePage() {
             <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-info/15 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="w-full max-w-md space-y-8 md:rounded-2xl md:glass p-4 md:p-8 md:shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-full max-w-md space-y-8 p-4 md:p-8 relative z-10 animate-in fade-in zoom-in-95 duration-200">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-text">Choose your username</h1>
-                    <p className="text-sm text-text-secondary">
+                    <h1 className="text-3xl font-hero font-bold tracking-tight text-text">Choose your username</h1>
+                    <p className="text-sm font-bold text-text-secondary">
                         Your account requires a unique handle before you can continue.
                     </p>
                 </div>
@@ -119,7 +124,7 @@ export default function SetUsernamePage() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-text">
+                            <label className="block text-sm font-bold text-text">
                                 Username <span className="text-primary">*</span>
                             </label>
                             <div className="relative mt-2">
@@ -143,7 +148,7 @@ export default function SetUsernamePage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-text">Full Name</label>
+                            <label className="block text-sm font-bold text-text">Full Name</label>
                             <div className="relative mt-2">
                                 <input
                                     type="text"
@@ -163,21 +168,28 @@ export default function SetUsernamePage() {
                         className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {submitting ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                <span>Setting username...</span>
-                            </>
+                            <Cardio size="52" color="white" speed="1.5" stroke="5" bgOpacity="0.1" />
                         ) : (
                             <>
                                 <span>Continue to Dashboard</span>
-                                <ArrowRight className="h-4 w-4" />
+                                <ChevronRight className="h-4 w-4" strokeWidth={4} />
                             </>
                         )}
                     </button>
                 </form>
 
-                <div className="text-center text-xs text-text-muted">
-                    Logged in as <span className="font-semibold text-text">{sessionData?.user?.email}</span>
+                <div className="flex items-center justify-between pt-4 border-t border-border/50 text-xs text-text-muted">
+                    <span className="truncate max-w-[200px]" title={sessionData?.user?.email}>
+                        Logged in as <span className="font-semibold text-text">{sessionData?.user?.email}</span>
+                    </span>
+                    <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="inline-flex items-center gap-1.5 text-text-muted hover:text-red-500 transition-colors cursor-pointer shrink-0"
+                    >
+                        <LogOut className="h-4 w-4" strokeWidth={4} />
+                        <span className="font-bold font-hero">Log out</span>
+                    </button>
                 </div>
             </div>
         </div>

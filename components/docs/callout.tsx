@@ -31,11 +31,11 @@ export function Callout({ variant = "info", title, children }: CalloutProps) {
   const styles = variantStyles[variant];
 
   return (
-    <div className={`my-6 rounded-2xl border ${styles.bg} ${styles.border} p-5`}>
+    <div className={`my-6 rounded-2xl border ${styles.bg} ${styles.border} p-5 min-w-0 break-words`}>
       {title && (
         <p className={`mb-2 text-sm font-semibold ${styles.title}`}>{title}</p>
       )}
-      <div className="text-sm text-text-secondary leading-relaxed">{children}</div>
+      <div className="text-sm text-text-secondary leading-relaxed break-words">{children}</div>
     </div>
   );
 }

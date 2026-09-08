@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Code, Key, Server, ArrowRight } from "lucide-react";
+import { Code, Key, Server, ChevronRight } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
+
+export const metadata: Metadata = {
+  title: "Installation | Logged",
+  description:
+    "Install the Logged SDK in your application and initialize your first client.",
+};
 
 export default function InstallationPage() {
   return (
@@ -125,7 +132,7 @@ const logger = new Logged({
             className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
           >
             Quick Start
-            <ArrowRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" strokeWidth={4} />
           </Link>
           <Link
             href="/docs/sdk"

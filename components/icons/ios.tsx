@@ -26,7 +26,7 @@ function createMaterialIcon(symbolCode: string) {
   };
 }
 
-export const ArrowLeft = createMaterialIcon("\uE2EA");
+export const ChevronLeft = createMaterialIcon("\uE2EA");
 export const RefreshCw = createMaterialIcon("\uE5D5");
 export const Clock = createMaterialIcon("\uE8B5");
 export const TerminalSquare = createMaterialIcon("\uEB8E");

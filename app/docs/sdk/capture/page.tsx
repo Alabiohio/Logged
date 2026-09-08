@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
+
+export const metadata: Metadata = {
+  title: "Capture Errors | Logged",
+  description:
+    "Use logger.capture() to send caught errors to Logged with their message, stack, and metadata.",
+};
 
 export default function CapturePage() {
   return (
@@ -11,7 +18,7 @@ export default function CapturePage() {
           href="/docs/sdk"
           className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text transition"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" strokeWidth={4} />
           Back to SDK
         </Link>
         <h1 className="text-3xl font-black tracking-tight text-text sm:text-4xl">

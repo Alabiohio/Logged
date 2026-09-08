@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { FolderKanban, Download, Settings, Send, BarChart3, ArrowRight, CheckCircle2 } from "lucide-react";
+import { FolderKanban, Download, Settings, Send, BarChart3, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
+
+export const metadata: Metadata = {
+  title: "Quick Start | Logged",
+  description:
+    "Get started with Logged in minutes. Install the SDK, create a project, and send your first log.",
+};
 
 const steps = [
   {
@@ -16,19 +23,19 @@ const steps = [
     description:
       "Add the Logged SDK to your application using npm.",
     icon: Download,
-      code: {
-        language: "bash",
-        code: "npm install @oheoco/logged",
-      },
+    code: {
+      language: "bash",
+      code: "npm install @oheoco/logged",
+    },
   },
   {
     title: "Initialize Logged",
     description:
       "Create a Logged client with your project API key.",
     icon: Settings,
-      code: {
-        language: "typescript",
-        code: `import { Logged } from "@oheoco/logged";
+    code: {
+      language: "typescript",
+      code: `import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
@@ -74,7 +81,7 @@ export default function QuickStartPage() {
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background-secondary text-sm font-bold text-primary">
                 {index + 1}
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 min-w-0 space-y-3">
                 <div className="flex items-center gap-2">
                   <Icon className="h-5 w-5 text-primary" />
                   <h2 className="text-lg font-bold text-text">{step.title}</h2>
@@ -89,7 +96,7 @@ export default function QuickStartPage() {
                     className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
                   >
                     Open Logged
-                    <ArrowRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4" strokeWidth={4} />
                   </Link>
                 )}
               </div>
@@ -111,7 +118,7 @@ export default function QuickStartPage() {
             className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
           >
             Explore the SDK
-            <ArrowRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" strokeWidth={4} />
           </Link>
           <Link
             href="/docs/rest-api"
