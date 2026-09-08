@@ -27,7 +27,7 @@ export default function ConsolePage() {
         <h2 className="text-2xl font-bold text-text">Setup</h2>
         <CodeBlock
           language="typescript"
-          code={`import { Logged } from "@logged/sdk";
+          code={`import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,

@@ -30,7 +30,7 @@ export default function NextJsExamplePage() {
           code={`"use client";
 
 import { useEffect } from "react";
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,
@@ -87,7 +87,7 @@ export default function RootLayout({ children }) {
           language="tsx"
           code={`"use client";
 
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,

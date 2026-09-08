@@ -77,7 +77,7 @@ Whether you're building a personal project, a startup, or a large-scale applicat
 ## Example
 
 ```javascript
-import Logged from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
     apiKey: "YOUR_API_KEY"
@@ -89,9 +89,7 @@ logger.warn("Payment is taking longer than expected");
 
 logger.error("Failed to connect to database");
 
-logger.debug({
-    response
-});
+logger.debug("Request details", { response });
 ```
 
 ---

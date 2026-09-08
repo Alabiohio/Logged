@@ -56,28 +56,31 @@ export function LogSearch() {
 
   return (
     <div className="relative flex-1 group min-w-[250px]">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted transition-colors group-focus-within:text-primary" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted transition-colors group-focus-within:text-primary" aria-hidden="true" />
       <input
         ref={inputRef}
         type="text"
+        aria-label="Search logs"
         placeholder="Search logs... (Press '/' to focus)"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full rounded-xl border border-border bg-background/50 pl-10 pr-10 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-text-muted/70"
+        className="w-full rounded-xl border border-border bg-background/50 pl-10 pr-10 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-primary transition-all placeholder:text-text-muted/70"
       />
       {search && (
         <button
+          type="button"
           onClick={() => {
             setSearch("");
             inputRef.current?.focus();
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text p-1 rounded-md transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text p-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title="Clear search"
+          aria-label="Clear search query"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       )}
-      <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none opacity-50">
+      <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none opacity-50" aria-hidden="true">
         <kbd className="bg-background-tertiary px-1.5 py-0.5 rounded text-[10px] font-mono border border-border/50 text-text-muted">/</kbd>
       </div>
     </div>

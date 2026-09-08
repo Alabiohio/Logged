@@ -137,6 +137,42 @@ body {
   min-height: 100vh;
 }
 
+@layer base {
+  button,
+  [role="button"],
+  a,
+  select,
+  summary,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  label[for],
+  [tabindex="0"],
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled,
+  select:disabled,
+  .cursor-not-allowed {
+    cursor: not-allowed !important;
+  }
+}
+
+/* Guarantee cursor pointer on all non-disabled interactive elements */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+select:not(:disabled),
+summary,
+label[for],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
 p {
   font-family: var(--font-pt-sans);
 }

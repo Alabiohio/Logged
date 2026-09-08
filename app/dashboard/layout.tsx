@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Navbar openMenu={openMenu} />
 
-        <main className="flex-1 overflow-y-auto flex flex-col px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+        <main id="main-content" className="flex-1 overflow-y-auto flex flex-col px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
           {children}
         </main>
       </div>

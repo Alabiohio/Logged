@@ -11,7 +11,7 @@ export default function SdkPage() {
           SDK
         </h1>
         <p className="text-base leading-7 text-text-secondary">
-          The <code className="font-mono text-primary">@logged/sdk</code> package
+          The <code className="font-mono text-primary">@oheoco/logged</code> package
           provides a typed client for sending logs, capturing errors, and
           intercepting browser console activity.
         </p>
@@ -21,7 +21,7 @@ export default function SdkPage() {
         <h2 className="text-2xl font-bold text-text">Installation</h2>
         <CodeBlock
           language="bash"
-          code="npm install @logged/sdk"
+          code="npm install @oheoco/logged"
         />
       </section>
 
@@ -29,7 +29,7 @@ export default function SdkPage() {
         <h2 className="text-2xl font-bold text-text">Initialization</h2>
         <CodeBlock
           language="typescript"
-          code={`import { Logged } from "@logged/sdk";
+          code={`import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,

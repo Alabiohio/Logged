@@ -21,10 +21,12 @@ export default function RestApiPage() {
         <h2 className="text-2xl font-bold text-text">Endpoint</h2>
         <CodeBlock
           language="http"
-          code="POST /api/v1/logs"
+          code={`POST /api/v1/logs
+Accept: application/json
+Content-Type: application/json`}
         />
         <p className="text-sm leading-7 text-text-secondary">
-          The API accepts single log objects as well as batches of logs.
+          The API supports CORS for browser clients. Preflight requests are handled automatically.
         </p>
       </section>
 
@@ -202,9 +204,9 @@ export default function RestApiPage() {
             </thead>
             <tbody className="divide-y divide-border/50">
               <tr>
-                <td className="py-3 pr-4 font-mono text-primary text-xs">401</td>
+                <td className="py-3 pr-4 font-mono text-primary text-xs">413</td>
                 <td className="py-3 text-text-secondary">
-                  Invalid or missing API key.
+                  Request body exceeds 100 KB limit.
                 </td>
               </tr>
               <tr>
@@ -214,15 +216,15 @@ export default function RestApiPage() {
                 </td>
               </tr>
               <tr>
-                <td className="py-3 pr-4 font-mono text-primary text-xs">404</td>
+                <td className="py-3 pr-4 font-mono text-primary text-xs">401</td>
                 <td className="py-3 text-text-secondary">
-                  Project or resource not found.
+                  Invalid or missing API key.
                 </td>
               </tr>
               <tr>
                 <td className="py-3 pr-4 font-mono text-primary text-xs">429</td>
                 <td className="py-3 text-text-secondary">
-                  Too many requests. Respect the Retry-After header.
+                  Too many requests. Check <code className="font-mono text-primary">Retry-After</code> and rate-limit headers.
                 </td>
               </tr>
               <tr>
@@ -230,6 +232,42 @@ export default function RestApiPage() {
                 <td className="py-3 text-text-secondary">
                   Server error. Retry with backoff.
                 </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-text">Rate limit headers</h2>
+        <p className="text-sm leading-7 text-text-secondary">
+          Successful responses include rate-limit metadata. When rate-limited, the
+          response also includes a <code className="font-mono text-primary">Retry-After</code> header.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="pb-3 pr-4 font-semibold text-text">Header</th>
+                <th className="pb-3 font-semibold text-text">Description</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              <tr>
+                <td className="py-3 pr-4 font-mono text-primary text-xs">X-RateLimit-Limit</td>
+                <td className="py-3 text-text-secondary">Maximum requests allowed per minute.</td>
+              </tr>
+              <tr>
+                <td className="py-3 pr-4 font-mono text-primary text-xs">X-RateLimit-Remaining</td>
+                <td className="py-3 text-text-secondary">Requests remaining in the current window.</td>
+              </tr>
+              <tr>
+                <td className="py-3 pr-4 font-mono text-primary text-xs">X-RateLimit-Reset</td>
+                <td className="py-3 text-text-secondary">Unix timestamp when the rate limit window resets.</td>
+              </tr>
+              <tr>
+                <td className="py-3 pr-4 font-mono text-primary text-xs">Retry-After</td>
+                <td className="py-3 text-text-secondary">Seconds to wait before retrying. Only present on 429 responses.</td>
               </tr>
             </tbody>
           </table>

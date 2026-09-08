@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 import { LOGGED_BASE_URL } from "@/lib/site-config";
 
 // Use NEXT_PUBLIC_LOGGED_API_KEY if available, or fallback to a string for testing

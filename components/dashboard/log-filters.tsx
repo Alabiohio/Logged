@@ -40,11 +40,12 @@ export function LogFilters() {
     <div className="flex flex-wrap items-center gap-3">
       {/* Level Filter */}
       <div className="relative">
-        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" aria-hidden="true" />
         <select
           value={level}
           onChange={(e) => updateFilter("level", e.target.value)}
-          className="appearance-none rounded-xl border border-border bg-background/50 pl-9 pr-8 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer transition-colors hover:bg-glass/80"
+          aria-label="Filter by log level"
+          className="appearance-none rounded-xl border border-border bg-background/50 pl-9 pr-8 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-primary cursor-pointer transition-colors hover:bg-glass/80"
         >
           <option value="all">All Levels</option>
           <option value="error">Error</option>
@@ -53,7 +54,7 @@ export function LogFilters() {
           <option value="success">Success</option>
           <option value="debug">Debug</option>
         </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted pointer-events-none" />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted pointer-events-none" aria-hidden="true" />
       </div>
 
       {/* Environment Filter */}
@@ -61,45 +62,72 @@ export function LogFilters() {
         <select
           value={environment}
           onChange={(e) => updateFilter("environment", e.target.value)}
-          className="appearance-none rounded-xl border border-border bg-background/50 pl-4 pr-8 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer transition-colors hover:bg-glass/80"
+          aria-label="Filter by environment"
+          className="appearance-none rounded-xl border border-border bg-background/50 pl-4 pr-8 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-primary cursor-pointer transition-colors hover:bg-glass/80"
         >
           <option value="all">All Environments</option>
           <option value="production">Production</option>
           <option value="staging">Staging</option>
           <option value="development">Development</option>
         </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted pointer-events-none" />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted pointer-events-none" aria-hidden="true" />
       </div>
       
       {/* Date Filter (from) */}
       <div className="relative flex items-center">
-          <span className="text-xs text-text-muted mr-2 hidden sm:inline">From:</span>
+        <label htmlFor="log-filter-from" className="text-xs text-text-muted mr-1.5 whitespace-nowrap">From:</label>
+        <div className="relative flex items-center">
           <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => updateFilter("from", e.target.value)}
-              className="rounded-xl border border-border bg-background/50 px-3 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer transition-colors hover:bg-glass/80"
+            id="log-filter-from"
+            type="date"
+            placeholder="mm/dd/yy"
+            aria-label="Filter from date"
+            value={fromDate}
+            onChange={(e) => updateFilter("from", e.target.value)}
+            className={`rounded-xl border border-border bg-background/50 px-3 py-2 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-primary cursor-pointer transition-colors hover:bg-glass/80 min-h-[40px] ${
+              !fromDate ? "text-transparent [&::-webkit-datetime-edit]:text-transparent" : ""
+            }`}
           />
+          {!fromDate && (
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted select-none">
+              mm/dd/yy
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Date Filter (to) */}
       <div className="relative flex items-center">
-          <span className="text-xs text-text-muted mr-2 hidden sm:inline">To:</span>
+        <label htmlFor="log-filter-to" className="text-xs text-text-muted mr-1.5 whitespace-nowrap">To:</label>
+        <div className="relative flex items-center">
           <input
-              type="date"
-              value={toDate}
-              onChange={(e) => updateFilter("to", e.target.value)}
-              className="rounded-xl border border-border bg-background/50 px-3 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer transition-colors hover:bg-glass/80"
+            id="log-filter-to"
+            type="date"
+            placeholder="mm/dd/yy"
+            aria-label="Filter to date"
+            value={toDate}
+            onChange={(e) => updateFilter("to", e.target.value)}
+            className={`rounded-xl border border-border bg-background/50 px-3 py-2 text-sm text-text outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-primary cursor-pointer transition-colors hover:bg-glass/80 min-h-[40px] ${
+              !toDate ? "text-transparent [&::-webkit-datetime-edit]:text-transparent" : ""
+            }`}
           />
+          {!toDate && (
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted select-none">
+              mm/dd/yy
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Clear Filters Button */}
       {hasFilters && (
         <button
+          type="button"
           onClick={clearFilters}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 text-sm text-text-muted hover:text-text hover:bg-glass rounded-xl transition-all border border-transparent hover:border-border"
+          aria-label="Clear all log filters"
+          className="inline-flex items-center gap-1.5 px-3 py-2.5 text-sm text-text-muted hover:text-text hover:bg-glass rounded-xl transition-all border border-transparent hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
           Clear
         </button>
       )}

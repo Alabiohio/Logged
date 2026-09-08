@@ -20,10 +20,10 @@ export default function InstallationPage() {
         <h2 className="text-2xl font-bold text-text">Install the SDK</h2>
         <CodeBlock
           language="bash"
-          code="npm install @logged/sdk"
+          code="npm install @oheoco/logged"
         />
         <p className="text-sm text-text-secondary">
-          This installs the <code className="font-mono text-primary">@logged/sdk</code> package
+          This installs the <code className="font-mono text-primary">@oheoco/logged</code> package
           into your project.
         </p>
       </section>
@@ -32,7 +32,7 @@ export default function InstallationPage() {
         <h2 className="text-2xl font-bold text-text">Initialize the client</h2>
         <CodeBlock
           language="typescript"
-          code={`import { Logged } from "@logged/sdk";
+          code={`import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
@@ -85,7 +85,7 @@ const logger = new Logged({
               <tr>
                 <td className="py-3 pr-4 font-mono text-primary text-xs">baseUrl</td>
                 <td className="py-3 pr-4 text-text-secondary">No</td>
-                <td className="py-3 text-text-secondary">Logged API URL. Defaults to the app URL.</td>
+                <td className="py-3 text-text-secondary">Logged API URL. Defaults to <code className="font-mono text-primary">NEXT_PUBLIC_LOGGED_BASE_URL</code> or <code className="font-mono text-primary">http://localhost:3000</code>.</td>
               </tr>
               <tr>
                 <td className="py-3 pr-4 font-mono text-primary text-xs">debug</td>

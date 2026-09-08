@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { LOGGED_BASE_URL } from "@/lib/site-config";

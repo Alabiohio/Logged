@@ -16,19 +16,19 @@ const steps = [
     description:
       "Add the Logged SDK to your application using npm.",
     icon: Download,
-    code: {
-      language: "bash",
-      code: "npm install @logged/sdk",
-    },
+      code: {
+        language: "bash",
+        code: "npm install @oheoco/logged",
+      },
   },
   {
     title: "Initialize Logged",
     description:
       "Create a Logged client with your project API key.",
     icon: Settings,
-    code: {
-      language: "typescript",
-      code: `import { Logged } from "@logged/sdk";
+      code: {
+        language: "typescript",
+        code: `import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,

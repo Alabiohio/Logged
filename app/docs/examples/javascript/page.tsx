@@ -27,7 +27,7 @@ export default function JavaScriptExamplePage() {
         <CodeBlock
           language="html"
           code={`<script type="module">
-  import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
   const logger = new Logged({
     apiKey: "YOUR_API_KEY",
@@ -47,7 +47,7 @@ export default function JavaScriptExamplePage() {
         <h2 className="text-2xl font-bold text-text">CommonJS</h2>
         <CodeBlock
           language="javascript"
-          code={`const { Logged } = require("@logged/sdk");
+          code={`const { Logged } = require("@oheoco/logged");
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY,
@@ -61,7 +61,7 @@ logger.info("Server started");`}
         <h2 className="text-2xl font-bold text-text">ES modules</h2>
         <CodeBlock
           language="javascript"
-          code={`import { Logged } from "@logged/sdk";
+          code={`import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY,

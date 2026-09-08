@@ -105,23 +105,31 @@ export function LogDetailsDrawer({ log, onClose }: LogDetailsDrawerProps) {
     const clientInfo = log.userAgent ? parseUserAgent(log.userAgent) : null;
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="log-details-drawer-title"
+            className="fixed inset-0 z-50 flex justify-end"
+        >
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
+                aria-hidden="true"
             />
 
             {/* Drawer panel — full-screen on mobile, side panel on larger screens */}
             <div className="relative z-10 w-full sm:max-w-lg flex flex-col bg-background border-l border-border shadow-lg animate-in slide-in-from-right">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-border px-6 py-4 shrink-0">
-                    <h2 className="text-lg font-bold text-text">Log Details</h2>
+                    <h2 id="log-details-drawer-title" className="text-lg font-bold text-text">Log Details</h2>
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-secondary transition hover:bg-glass-hover hover:text-text"
+                        aria-label="Close log details"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-secondary transition hover:bg-glass-hover hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     >
-                        <X className="h-4 w-4" />
+                        <X className="h-4 w-4" aria-hidden="true" />
                     </button>
                 </div>
 

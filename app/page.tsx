@@ -9,7 +9,7 @@ import CTA from "@/components/Cta";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
+    <main id="main-content" className="relative min-h-screen overflow-hidden bg-background">
       {/* Background Blur */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute left-[-120px] top-20 h-80 w-80 rounded-full bg-primary/25 blur-[120px]" />

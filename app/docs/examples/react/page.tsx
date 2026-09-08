@@ -26,7 +26,7 @@ export default function ReactExamplePage() {
         <h2 className="text-2xl font-bold text-text">Initialize Logged</h2>
         <CodeBlock
           language="tsx"
-          code={`import { Logged } from "@logged/sdk";
+          code={`import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: import.meta.env.VITE_LOGGED_API_KEY,

@@ -1,4 +1,4 @@
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 import dotenv from "dotenv";
 import { LOGGED_BASE_URL } from "./lib/site-config";
 

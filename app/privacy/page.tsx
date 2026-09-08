@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
+    <main id="main-content" className="relative min-h-screen overflow-hidden bg-background">
       <div className="absolute inset-0 -z-10">
         <div className="absolute left-[-120px] top-20 h-80 w-80 rounded-full bg-primary/25 blur-[120px]" />
         <div className="absolute right-[-100px] top-40 h-96 w-96 rounded-full bg-info/20 blur-[120px]" />
@@ -87,7 +87,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold text-text">7. Contact Us</h2>
             <p className="mt-4">
               If you have any questions about this Privacy Policy, please contact us
-              at privacy@logged.dev.
+              at info@oheo.site.
             </p>
           </section>
         </div>

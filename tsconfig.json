@@ -20,7 +20,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@logged/sdk": ["./packages/sdk/src"]
+      "@oheoco/logged": ["./packages/sdk/src"]
     }
   },
   "include": [

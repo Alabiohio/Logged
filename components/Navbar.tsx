@@ -28,14 +28,14 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 px-4 py-4 sm:px-6 sm:py-5"
     >
       {/* Main bar */}
-      <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-border bg-glass px-5 py-3 backdrop-blur-3xl shadow-lg">
+      <nav aria-label="Main Navigation" className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-border bg-glass px-5 py-3 backdrop-blur-3xl shadow-lg">
         {/* Logo */}
         <Link
           href="/"
           className="relative flex items-center group shrink-0"
         >
           <motion.div whileHover={{ rotate: 10, scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
-            <Image src="/logo/logo.png" alt="Oheo logo" width={1000} height={20} className="relative w-9 h-9 object-contain" />
+            <Image src="/logo/logo.png" alt="Logged logo" width={1000} height={20} className="relative w-9 h-9 object-contain" />
           </motion.div>
           <span className="text-xl font-black tracking-tight text-text-secondary sm:text-2xl ml-2">Logged</span>
         </Link>
@@ -46,7 +46,7 @@ export default function Navbar() {
             <Link
               key={link.label}
               href={link.href}
-              className="relative transition hover:text-text group"
+              className="relative transition hover:text-text group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md px-1"
             >
               {link.label}
               <span className="absolute left-0 bottom-[-4px] h-[2px] w-0 bg-primary transition-all duration-300 group-hover:w-full" />
@@ -63,19 +63,20 @@ export default function Navbar() {
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 rounded-full border border-border bg-primary/10 px-3 py-1.5 text-sm font-medium text-text-secondary backdrop-blur-3xl transition hover:bg-glass hover:text-text"
+                  className="flex items-center gap-2 rounded-full border border-border bg-primary/10 px-3 py-1.5 text-sm font-medium text-text-secondary backdrop-blur-3xl transition hover:bg-glass hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   title={user.name || user.email}
+                  aria-label={`Dashboard for ${user.name || user.email}`}
                 >
                   {user.image ? (
                     <Image
                       src={user.image}
-                      alt={user.name || "Profile"}
+                      alt={user.name || "Profile picture"}
                       width={28}
                       height={28}
                       className="rounded-full object-cover w-7 h-7"
                     />
                   ) : (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary" aria-hidden="true">
                       <User size={16} />
                     </div>
                   )}
@@ -88,7 +89,7 @@ export default function Navbar() {
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link
                   href="/login"
-                  className="rounded-full border border-border bg-primary px-5 py-2 text-sm text-text-secondary backdrop-blur-3xl transition hover:bg-glass"
+                  className="rounded-full border border-border bg-primary px-5 py-2 text-sm text-text-secondary backdrop-blur-3xl transition hover:bg-glass focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   Sign In
                 </Link>
@@ -101,10 +102,12 @@ export default function Navbar() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-glass transition hover:bg-glass-hover md:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-navigation-menu"
+          aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-glass transition hover:bg-glass-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden"
         >
-          {open ? <X size={18} /> : <Menu size={18} />}
+          {open ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
         </motion.button>
       </nav>
 
@@ -112,6 +115,7 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
+            id="mobile-navigation-menu"
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}

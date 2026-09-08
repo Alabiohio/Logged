@@ -93,7 +93,7 @@ logger.interceptConsole();
 | :--- | :--- | :--- | :--- |
 | `apiKey` | `string` | **Required** | Your Logged Project API Key. |
 | `environment` | `string` | `"development"` | Application environment tag (e.g. `production`, `staging`, `development`). |
-| `baseUrl` | `string` | `"http://localhost:3000"` | Optional custom backend ingestion API base URL. |
+| `baseUrl` | `string` | `http://localhost:3000` or `NEXT_PUBLIC_LOGGED_BASE_URL` | Optional custom backend ingestion API base URL. |
 | `debug` | `boolean` | `false` | Enable SDK debug logging to console. |
 
 ---

@@ -4,7 +4,7 @@ interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   className?: string;
 }
 
-function createMaterialIcon(symbolName: string) {
+function createMaterialIcon(symbolCode: string) {
   return function MaterialIcon({ className = "", style, ...props }: IconProps) {
     return (
       <span
@@ -20,16 +20,16 @@ function createMaterialIcon(symbolName: string) {
         }}
         {...props}
       >
-        {symbolName}
+        {symbolCode}
       </span>
     );
   };
 }
 
-export const ArrowLeft = createMaterialIcon("arrow_back_ios_new");
-export const RefreshCw = createMaterialIcon("refresh");
-export const Clock = createMaterialIcon("schedule");
-export const TerminalSquare = createMaterialIcon("terminal");
+export const ArrowLeft = createMaterialIcon("\uE2EA");
+export const RefreshCw = createMaterialIcon("\uE5D5");
+export const Clock = createMaterialIcon("\uE8B5");
+export const TerminalSquare = createMaterialIcon("\uEB8E");
 export const Loader2 = function Loader2Icon({ className = "", style, ...props }: IconProps) {
   return (
     <span
@@ -45,15 +45,15 @@ export const Loader2 = function Loader2Icon({ className = "", style, ...props }:
       }}
       {...props}
     >
-      progress_activity
+      {"\uE9D0"}
     </span>
   );
 };
-export const SearchX = createMaterialIcon("search_off");
-export const ChevronRight = createMaterialIcon("chevron_right");
-export const ChevronDown = createMaterialIcon("keyboard_arrow_down");
-export const Maximize2 = createMaterialIcon("open_in_full");
-export const ShieldX = createMaterialIcon("security_update_warning");
-export const Search = createMaterialIcon("search");
-export const X = createMaterialIcon("close");
-export const SlidersHorizontal = createMaterialIcon("tune");
+export const SearchX = createMaterialIcon("\uEA76");
+export const ChevronRight = createMaterialIcon("\uE5CC");
+export const ChevronDown = createMaterialIcon("\uE313");
+export const Maximize2 = createMaterialIcon("\uF1CE");
+export const ShieldX = createMaterialIcon("\uE2C5");
+export const Search = createMaterialIcon("\uE8B6");
+export const X = createMaterialIcon("\uE5CD");
+export const SlidersHorizontal = createMaterialIcon("\uE429");

@@ -102,7 +102,7 @@ export default function Footer() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="group flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200"
+                  className="group flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   style={{
                     background: "var(--glass-hover)",
                     border: "1px solid var(--border)",
@@ -119,7 +119,7 @@ export default function Footer() {
                     (e.currentTarget as HTMLElement).style.background = "var(--glass-hover)";
                   }}
                 >
-                  {s.icon}
+                  <span aria-hidden="true">{s.icon}</span>
                 </Link>
               ))}
             </div>
@@ -141,7 +141,7 @@ export default function Footer() {
                     <li key={item.label}>
                       <Link
                         href={item.href}
-                        className="text-sm transition-colors duration-150"
+                        className="text-sm transition-colors duration-150 rounded px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         style={{ color: "var(--text-muted)" }}
                         onMouseEnter={(e) => {
                           (e.currentTarget as HTMLElement).style.color = "#10B981";

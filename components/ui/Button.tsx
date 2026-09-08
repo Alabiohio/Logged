@@ -27,6 +27,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 export function Button({
+  type = "button",
   variant = "primary",
   size = "md",
   loading = false,
@@ -38,11 +39,15 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
+      type={type}
       disabled={disabled || loading}
+      aria-busy={loading ? true : undefined}
+      aria-disabled={disabled || loading ? true : undefined}
       className={`
         inline-flex items-center justify-center gap-2 cursor-pointer
         ${variantClasses[variant]}
         ${sizeClasses[size]}
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
       `}
@@ -54,6 +59,7 @@ export function Button({
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <circle
             className="opacity-25"
@@ -70,7 +76,7 @@ export function Button({
           />
         </svg>
       ) : (
-        icon && <span className="flex-shrink-0">{icon}</span>
+        icon && <span className="flex-shrink-0" aria-hidden="true">{icon}</span>
       )}
       {children}
     </button>

@@ -360,7 +360,7 @@ export default function ProjectOverviewPage() {
                         <div className="flex flex-col items-center justify-center py-12 text-center">
                             <Clock className="h-10 w-10 text-text-muted/30 mb-3" />
                             <p className="text-sm text-text-muted">
-                                No logs yet. Send your first log using @logged/sdk.
+                                No logs yet. Send your first log using @oheoco/logged.
                             </p>
                             <Link
                                 href="/docs"
