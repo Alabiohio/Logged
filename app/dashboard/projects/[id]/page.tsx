@@ -4,9 +4,13 @@ import { useEffect, useState, useTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    Settings, Trash2, Key, RefreshCw, Plus, Check, Copy, AlertTriangle, ChevronLeft,
-    Clock, Activity, FileText, Layers, Shield, Sparkles, User, ExternalLink, X, Search, ChevronRight, SlidersHorizontal, Loader2,
+    Settings, Trash2, Key, Plus, Check, Copy, AlertTriangle,
+    Activity, FileText, Layers, Sparkles, User, ExternalLink,
 } from "lucide-react";
+import {
+    ChevronLeft, RefreshCw, Clock, X, Search, ChevronRight, SlidersHorizontal, Loader2,
+    ShieldX, Bug, Info, Calendar, Globe, Pencil, AlertCircle, CheckCircle2,
+} from "@/components/icons/ios";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { ApiKeyCard } from "@/components/ApiKeyCard";
@@ -238,7 +242,7 @@ export default function ProjectOverviewPage() {
                 href="/dashboard/projects"
                 className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text transition-colors"
             >
-                <ChevronLeft className="h-4 w-4" strokeWidth={4} />
+                <ChevronLeft className="h-4 w-4" />
                 All Projects
             </Link>
 
@@ -382,7 +386,7 @@ export default function ProjectOverviewPage() {
                                 className="inline-flex items-center gap-1 text-sm font-semibold text-error hover:underline"
                             >
                                 View details
-                                <ChevronRight className="h-4 w-4" strokeWidth={4} />
+                                <ChevronRight className="h-4 w-4" />
                             </Link>
                         </div>
                     ) : (

@@ -57,3 +57,11 @@ export const ShieldX = createMaterialIcon("\uE2C5");
 export const Search = createMaterialIcon("\uE8B6");
 export const X = createMaterialIcon("\uE5CD");
 export const SlidersHorizontal = createMaterialIcon("\uE429");
+export const Bug = createMaterialIcon("\uE868");
+export const Info = createMaterialIcon("\uE88E");
+export const Calendar = createMaterialIcon("\uE935");
+export const Globe = createMaterialIcon("\uE80B");
+export const Pencil = createMaterialIcon("\uE3C9");
+export const AlertCircle = createMaterialIcon("\uE000");
+export const CheckCircle2 = createMaterialIcon("\uE86C");
+

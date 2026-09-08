@@ -1,9 +1,9 @@
-import type { LucideIcon } from "lucide-react";
+import type { ElementType } from "react";
 
 interface StatCardProps {
     label: string;
     value: string | number;
-    icon: LucideIcon;
+    icon: ElementType<{ className?: string }>;
     iconColor?: string;
     iconBg?: string;
     trend?: string;

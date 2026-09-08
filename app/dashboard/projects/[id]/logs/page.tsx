@@ -60,7 +60,7 @@ function LogRow({ log, onClick }: { log: LogRecord; onClick: () => void }) {
 
         {/* Desktop Columns */}
         <div className="hidden sm:flex w-5 shrink-0 items-center justify-center text-text-muted group-hover:text-text transition-colors">
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" strokeWidth={4} />}
+          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </div>
 
         <div className="hidden sm:block w-44 shrink-0 text-xs font-mono text-text-muted">
