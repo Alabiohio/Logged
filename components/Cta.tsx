@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function CTA() {
   return (
@@ -28,15 +29,17 @@ export default function CTA() {
           Join developers building more reliable software with Logged.
         </p>
 
-        <motion.button
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="mt-8 inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 font-semibold text-white shadow-xl shadow-primary/20 transition hover:bg-primary-hover sm:mt-10"
-        >
-          Start Free
-          <ChevronRight size={18} />
-        </motion.button>
+        <Link href="/dashboard">
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="mt-8 inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 font-semibold text-white shadow-xl shadow-primary/20 transition hover:bg-primary-hover sm:mt-10"
+          >
+            Start Free
+            <ChevronRight size={18} />
+          </motion.button>
+        </Link>
       </motion.div>
     </section>
   );

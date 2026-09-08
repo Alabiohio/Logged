@@ -35,9 +35,9 @@ export default function Navbar() {
           href="/"
           className="relative flex items-center group shrink-0"
         >
-          <motion.div whileHover={{ rotate: 10, scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+          <div>
             <Image src="/logo/logo.png" alt="Logged logo" width={1000} height={20} className="relative w-9 h-9 object-contain" />
-          </motion.div>
+          </div>
           <span className="text-xl font-black tracking-tight text-text-secondary sm:text-2xl ml-2">Logged</span>
         </Link>
 
