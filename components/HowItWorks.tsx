@@ -1,119 +1,256 @@
 "use client";
 
-import {
-  FolderPlus,
-  KeyRound,
-  Code2,
-  Activity,
-  ChevronRight,
-} from "lucide-react";
 import { motion } from "framer-motion";
-
-const steps = [
-  {
-    icon: FolderPlus,
-    title: "Create a Project",
-    description:
-      "Create a project in Logged and organize your applications in one place.",
-  },
-  {
-    icon: KeyRound,
-    title: "Copy Your API Key",
-    description:
-      "Every project gets a secure API key for sending logs safely.",
-  },
-  {
-    icon: Code2,
-    title: "Install the SDK",
-    description:
-      "Add the SDK to your application and initialize it with your API key.",
-  },
-  {
-    icon: Activity,
-    title: "Start Monitoring",
-    description:
-      "Logs begin appearing instantly in your dashboard with filtering and search.",
-  },
-];
+import { FolderPlus, KeyRound, Code2, Activity, Check, Copy } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function HowItWorks() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6 }}
-        className="text-center"
-      >
-        <h2 className="mt-6 text-3xl font-hero font-black text-text sm:text-4xl lg:text-5xl">
-          Get started in minutes.
-        </h2>
+    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div className="text-center">
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-xs font-bold tracking-widest text-primary uppercase"
+        >
+          STREAMLINED WORKFLOW
+        </motion.p>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          className="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
+        >
+          Get started in minutes
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="mx-auto mt-4 max-w-2xl text-base text-text-secondary sm:text-lg"
+        >
+          No complicated setup. Just create a project, grab your key, send logs, and start debugging.
+        </motion.p>
+      </div>
 
-        <p className="mx-auto mt-5 max-w-2xl text-base text-text-muted sm:text-lg">
-          No complicated setup. Just create a project, install the SDK,
-          and start receiving logs instantly.
-        </p>
-      </motion.div>
+      <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {/* Step 1 */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          whileHover={{ y: -6 }}
+          className="flex flex-col rounded-3xl border border-border/80 bg-glass/50 p-6 backdrop-blur-xl transition hover:border-primary/50"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <FolderPlus size={24} />
+            </div>
+            <span className="font-console text-xs font-bold text-primary">STEP 01</span>
+          </div>
 
-      <motion.div
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        variants={{
-          hidden: {},
-          show: {
-            transition: { staggerChildren: 0.15, delayChildren: 0.2 },
-          },
-        }}
-        className="mt-16 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:mt-24 lg:grid-cols-4"
-      >
-        {steps.map((step, index) => {
-          const Icon = step.icon;
+          <h3 className="text-xl font-bold text-text">Create a Project</h3>
+          <p className="mt-2 text-sm text-text-muted leading-relaxed">
+            Organize your web apps, microservices, and APIs in dedicated project spaces.
+          </p>
 
-          return (
-            <motion.div
-              key={step.title}
-              variants={{
-                hidden: { opacity: 0, y: 30 },
-                show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-              }}
-              className="relative"
-            >
-              <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                className="glass p-6 sm:p-8 h-full rounded-3xl cursor-pointer"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
-                  <Icon size={26} />
-                </div>
+          <IllustrationStepOne />
+        </motion.div>
 
-                <div className="mt-6 sm:mt-8">
-                  <span className="text-sm font-semibold text-primary-hover">
-                    Step {index + 1}
-                  </span>
+        {/* Step 2 */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          whileHover={{ y: -6 }}
+          className="flex flex-col rounded-3xl border border-border/80 bg-glass/50 p-6 backdrop-blur-xl transition hover:border-primary/50"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <KeyRound size={24} />
+            </div>
+            <span className="font-console text-xs font-bold text-primary">STEP 02</span>
+          </div>
 
-                  <h3 className="mt-3 text-xl font-bold sm:text-2xl">
-                    {step.title}
-                  </h3>
+          <h3 className="text-xl font-bold text-text">Copy Your API Key</h3>
+          <p className="mt-2 text-sm text-text-muted leading-relaxed">
+            Every project gets a secure API key to authenticate log ingestion.
+          </p>
 
-                  <p className="mt-4 leading-7 text-text-muted">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.div>
+          <IllustrationStepTwo />
+        </motion.div>
 
-              {index !== steps.length - 1 && (
-                <ChevronRight
-                  className="absolute -right-7 top-1/2 hidden -translate-y-1/2 text-text-disabled lg:block"
-                  size={28}
-                />
-              )}
-            </motion.div>
-          );
-        })}
-      </motion.div>
+        {/* Step 3 */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ y: -6 }}
+          className="flex flex-col rounded-3xl border border-border/80 bg-glass/50 p-6 backdrop-blur-xl transition hover:border-primary/50"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Code2 size={24} />
+            </div>
+            <span className="font-console text-xs font-bold text-primary">STEP 03</span>
+          </div>
+
+          <h3 className="text-xl font-bold text-text">Install the SDK</h3>
+          <p className="mt-2 text-sm text-text-muted leading-relaxed">
+            Add `@logged/sdk` to your app and initialize with a couple lines of code.
+          </p>
+
+          <IllustrationStepThree />
+        </motion.div>
+
+        {/* Step 4 */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          whileHover={{ y: -6 }}
+          className="flex flex-col rounded-3xl border border-border/80 bg-glass/50 p-6 backdrop-blur-xl transition hover:border-primary/50"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Activity size={24} />
+            </div>
+            <span className="font-console text-xs font-bold text-primary">STEP 04</span>
+          </div>
+
+          <h3 className="text-xl font-bold text-text">Start Monitoring</h3>
+          <p className="mt-2 text-sm text-text-muted leading-relaxed">
+            Logs stream live into your dashboard with instant search & filter controls.
+          </p>
+
+          <IllustrationStepFour />
+        </motion.div>
+      </div>
     </section>
+  );
+}
+
+{/* Step 1 Visual: Animated Project Card Creator */}
+function IllustrationStepOne() {
+  return (
+    <div className="mt-6 flex-1 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-inner">
+      <div className="flex items-center gap-2 border-b border-border/40 pb-3">
+        <div className="h-2.5 w-2.5 rounded-full bg-primary/40 animate-pulse" />
+        <span className="font-console text-xs text-text-muted">Create New Project</span>
+      </div>
+      <div className="mt-3 space-y-2">
+        <div className="rounded-lg bg-glass-hover p-2 text-xs font-medium text-text flex items-center justify-between">
+          <span>Name: <strong className="text-primary">E-Commerce API</strong></span>
+          <motion.span
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary font-bold"
+          >
+            PROD
+          </motion.span>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, width: "0%" }}
+          animate={{ opacity: 1, width: "100%" }}
+          transition={{ repeat: Infinity, duration: 3, repeatDelay: 1 }}
+          className="h-1 rounded-full bg-primary"
+        />
+      </div>
+    </div>
+  );
+}
+
+{/* Step 2 Visual: Interactive Key Generator */}
+function IllustrationStepTwo() {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCopied((prev) => !prev);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="mt-6 flex-1 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-inner flex flex-col justify-between">
+      <span className="font-console text-[11px] text-text-muted">API Access Token</span>
+      <div className="mt-2 flex items-center justify-between rounded-xl border border-border/40 bg-glass p-2.5 font-console text-xs">
+        <span className="text-primary truncate">lg_live_9482...</span>
+        <motion.div animate={{ scale: copied ? 1.2 : 1 }}>
+          {copied ? <Check size={14} className="text-primary" /> : <Copy size={14} className="text-text-muted" />}
+        </motion.div>
+      </div>
+      <span className="mt-2 text-[10px] text-primary/80 font-console">
+        {copied ? "✓ Key copied to clipboard" : "Click to copy key"}
+      </span>
+    </div>
+  );
+}
+
+{/* Step 3 Visual: Animated Terminal Code Execution */}
+function IllustrationStepThree() {
+  return (
+    <div className="mt-6 flex-1 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-inner font-console text-[11px]">
+      <div className="flex items-center gap-1 text-text-muted">
+        <span className="text-primary">$</span>
+        <span>npm i @logged/sdk</span>
+      </div>
+      <motion.div
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ repeat: Infinity, duration: 1.5 }}
+        className="mt-3 text-[10px] text-primary font-bold"
+      >
+        + @logged/sdk@1.4.0 added
+      </motion.div>
+      <div className="mt-2 text-[10px] text-text-disabled">
+        logger.init(&#123; apiKey &#125;)
+      </div>
+    </div>
+  );
+}
+
+{/* Step 4 Visual: Real-time Live Log Stream Animation */}
+function IllustrationStepFour() {
+  const [logs, setLogs] = useState([
+    { level: "INFO", text: "Auth success", color: "text-info" },
+    { level: "WARN", text: "High latency", color: "text-warning" },
+  ]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLogs((prev) => [
+        {
+          level: "ERROR",
+          text: "DB timeout",
+          color: "text-error",
+        },
+        prev[0],
+      ]);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="mt-6 flex-1 rounded-2xl border border-border/60 bg-background/80 p-3 shadow-inner space-y-2 overflow-hidden">
+      {logs.slice(0, 2).map((log, idx) => (
+        <motion.div
+          key={idx + log.text}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center justify-between rounded-lg bg-glass p-2 text-[11px] font-console"
+        >
+          <span className={`font-bold ${log.color}`}>{log.level}</span>
+          <span className="text-text-muted truncate max-w-[90px]">{log.text}</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
+        </motion.div>
+      ))}
+    </div>
   );
 }

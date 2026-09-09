@@ -7,6 +7,13 @@ import Pricing from "@/components/Pricing";
 import FAQ from "@/components/Faq";
 import Footer from "@/components/Footer";
 import CTA from "@/components/Cta";
+import TheProblem from "@/components/landing/TheProblem";
+import WhyLogged from "@/components/landing/WhyLogged";
+import InterestingFacts from "@/components/landing/InterestingFacts";
+import Comparison from "@/components/landing/Comparison";
+import QuickDemo from "@/components/landing/QuickDemo";
+import ClosingBanner from "@/components/landing/ClosingBanner";
+import ProcessPipeline from "@/components/landing/ProcessPipeline";
 
 export const metadata: Metadata = {
   title: {
@@ -24,12 +31,19 @@ export default function Home() {
         <div className="absolute left-[-120px] top-20 h-80 w-80 rounded-full bg-primary/25 blur-[120px]" />
         <div className="absolute right-[-100px] top-40 h-96 w-96 rounded-full bg-info/20 blur-[120px]" />
         <div className="absolute bottom-0 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary-light/30 blur-[150px]" />
-    </div>
+      </div>
 
       <Navbar />
       <Hero />
       <DashboardPreview />
+      <TheProblem />
+      <ProcessPipeline />
+      <WhyLogged />
+      <InterestingFacts />
+      <Comparison />
+      <QuickDemo />
       <HowItWorks />
+      <ClosingBanner />
       <FAQ />
       <CTA />
       <Footer />

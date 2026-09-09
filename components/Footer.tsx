@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { openCookieBanner } from "@/components/CookieBanner";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -191,15 +192,18 @@ export default function Footer() {
             >
               Terms
             </Link>
-            <Link
-              href="#"
-              className="text-xs transition-colors duration-150"
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                openCookieBanner();
+              }}
+              className="text-xs transition-colors duration-150 cursor-pointer"
               style={{ color: "var(--text-disabled)" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-disabled)"; }}
             >
               Cookies
-            </Link>
+            </button>
           </div>
         </div>
       </div>

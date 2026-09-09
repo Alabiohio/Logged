@@ -5,7 +5,15 @@
  * event names/parameters are consistent across the codebase.
  */
 
-import { sendGAEvent } from "@next/third-parties/google";
+import { sendGAEvent as rawSendGAEvent } from "@next/third-parties/google";
+import { hasAnalyticsConsent } from "@/lib/cookieConsent";
+
+function sendGAEvent(...args: Parameters<typeof rawSendGAEvent>) {
+  if (typeof window !== "undefined" && !hasAnalyticsConsent()) {
+    return;
+  }
+  rawSendGAEvent(...args);
+}
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 

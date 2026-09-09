@@ -280,3 +280,8 @@ select option {
   box-shadow:
     0 0 60px rgba(16,185,129,.25);
 }
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
