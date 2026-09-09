@@ -8,20 +8,12 @@ export default function WhyLogged() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div className="text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-xs font-bold tracking-widest text-primary uppercase"
-        >
-          WHY LOGGED?
-        </motion.p>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
+          className="mt-3 text-2xl font-hero font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
         >
           Built for the moment things go wrong.
         </motion.h2>
@@ -47,7 +39,6 @@ export default function WhyLogged() {
               Development, staging, production—keep your application&apos;s activity organized without switching between terminal tabs.
             </p>
           </div>
-          <IllustrationEnvironmentSwitcher />
         </motion.div>
 
         {/* Card 2: Context over clutter */}
@@ -214,7 +205,6 @@ function IllustrationSearchFilter() {
         </motion.span>
       </div>
       <div className="mt-3 flex items-center justify-between font-console text-xs text-text-muted">
-        <span>Scanned 14,200 events</span>
         <span className="font-bold text-primary">
           {query ? "1 match found" : "14,200 results"}
         </span>

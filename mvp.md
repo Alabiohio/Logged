@@ -135,7 +135,7 @@ timestamp
 Build
 
 ```text
-@logged/sdk
+@oheoco/logged
 ```
 
 Methods

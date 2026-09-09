@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function QuickDemo() {
   const [copied, setCopied] = useState(false);
 
-  const codeSnippet = `import { Logged } from "@logged/sdk";
+  const codeSnippet = `import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY,
@@ -29,14 +29,6 @@ logger.error("Payment failed", {
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
         {/* Left copy */}
         <div>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-xs font-bold tracking-widest text-primary uppercase"
-          >
-            DEVELOPER EXPERIENCE
-          </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -104,13 +96,13 @@ logger.error("Payment failed", {
 
           {/* Installation strip */}
           <div className="mt-4 flex items-center justify-between rounded-xl bg-glass p-3 font-console text-xs text-primary">
-            <span>$ npm install @logged/sdk</span>
+            <span>$ npm install @oheoco/logged</span>
           </div>
 
           {/* Code snippet */}
           <pre className="mt-4 overflow-x-auto p-2 font-console text-xs sm:text-sm text-text leading-relaxed">
             <code>
-              <span className="text-primary font-bold">import</span> &#123; Logged &#125; <span className="text-primary font-bold">from</span> <span className="text-warning">&quot;@logged/sdk&quot;</span>;{"\n\n"}
+              <span className="text-primary font-bold">import</span> &#123; Logged &#125; <span className="text-primary font-bold">from</span> <span className="text-warning">&quot;@oheoco/logged&quot;</span>;{"\n\n"}
               <span className="text-primary font-bold">const</span> logger = <span className="text-primary font-bold">new</span> Logged(&#123;{"\n"}
               {"  "}apiKey: process.env.<span className="text-info">LOGGED_API_KEY</span>,{"\n"}
               &#125;);{"\n\n"}

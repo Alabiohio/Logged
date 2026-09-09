@@ -19,7 +19,7 @@ The goal is:
 A developer initializes Logged:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: "...",
@@ -51,7 +51,7 @@ Browser Application
        └── console.error()
                 │
                 ▼
-        @logged/sdk
+        @oheoco/logged
                 │
                 ▼
         Logged API
@@ -1007,7 +1007,7 @@ console.log()
 And the complete Logged pipeline is now:
 
 ```text
-                    @logged/sdk
+                    @oheoco/logged
                          │
         ┌────────────────┼────────────────┐
         │                │                │

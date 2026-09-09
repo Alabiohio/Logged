@@ -1,6 +1,6 @@
 # Phase 7 — Browser Auto Capture
 
-Phase 7 builds on `@logged/sdk` and adds **automatic browser error detection**.
+Phase 7 builds on `@oheoco/logged` and adds **automatic browser error detection**.
 
 The goal is:
 
@@ -9,7 +9,7 @@ The goal is:
 The developer experience becomes:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,
@@ -30,7 +30,7 @@ Browser application
        └── Runtime failure
               │
               ▼
-        @logged/sdk
+        @oheoco/logged
               │
               ▼
        POST /api/v1/logs
@@ -77,7 +77,7 @@ Once called, the SDK registers its browser listeners.
 Example:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: "...",
@@ -109,7 +109,7 @@ You don't want this:
 ```text
 Next.js server
       ↓
-import @logged/sdk
+import @oheoco/logged
       ↓
 window.onerror
       ↓
@@ -620,7 +620,7 @@ For Next.js App Router, you'll likely create a small client component:
 "use client";
 
 import { useEffect } from "react";
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,
@@ -771,7 +771,7 @@ Then verify:
 ```text
 Browser
    ↓
-@logged/sdk
+@oheoco/logged
    ↓
 POST /api/v1/logs
    ↓
@@ -876,7 +876,7 @@ and explain what it captures.
 Phase 7 is complete when a developer can install Logged:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 initialize it:
@@ -923,7 +923,7 @@ and sends it to:
 ```text
 Browser
    ↓
-@logged/sdk
+@oheoco/logged
    ↓
 POST /api/v1/logs
    ↓

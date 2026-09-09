@@ -114,13 +114,13 @@ Examples
 Show:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 Then:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 ```
 
 Explain:
@@ -165,7 +165,7 @@ Explain that each project receives an API key.
 ## Step 2 — Install SDK
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 ---
@@ -173,7 +173,7 @@ npm install @logged/sdk
 ## Step 3 — Initialize
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
@@ -215,7 +215,7 @@ Tell the developer where to find the log.
 Introduce the SDK.
 
 ```text
-@logged/sdk
+@oheoco/logged
 ```
 
 Explain:
@@ -442,7 +442,7 @@ Example:
 "use client";
 
 import { useEffect } from "react";
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.NEXT_PUBLIC_LOGGED_API_KEY!,
@@ -510,7 +510,7 @@ Example:
 
 ```html
 <script type="module">
-  import { Logged } from "@logged/sdk";
+  import { Logged } from "@oheoco/logged";
 
   const logger = new Logged({
     apiKey: "YOUR_API_KEY",
@@ -713,7 +713,7 @@ const logger = new Logged({
 Every important command should be copyable:
 
 ```text
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 and:
@@ -756,7 +756,7 @@ But documentation should be **more functional than decorative**.
 Don't make developers scroll through giant glass cards just to find:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 Prioritize readability.
@@ -837,13 +837,13 @@ The SDK itself needs a strong README.
 At minimum:
 
 ```text
-@logged/sdk
+@oheoco/logged
 
 Simple logging for JavaScript applications.
 
 Installation
 
-npm install @logged/sdk
+npm install @oheoco/logged
 
 Quick Start
 
@@ -983,7 +983,7 @@ just because it looks good in the docs.
 The examples should be tested against the actual:
 
 ```text
-@logged/sdk
+@oheoco/logged
        ↓
 Logged API
        ↓
@@ -1009,7 +1009,7 @@ Create a Project
       ↓
 Get an API key
       ↓
-Install @logged/sdk
+Install @oheoco/logged
       ↓
 Initialize SDK
       ↓
@@ -1044,7 +1044,7 @@ The complete system is now:
        │                    │                    │
        └────────────────────┼────────────────────┘
                             ▼
-                       @logged/sdk
+                       @oheoco/logged
                             │
                             ▼
                      POST /api/v1/logs

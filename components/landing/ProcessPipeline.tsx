@@ -24,7 +24,7 @@ export default function ProcessPipeline() {
     {
       id: 1,
       title: "2. Lightweight SDK Ingestion",
-      desc: "@logged/sdk batches events asynchronously without blocking main thread execution.",
+      desc: "@oheoco/logged batches events asynchronously without blocking main thread execution.",
       icon: Database,
     },
     {
@@ -42,22 +42,14 @@ export default function ProcessPipeline() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-      <div className="text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-xs font-bold tracking-widest text-primary uppercase"
-        >
-          UNDER THE HOOD
-        </motion.p>
+    <section className="mx-auto py-20">
+      <div className="text-center px-4 sm:px-6 lg:px-8">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
+          className="mt-3 text-2xl font-hero font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
         >
           How Logged processes your data
         </motion.h2>
@@ -78,7 +70,7 @@ export default function ProcessPipeline() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.3 }}
-        className="mt-16 rounded-3xl border border-border/80 bg-glass/60 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl"
+        className="mt-16 bg-glass/60 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl"
       >
         {/* Animated Connector Line */}
         <div className="relative mb-12 hidden lg:block">

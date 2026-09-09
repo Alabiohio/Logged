@@ -1,6 +1,6 @@
 Absolutely. We'll use the roadmap you provided as the source of truth. **Phase 4 = JavaScript/TypeScript SDK**, with browser auto-capture and console interception intentionally left for Phases 7 and 8.
 
-# Phase 4 — `@logged/sdk`
+# Phase 4 — `@oheoco/logged`
 
 ## Objective
 
@@ -9,13 +9,13 @@ Create a small, reliable SDK that lets developers send structured logs to Logged
 The target experience:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 Then:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY,
@@ -62,7 +62,7 @@ Keep the SDK independent from your Next.js dashboard.
 The developer should initialize Logged once:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: "lg_live_xxxxxxxxx",
@@ -558,7 +558,7 @@ dist/
 Support:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 ```
 
 Don't force users to import internal files.
@@ -571,7 +571,7 @@ Your package should eventually have something like:
 
 ```json
 {
-  "name": "@logged/sdk",
+  "name": "@oheoco/logged",
   "version": "0.1.0",
   "description": "Logging SDK for Logged",
   "main": "./dist/index.js",
@@ -639,13 +639,13 @@ sdk-test/
 Install the local SDK:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 Then:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
@@ -665,7 +665,7 @@ Then verify:
 ```text
 Next.js Test App
        ↓
-@logged/sdk
+@oheoco/logged
        ↓
 Logged API
        ↓
@@ -723,7 +723,7 @@ The Phase 4 SDK should do one thing extremely well:
 You should be able to install the SDK into a completely separate application:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 Initialize it:
@@ -763,7 +763,7 @@ And every call should reliably produce a corresponding record in your Logged dat
            │
            ▼
 ┌──────────────────────┐
-│ @logged/sdk          │
+│ @oheoco/logged          │
 │                      │
 │ Normalize             │
 │ Add environment       │

@@ -12,7 +12,7 @@ The core experience:
 Developer's App
       │
       ▼
-@logged/sdk
+@oheoco/logged
       │
       ▼
 Logged API
@@ -654,7 +654,7 @@ If the project has no logs:
 ```text
 No logs yet
 
-Send your first log using @logged/sdk.
+Send your first log using @oheoco/logged.
 
 [View Documentation]
 ```

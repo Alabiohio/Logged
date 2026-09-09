@@ -3,7 +3,7 @@ Yes. At this point, you should treat **Logged as a real npm package**, not just 
 Your goal is:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 and a developer can immediately use it.
@@ -15,13 +15,13 @@ and a developer can immediately use it.
 I'd recommend:
 
 ```text
-@logged/sdk
+@oheoco/logged
 ```
 
 So installation becomes:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 Before building around it, check that the package name is available on npm.
@@ -75,7 +75,7 @@ Something along these lines:
 
 ```json
 {
-  "name": "@logged/sdk",
+  "name": "@oheoco/logged",
   "version": "0.1.0",
   "description": "Simple application logging and error monitoring SDK",
   "license": "MIT",
@@ -135,13 +135,13 @@ export type {
 Then developers can simply do:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 ```
 
 Not:
 
 ```ts
-import { Logged } from "@logged/sdk/dist/client";
+import { Logged } from "@oheoco/logged/dist/client";
 ```
 
 The latter is something you want to prevent.
@@ -202,7 +202,7 @@ npm install ../path/to/logged-sdk-0.1.0.tgz
 Now test:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 ```
 
 and:
@@ -244,7 +244,7 @@ npm install ../logged-sdk-0.1.0.tgz
 Then test:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 ```
 
 Verify:
@@ -347,7 +347,7 @@ npm publish --access public
 For a scoped public package such as:
 
 ```text
-@logged/sdk
+@oheoco/logged
 ```
 
 `--access public` is important for the initial public publication.
@@ -407,17 +407,17 @@ Breaking API change:
 Your npm page should immediately show something like:
 
 ```text
-@logged/sdk
+@oheoco/logged
 
 Simple logging and error monitoring for JavaScript applications.
 
 Installation
 
-npm install @logged/sdk
+npm install @oheoco/logged
 
 Quick Start
 
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: "YOUR_API_KEY",
@@ -475,7 +475,7 @@ v0.1.0
 with:
 
 ```text
-Initial public release of @logged/sdk.
+Initial public release of @oheoco/logged.
 
 Features:
 - Structured logging
@@ -496,7 +496,7 @@ Before you run `npm publish`, verify this exact flow:
                     Logged
                       │
                       ▼
-              npm install @logged/sdk
+              npm install @oheoco/logged
                       │
                       ▼
                 Developer App
@@ -525,13 +525,13 @@ If that works from a **completely separate test application**, you're ready.
 A developer should be able to do:
 
 ```bash
-npm install @logged/sdk
+npm install @oheoco/logged
 ```
 
 then:
 
 ```ts
-import { Logged } from "@logged/sdk";
+import { Logged } from "@oheoco/logged";
 
 const logger = new Logged({
   apiKey: process.env.LOGGED_API_KEY!,
@@ -561,4 +561,4 @@ Application started
 
 Don't start Phase 11 yet.
 
-First get **`@logged/sdk@0.1.0` published and successfully tested from a completely separate Next.js application**. That gives you the first real external-consumer version of Logged.
+First get **`@oheoco/logged@0.1.0` published and successfully tested from a completely separate Next.js application**. That gives you the first real external-consumer version of Logged.

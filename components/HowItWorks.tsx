@@ -8,20 +8,12 @@ export default function HowItWorks() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div className="text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-xs font-bold tracking-widest text-primary uppercase"
-        >
-          STREAMLINED WORKFLOW
-        </motion.p>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
+          className="mt-3 text-2xl font-hero font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
         >
           Get started in minutes
         </motion.h2>
@@ -103,7 +95,7 @@ export default function HowItWorks() {
 
           <h3 className="text-xl font-bold text-text">Install the SDK</h3>
           <p className="mt-2 text-sm text-text-muted leading-relaxed">
-            Add `@logged/sdk` to your app and initialize with a couple lines of code.
+            Add `@oheoco/logged` to your app and initialize with a couple lines of code.
           </p>
 
           <IllustrationStepThree />
@@ -200,14 +192,14 @@ function IllustrationStepThree() {
     <div className="mt-6 flex-1 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-inner font-console text-[11px]">
       <div className="flex items-center gap-1 text-text-muted">
         <span className="text-primary">$</span>
-        <span>npm i @logged/sdk</span>
+        <span>npm i @oheoco/logged</span>
       </div>
       <motion.div
         animate={{ opacity: [0.3, 1, 0.3] }}
         transition={{ repeat: Infinity, duration: 1.5 }}
         className="mt-3 text-[10px] text-primary font-bold"
       >
-        + @logged/sdk@1.4.0 added
+        + @oheoco/logged@1.4.0 added
       </motion.div>
       <div className="mt-2 text-[10px] text-text-disabled">
         logger.init(&#123; apiKey &#125;)

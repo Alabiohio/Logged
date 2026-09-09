@@ -44,20 +44,12 @@ export default function InterestingFacts() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div className="text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-xs font-bold tracking-widest text-primary uppercase"
-        >
-          DEBUGGING INSIGHTS
-        </motion.p>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
+          className="mt-3 text-3xl font-hero font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
         >
           A few things about debugging
         </motion.h2>
@@ -75,9 +67,6 @@ export default function InterestingFacts() {
             className="flex flex-col justify-between rounded-3xl border border-border/80 bg-glass/50 p-6 backdrop-blur-xl transition hover:border-primary/50"
           >
             <div>
-              <span className="font-console text-3xl font-black text-primary/40">
-                {fact.number}
-              </span>
               <h3 className="mt-4 text-lg font-bold leading-snug text-text">
                 {fact.title}
               </h3>
