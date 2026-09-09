@@ -5,6 +5,7 @@ import { ChevronDown, Check, FolderKanban, Plus, Search } from "lucide-react";
 import { usePathname, useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { trackProjectSwitched } from "@/lib/analytics";
 
 interface Project {
   id: string;
@@ -71,6 +72,10 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
   }, []);
 
   const handleSelectProject = (projectId: string) => {
+    const selected = projects.find((p) => p.id === projectId);
+    if (selected) {
+      trackProjectSwitched(projectId, selected.name);
+    }
     setDropdownOpen(false);
     if (pathname.includes("/logs")) {
       router.push(`/dashboard/projects/${projectId}/logs`);

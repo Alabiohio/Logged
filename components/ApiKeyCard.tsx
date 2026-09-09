@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Copy, RefreshCcw, Check } from "lucide-react";
+import { trackApiKeyCopied, trackApiKeyRegenerated } from "@/lib/analytics";
 
 interface ApiKeyCardProps {
   apiKey: string;
@@ -20,6 +21,7 @@ export function ApiKeyCard({ apiKey, environment, projectId, onRegenerate }: Api
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(apiKey);
+    trackApiKeyCopied(projectId, environment);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -38,6 +40,7 @@ export function ApiKeyCard({ apiKey, environment, projectId, onRegenerate }: Api
       });
       if (res.ok) {
         const data = await res.json();
+        trackApiKeyRegenerated(projectId, environment);
         onRegenerate(environment, data.apiKey);
       }
     } catch (err) {

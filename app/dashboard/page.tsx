@@ -17,6 +17,7 @@ import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { StatCardSkeleton, LogRowSkeleton, ProjectCardSkeleton } from "@/components/dashboard/skeleton";
 import { motion } from "framer-motion";
+import { trackDashboardViewed, trackProjectOpened, trackLogViewed } from "@/lib/analytics";
 
 type DashboardData = {
     stats: {
@@ -63,7 +64,9 @@ export default function DashboardPage() {
             try {
                 const res = await fetch("/api/dashboard/stats");
                 if (res.ok) {
-                    setData(await res.json());
+                    const json = await res.json();
+                    setData(json);
+                    trackDashboardViewed(json.stats);
                 } else {
                     setError(true);
                 }
@@ -240,9 +243,10 @@ export default function DashboardPage() {
                                                 key={log.id}
                                                 whileHover={{ x: 4 }}
                                                 className="py-3 cursor-pointer hover:bg-white/5 transition-colors rounded-lg px-1"
-                                                onClick={() =>
-                                                    (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
-                                                }
+                                                onClick={() => {
+                                                    trackLogViewed(log.id, log.level, log.projectId);
+                                                    window.location.href = `/dashboard/projects/${log.projectId}/logs`;
+                                                }}
                                             >
                                                 <div className="flex items-center gap-2 mb-1.5">
                                                     <LogLevelBadge level={log.level} />
@@ -276,9 +280,10 @@ export default function DashboardPage() {
                                                     key={log.id}
                                                     whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
                                                     className="transition-colors cursor-pointer"
-                                                    onClick={() =>
-                                                        (window.location.href = `/dashboard/projects/${log.projectId}/logs`)
-                                                    }
+                                                    onClick={() => {
+                                                        trackLogViewed(log.id, log.level, log.projectId);
+                                                        window.location.href = `/dashboard/projects/${log.projectId}/logs`;
+                                                    }}
                                                 >
                                                     <td className="py-4 pr-3 text-text-muted font-mono whitespace-nowrap text-xs">
                                                         {timeAgo(log.createdAt)}
@@ -340,6 +345,7 @@ export default function DashboardPage() {
                                         >
                                             <Link
                                                 href={`/dashboard/projects/${project.id}`}
+                                                onClick={() => trackProjectOpened(project.id, project.name)}
                                                 className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background p-4 transition hover:bg-glass-hover group"
                                             >
                                                 <div className="min-w-0">

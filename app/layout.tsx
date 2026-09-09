@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inconsolata, Orbitron, PT_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const inconsolata = Inconsolata({
   variable: "--font-inconsolata",
@@ -90,6 +91,9 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        {process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID} />
+        )}
       </body>
     </html>
   );

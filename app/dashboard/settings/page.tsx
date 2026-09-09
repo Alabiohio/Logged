@@ -12,6 +12,7 @@ import "ldrs/react/Cardio.css";
 import { authClient } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { trackSettingsSaved, trackSessionRevoked } from "@/lib/analytics";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -259,6 +260,7 @@ export default function SettingsPage() {
             if (!prefRes.ok) {
                 setError("Failed to save preferences");
             } else {
+                trackSettingsSaved("profile");
                 setSuccess("Settings saved successfully");
                 setTimeout(() => setSuccess(null), 4000);
             }
@@ -294,6 +296,7 @@ export default function SettingsPage() {
                 method: "DELETE",
             });
             if (res.ok) {
+                trackSessionRevoked();
                 setSessions((prev) => prev.filter((s) => s.token !== token));
             }
         } catch {

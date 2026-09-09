@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
+import { trackSignOut, trackThemeChanged } from "@/lib/analytics";
 
 export function Sidebar({
   mobileOpen,
@@ -34,6 +35,7 @@ export function Sidebar({
   ];
 
   const handleSignOut = async () => {
+    trackSignOut();
     await authClient.signOut();
     router.push("/login");
   };
@@ -111,7 +113,7 @@ export function Sidebar({
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setTheme(t)}
+                  onClick={() => { setTheme(t); trackThemeChanged(t); }}
                   title={t.charAt(0).toUpperCase() + t.slice(1)}
                   aria-label={`${t} theme`}
                   className={`relative flex flex-1 items-center justify-center rounded-xl p-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
+import { trackProjectCreated } from "@/lib/analytics";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function NewProjectPage() {
           return;
         }
 
+        trackProjectCreated(form.name);
         router.push(`/dashboard/projects/${data.id}`)
       } catch (err) {
         setError("Failed to create project. Please try again.");
