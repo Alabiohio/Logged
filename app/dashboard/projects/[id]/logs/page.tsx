@@ -375,12 +375,10 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
         </div>
 
         {/* Toolbar — Search + Filters */}
-        <div className="md:glass md:rounded-2xl md:p-4 space-y-4 group/toolbar">
+        <div className="md:glass md:rounded-2xl md:p-4 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <LogSearch />
-            <div className="hidden sm:block group-focus-within/toolbar:block">
-              <LogFilters />
-            </div>
+            <LogFilters />
           </div>
           <ActiveFilterBadges />
         </div>
@@ -580,18 +578,47 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
   );
 }
 
+function LogExplorerSkeleton() {
+  return (
+    <div className="-mx-3 -my-3 sm:-mx-4 sm:-my-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 flex flex-col h-[calc(100dvh-76px)] lg:flex-1 space-y-4">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between py-4">
+        <div className="h-8 w-40 bg-glass rounded-xl animate-pulse" />
+        <div className="h-8 w-24 bg-glass rounded-xl animate-pulse" />
+      </div>
+
+      {/* Toolbar with static Search bar + Icon intact */}
+      <div className="md:glass md:rounded-2xl md:p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted opacity-60 pointer-events-none" aria-hidden="true" />
+            <input
+              disabled
+              type="text"
+              placeholder="Search logs..."
+              className="w-full rounded-xl border border-border bg-background/50 pl-10 pr-10 py-2.5 text-sm text-text opacity-70 cursor-not-allowed"
+            />
+          </div>
+          <div className="h-10 w-64 bg-background/50 rounded-xl border border-border animate-pulse" />
+        </div>
+      </div>
+
+      {/* Logs Skeleton */}
+      <div className="flex-1 overflow-hidden glass rounded-2xl py-2">
+        {[...Array(8)].map((_, i) => (
+          <LogRowSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LogExplorerPage(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const projectId = params.id;
 
   return (
-    <Suspense fallback={
-      <div className="space-y-4 flex flex-col h-[calc(100vh-theme(spacing.32))]">
-        <div className="h-16 bg-glass rounded-2xl animate-pulse" />
-        <div className="h-20 bg-glass rounded-2xl animate-pulse" />
-        <div className="flex-1 bg-glass rounded-2xl animate-pulse" />
-      </div>
-    }>
+    <Suspense fallback={<LogExplorerSkeleton />}>
       <LogExplorerContent projectId={projectId} />
     </Suspense>
   );

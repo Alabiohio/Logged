@@ -92,15 +92,23 @@ export default function NewProjectPage() {
 
           {/* Description */}
           <div className="space-y-2">
-            <label htmlFor="description" className="block text-sm font-semibold text-text">
-              Description
-              <span className="ml-2 text-xs font-normal text-text-muted">Optional</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="description" className="block text-sm font-semibold text-text">
+                Description
+                <span className="ml-2 text-xs font-normal text-text-muted">Optional</span>
+              </label>
+              <span className={`text-xs tabular-nums ${
+                form.description.length >= 150 ? "text-error" : "text-text-muted"
+              }`}>
+                {form.description.length}/150
+              </span>
+            </div>
             <textarea
               id="description"
               name="description"
               rows={3}
-              placeholder="What does this project do?"
+              maxLength={150}
+              placeholder="A short description of your project."
               value={form.description}
               onChange={handleChange}
               className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-text placeholder-text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"

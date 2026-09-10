@@ -34,12 +34,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <FolderKanban className="h-6 w-6" />
           </div>
-          <div>
-            <h3 className="font-bold text-text group-hover:text-primary transition-colors">
+          <div className="min-w-0 overflow-hidden">
+            <h3 className="font-bold text-text group-hover:text-primary transition-colors truncate">
               {project.name}
             </h3>
             {project.description && (
-              <p className="mt-1 text-sm text-text-secondary line-clamp-1">
+              <p className="mt-1 text-sm text-text-secondary line-clamp-2 break-words">
                 {project.description}
               </p>
             )}

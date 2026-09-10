@@ -1,5 +1,6 @@
 "use client";
 
+import { startTransition } from "react";
 import { Filter, ChevronDown, X } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
@@ -21,7 +22,9 @@ export function LogFilters() {
       params.delete(key);
     }
     params.delete("cursor"); // Reset pagination
-    router.replace(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const clearFilters = () => {
@@ -31,7 +34,9 @@ export function LogFilters() {
     params.delete("from");
     params.delete("to");
     params.delete("cursor");
-    router.replace(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const hasFilters = level !== "all" || environment !== "all" || fromDate || toDate;

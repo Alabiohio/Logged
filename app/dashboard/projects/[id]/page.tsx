@@ -211,6 +211,7 @@ export default function ProjectOverviewPage() {
             icon: FileText,
             iconColor: "text-primary",
             iconBg: "bg-primary/10",
+            href: `/dashboard/projects/${project.id}/logs`,
         },
         {
             label: "Errors",
@@ -218,6 +219,7 @@ export default function ProjectOverviewPage() {
             icon: AlertTriangle,
             iconColor: "text-error",
             iconBg: "bg-error/10",
+            href: `/dashboard/projects/${project.id}/logs?level=error`,
         },
         {
             label: "Warnings",
@@ -225,6 +227,7 @@ export default function ProjectOverviewPage() {
             icon: Bug,
             iconColor: "text-warning",
             iconBg: "bg-warning/10",
+            href: `/dashboard/projects/${project.id}/logs?level=warn`,
         },
         {
             label: "Info",
@@ -232,6 +235,7 @@ export default function ProjectOverviewPage() {
             icon: Info,
             iconColor: "text-info",
             iconBg: "bg-info/10",
+            href: `/dashboard/projects/${project.id}/logs?level=info`,
         },
     ];
 
@@ -255,10 +259,12 @@ export default function ProjectOverviewPage() {
                         </h1>
                     </div>
                     {project.description && (
-                        <p className="text-text-secondary max-w-xl">
+                        <p className="text-text-secondary max-w-xl break-words line-clamp-3">
                             {project.description}
                         </p>
                     )}
+
+
                     <div className="flex items-center gap-6 flex-wrap text-sm text-text-muted">
                         <span className="flex items-center gap-1.5">
                             <Calendar className="h-4 w-4" /> Created{" "}
@@ -314,6 +320,7 @@ export default function ProjectOverviewPage() {
                         icon={stat.icon}
                         iconColor={stat.iconColor}
                         iconBg={stat.iconBg}
+                        href={stat.href}
                     />
                 ))}
             </div>
@@ -493,11 +500,18 @@ export default function ProjectOverviewPage() {
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-text">
-                                    Description
-                                </label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-semibold text-text">
+                                        Description
+                                        <span className="ml-2 text-xs font-normal text-text-muted">Optional</span>
+                                    </label>
+                                    <span className={`text-xs tabular-nums ${editForm.description.length >= 150 ? "text-error" : "text-text-muted"}`}>
+                                        {editForm.description.length}/150
+                                    </span>
+                                </div>
                                 <textarea
                                     rows={2}
+                                    maxLength={150}
                                     value={editForm.description}
                                     onChange={(e) =>
                                         setEditForm((f) => ({

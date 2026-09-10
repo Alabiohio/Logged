@@ -15,7 +15,9 @@ import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { LogFilters } from "@/components/dashboard/log-filters";
+import { LogSearch } from "@/components/dashboard/log-search";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { LogRowSkeleton, StatCardSkeleton } from "@/components/dashboard/skeleton";
 
 type ActivityLog = {
@@ -161,80 +163,48 @@ export default function ActivityPage() {
                         </>
                     ) : data ? (
                         <>
-                            <div className="glass rounded-[var(--radius-lg)] p-5 shadow-sm space-y-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-info/10">
-                                    <FileText className="h-5 w-5 text-info" />
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-black text-text">
-                                        {data.stats.total.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-text-secondary mt-1">Total Logs</p>
-                                </div>
-                            </div>
-                            <div className="glass rounded-[var(--radius-lg)] p-5 shadow-sm space-y-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-error/10">
-                                    <AlertTriangle className="h-5 w-5 text-error" />
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-black text-text">
-                                        {data.stats.errors.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-text-secondary mt-1">Errors Today</p>
-                                </div>
-                            </div>
-                            <div className="glass rounded-[var(--radius-lg)] p-5 shadow-sm space-y-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-warning/10">
-                                    <AlertCircle className="h-5 w-5 text-warning" />
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-black text-text">
-                                        {data.stats.warnings.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-text-secondary mt-1">Warnings Today</p>
-                                </div>
-                            </div>
-                            <div className="glass rounded-[var(--radius-lg)] p-5 shadow-sm space-y-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
-                                    <Filter className="h-5 w-5 text-primary" />
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-black text-text">
-                                        {data.pagination.total.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-text-secondary mt-1">Matching Logs</p>
-                                </div>
-                            </div>
+                            <StatCard
+                                label="Total Logs"
+                                value={data.stats.total.toLocaleString()}
+                                icon={FileText}
+                                iconColor="text-info"
+                                iconBg="bg-info/10"
+                                href="/dashboard/activity"
+                            />
+                            <StatCard
+                                label="Errors Today"
+                                value={data.stats.errors.toLocaleString()}
+                                icon={AlertTriangle}
+                                iconColor="text-error"
+                                iconBg="bg-error/10"
+                                href="/dashboard/activity?level=error"
+                            />
+                            <StatCard
+                                label="Warnings Today"
+                                value={data.stats.warnings.toLocaleString()}
+                                icon={AlertCircle}
+                                iconColor="text-warning"
+                                iconBg="bg-warning/10"
+                                href="/dashboard/activity?level=warn"
+                            />
+                            <StatCard
+                                label="Matching Logs"
+                                value={data.pagination.total.toLocaleString()}
+                                icon={Filter}
+                                iconColor="text-primary"
+                                iconBg="bg-primary/10"
+                                href="/dashboard/activity"
+                            />
                         </>
                     ) : null}
                 </div>
             </section>
 
             {/* Filters */}
-            {!loading && data && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-text-secondary" />
-                        <input
-                            type="text"
-                            placeholder="Search logs..."
-                            defaultValue={new URLSearchParams(window.location.search).get("search") || ""}
-                            onChange={(e) => {
-                                const params = new URLSearchParams(window.location.search);
-                                if (e.target.value) {
-                                    params.set("search", e.target.value);
-                                } else {
-                                    params.delete("search");
-                                }
-                                params.delete("cursor");
-                                window.location.href = `/dashboard/activity?${params.toString()}`;
-                            }}
-                            className="w-full rounded-2xl border border-border bg-glass pl-12 pr-4 py-3 text-sm text-text placeholder-text-secondary outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                        />
-                    </div>
-                    <LogFilters />
-                </div>
-            )}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <LogSearch />
+                <LogFilters />
+            </div>
 
             {/* Logs */}
             {loading ? (

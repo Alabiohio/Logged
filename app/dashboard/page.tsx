@@ -167,6 +167,7 @@ export default function DashboardPage() {
                                     icon={FolderKanban}
                                     iconColor="text-primary"
                                     iconBg="bg-primary/10"
+                                    href="/dashboard/projects"
                                 />
                             </motion.div>
                             <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
@@ -176,6 +177,7 @@ export default function DashboardPage() {
                                     icon={FileText}
                                     iconColor="text-info"
                                     iconBg="bg-info/10"
+                                    href="/dashboard/activity"
                                 />
                             </motion.div>
                             <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
@@ -185,6 +187,7 @@ export default function DashboardPage() {
                                     icon={AlertTriangle}
                                     iconColor="text-error"
                                     iconBg="bg-error/10"
+                                    href="/dashboard/activity?level=error"
                                 />
                             </motion.div>
                             <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
@@ -194,6 +197,7 @@ export default function DashboardPage() {
                                     icon={AlertCircle}
                                     iconColor="text-warning"
                                     iconBg="bg-warning/10"
+                                    href="/dashboard/activity?level=warn"
                                 />
                             </motion.div>
                         </>

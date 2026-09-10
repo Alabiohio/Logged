@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inconsolata, Orbitron, PT_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CookieBanner } from "@/components/CookieBanner";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { InstallPrompt } from "@/components/InstallPrompt";
+import { PWARedirect } from "@/components/PWARedirect";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 const inconsolata = Inconsolata({
@@ -23,8 +26,20 @@ const ptSans = PT_Sans({
   weight: ["400", "700"],
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#090d16" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  manifest: "/manifest.webmanifest",
   title: {
     default: "Logged | Error Monitoring for Modern Apps",
     template: "%s | Logged",
@@ -38,11 +53,22 @@ export const metadata: Metadata = {
     "frontend monitoring",
     "observability",
     "Logged",
+    "PWA",
   ],
   applicationName: "Logged",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Logged",
+  },
   icons: {
-    icon: "/logo/logo.png",
-    apple: "/logo/logo.png",
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo/logo.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   openGraph: {
     title: "Logged | Error Monitoring for Modern Apps",
@@ -90,8 +116,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <PWARedirect />
           {children}
           <CookieBanner />
+          <ServiceWorkerRegister />
+          <InstallPrompt />
         </ThemeProvider>
         {process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID} />
@@ -100,3 +129,4 @@ export default function RootLayout({
     </html>
   );
 }
+

@@ -45,7 +45,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="mx-auto flex min-h-[85vh] max-w-8xl flex-col items-center justify-center gap-12 px-4 py-16 pt-44 lg:flex-row lg:gap-20 overflow-hidden">
+    <section className="mx-auto flex min-h-[85vh] max-w-8xl flex-col items-center justify-center gap-12 px-4 py-16 pt-24 lg:flex-row lg:gap-20 overflow-hidden">
       {/* Left */}
       <motion.div
         variants={containerVariants}

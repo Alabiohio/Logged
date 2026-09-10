@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronDown, Check, FolderKanban, Plus, Search } from "lucide-react";
 import { usePathname, useRouter, useParams } from "next/navigation";
 import Link from "next/link";
@@ -29,6 +29,28 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const toggleDropdown = useCallback(() => {
+    setDropdownOpen((prev) => {
+      if (prev) {
+        setSearchQuery("");
+        return false;
+      }
+      return true;
+    });
+  }, []);
+
+  // Auto-focus search input when dropdown opens
+  useEffect(() => {
+    if (dropdownOpen) {
+      // rAF ensures the input is mounted before we focus
+      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
+      return () => cancelAnimationFrame(id);
+    } else {
+      setSearchQuery("");
+    }
+  }, [dropdownOpen]);
 
   const currentProjectId = typeof params?.id === "string" ? params.id : null;
   const currentProject = projects.find((p) => p.id === currentProjectId);
@@ -55,11 +77,13 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        setSearchQuery("");
         setDropdownOpen(false);
       }
     };
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setSearchQuery("");
         setDropdownOpen(false);
       }
     };
@@ -101,7 +125,7 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
       <div className="relative" ref={dropdownRef}>
         <button
           type="button"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          onClick={toggleDropdown}
           aria-expanded={dropdownOpen}
           aria-haspopup="listbox"
           aria-label="Switch project"
@@ -127,6 +151,7 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                   <input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="Search project..."
                     aria-label="Search projects"
@@ -189,7 +214,7 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
     <div className="relative flex-1 flex justify-center" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+        onClick={toggleDropdown}
         aria-expanded={dropdownOpen}
         aria-haspopup="listbox"
         aria-label="Switch project menu"
@@ -216,6 +241,7 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Search project..."
                   aria-label="Search projects"
