@@ -106,9 +106,6 @@ export function InstallPrompt() {
             <div>
               <h4 className="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
                 Install Logged
-                <span className="bg-blue-500/20 text-blue-400 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full border border-blue-500/30">
-                  PWA
-                </span>
               </h4>
               <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
                 Install for quick access, offline mode & real-time monitoring.
@@ -119,7 +116,7 @@ export function InstallPrompt() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleInstallClick}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 bg-primary hover:bg-primary/50 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Install

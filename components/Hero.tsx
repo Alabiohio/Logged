@@ -45,17 +45,17 @@ export default function Hero() {
   };
 
   return (
-    <section className="mx-auto flex min-h-[85vh] max-w-8xl flex-col items-center justify-center gap-12 px-4 py-16 pt-24 lg:flex-row lg:gap-20 overflow-hidden">
+    <section className="mx-auto flex min-h-[85vh] flex-col items-center justify-center gap-12 px-2 py-16 pt-44 sm:pt-40 lg:pt-24 lg:flex-row lg:gap-12 xl:gap-40 overflow-hidden">
       {/* Left */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="max-w-3xl text-center lg:text-left"
+        className="text-center lg:text-left"
       >
         <motion.h1
           variants={itemVariants}
-          className="mt-4 text-5xl font-hero font-black leading-tight tracking-tight text-text sm:text-5xl lg:text-7xl"
+          className="mt-4 text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-hero font-black leading-tight tracking-tight text-text"
         >
           <span className="font-normal">Monitor</span>
           <span className="font-bold"> every</span>
@@ -119,7 +119,7 @@ export default function Hero() {
           }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
           style={{ transformStyle: "preserve-3d" }}
-          className="relative max-w-[260px] sm:max-w-[320px] drop-shadow-[0_25px_35px_rgba(0,0,0,0.3)]"
+          className="relative max-w-[260px] sm:max-w-[320px] lg:max-w-[280px] xl:max-w-[320px] drop-shadow-[0_25px_35px_rgba(0,0,0,0.3)]"
         >
           <Image
             src="/dcim/phone.png"

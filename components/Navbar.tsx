@@ -42,7 +42,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden gap-8 text-sm font-medium text-text-secondary md:flex">
+        <div className="hidden gap-8 text-sm font-medium text-text-secondary lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -56,7 +56,7 @@ export default function Navbar() {
         </div>
 
         {/* Desktop actions */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <ThemeToggle />
 
           {!isPending && (
@@ -106,7 +106,7 @@ export default function Navbar() {
           aria-expanded={open}
           aria-controls="mobile-navigation-menu"
           aria-label={open ? "Close navigation menu" : "Open navigation menu"}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-glass transition hover:bg-glass-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-glass transition hover:bg-glass-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:hidden"
         >
           {open ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
         </motion.button>
@@ -121,7 +121,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="mx-auto mt-3 max-w-7xl overflow-hidden rounded-3xl border border-border bg-glass px-6 py-6 backdrop-blur-3xl shadow-lg md:hidden"
+            className="mx-auto mt-3 max-w-7xl overflow-hidden rounded-3xl border border-border bg-glass px-6 py-6 backdrop-blur-3xl shadow-lg lg:hidden"
           >
             {/* Nav links */}
             <div className="flex flex-col gap-1">

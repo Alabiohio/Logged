@@ -5,6 +5,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --breakpoint-laptop: 1100px;
+}
+
+
 :root {
   /* Primary */
   --primary: #727D8F;
