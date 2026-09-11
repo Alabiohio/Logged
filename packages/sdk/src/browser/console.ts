@@ -4,7 +4,7 @@ import { DuplicateFilter, generateErrorFingerprint } from "../utils/fingerprint"
 import { safeSerializeArgs } from "../utils/serialize";
 import { LogPayload, LogLevel } from "../types";
 
-const CONSOLE_METHODS = ["log", "info", "warn", "error"] as const;
+const CONSOLE_METHODS = ["log", "info", "warn", "error", "table"] as const;
 type ConsoleMethod = typeof CONSOLE_METHODS[number];
 
 // A mapping from console method to Logged method/level
@@ -13,6 +13,7 @@ const LEVEL_MAP: Record<ConsoleMethod, LogLevel> = {
   info: "info",
   warn: "warn",
   error: "error",
+  table: "info",
 };
 
 export function setupConsoleCapture(logger: Logged): () => void {
@@ -47,6 +48,8 @@ export function setupConsoleCapture(logger: Logged): () => void {
       } else if (firstArg instanceof Error) {
         message = firstArg.message;
         stack = firstArg.stack;
+      } else if (method === "table") {
+        message = "Console table";
       }
 
       // Add context
@@ -75,6 +78,16 @@ export function setupConsoleCapture(logger: Logged): () => void {
       const metadata: Record<string, unknown> = {
         consoleArguments: serializedArgs,
       };
+
+      if (method === "table") {
+        const tableData = serializedArgs[0];
+        if (tableData !== undefined) {
+          metadata.table = tableData;
+        }
+        if (args[1] !== undefined) {
+          metadata.tableColumns = serializedArgs[1];
+        }
+      }
 
       if (firstArg instanceof Error && firstArg.name) {
         metadata.errorName = firstArg.name;

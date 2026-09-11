@@ -49,6 +49,14 @@ export default function SDKTestPage() {
     }
   };
 
+  const handleTableLog = () => {
+    logger.table("SDK test table", [
+      { name: "Alice", active: true, revenue: 1200 },
+      { name: "Bob", active: false, revenue: 980 },
+      { name: "Charlie", active: true, revenue: 2140 },
+    ]);
+  };
+
   if (!mounted) {
     return <div>Loading...</div>;
   }
@@ -89,6 +97,13 @@ export default function SDKTestPage() {
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           Capture Error Manually
+        </button>
+
+        <button
+          onClick={handleTableLog}
+          className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+        >
+          logger.table()
         </button>
       </div>
 

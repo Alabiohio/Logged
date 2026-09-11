@@ -56,6 +56,14 @@ export default function ConsoleTestPage() {
     console.log("Circular object:", obj);
   };
 
+  const handleTableLog = () => {
+    console.table([
+      { name: "Alice", active: true, revenue: 1200 },
+      { name: "Bob", active: false, revenue: 980 },
+      { name: "Charlie", active: true, revenue: 2140 },
+    ]);
+  };
+
   const handleSpam = () => {
     for (let i = 0; i < 50; i++) {
       console.log("Spamming logs", i);
@@ -112,6 +120,13 @@ export default function ConsoleTestPage() {
           className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 font-medium"
         >
           console.log (Circular Object)
+        </button>
+
+        <button
+          onClick={handleTableLog}
+          className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 font-medium"
+        >
+          console.table
         </button>
 
         <button

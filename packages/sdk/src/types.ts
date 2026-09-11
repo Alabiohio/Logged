@@ -6,6 +6,8 @@ export type LogLevel =
   | "error"
   | "debug";
 
+export type TableData = Record<string, unknown> | Array<Record<string, unknown>> | unknown[];
+
 export interface LogMetadata {
   [key: string]: unknown;
 }

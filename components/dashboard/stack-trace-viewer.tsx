@@ -42,17 +42,17 @@ export function StackTraceViewer({ stack }: StackTraceViewerProps) {
                     )}
                 </button>
             </div>
-            <div className="bg-background-secondary rounded-xl border border-error/10 overflow-hidden">
-                <div className="p-4 space-y-0.5 overflow-x-auto">
+            <div className="overflow-hidden rounded-xl border border-error/10 bg-background-secondary">
+                <div className="space-y-0.5 overflow-x-auto p-4">
                     {lines.map((line, i) => {
                         const isErrorLine = i === 0 && !line.trim().startsWith("at ");
                         return (
                             <div
                                 key={i}
-                                className={`font-mono text-xs leading-6 ${
+                                className={`break-all font-mono text-xs leading-6 ${
                                     isErrorLine
-                                        ? "text-error font-semibold"
-                                        : "text-text-muted pl-4"
+                                        ? "font-semibold text-error"
+                                        : "pl-4 text-text-muted"
                                 }`}
                             >
                                 {line}

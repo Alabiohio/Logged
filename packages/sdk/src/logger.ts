@@ -1,4 +1,4 @@
-import { LogLevel, LogMetadata, LoggedConfig, LogPayload } from "./types";
+import { LogLevel, LogMetadata, LoggedConfig, LogPayload, TableData } from "./types";
 import { Transport } from "./transport";
 import { setupAutoCapture } from "./browser/auto";
 import { setupConsoleCapture } from "./browser/console";
@@ -55,6 +55,15 @@ export class Logged {
 
   debug(message: string, metadata?: LogMetadata) {
     this.send("debug", message, metadata);
+  }
+
+  table(message: string, data: TableData, metadata?: LogMetadata) {
+    const payloadMetadata: LogMetadata = {
+      ...(metadata ?? {}),
+      table: data,
+    };
+
+    this.send("info", message, payloadMetadata);
   }
 
   capture(error: unknown, metadata?: LogMetadata) {

@@ -1,6 +1,7 @@
 const CACHE_NAME = "logged-pwa-v1";
 const PRECACHE_ASSETS = [
   "/",
+  "/offline",
   "/dashboard",
   "/status",
   "/favicon.ico",
@@ -87,9 +88,11 @@ self.addEventListener("fetch", (event) => {
       .catch(async () => {
         const cachedResponse = await caches.match(request);
         if (cachedResponse) return cachedResponse;
-        
-        // Return root app shell if offline page requested
+
         if (request.mode === "navigate") {
+          const offlinePage = await caches.match("/offline");
+          if (offlinePage) return offlinePage;
+
           const dashboardFallback = await caches.match("/dashboard");
           if (dashboardFallback) return dashboardFallback;
           return caches.match("/");

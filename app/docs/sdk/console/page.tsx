@@ -60,6 +60,9 @@ logger.interceptConsole();`}
           <li>
             <span className="font-mono text-primary">console.error</span>
           </li>
+          <li>
+            <span className="font-mono text-primary">console.table</span>
+          </li>
         </ul>
       </section>
 
@@ -73,11 +76,17 @@ console.info("User authenticated");
 
 console.warn("API response is slow");
 
-console.error("Payment failed");`}
+console.error("Payment failed");
+
+console.table([
+  { name: "Alice", active: true, revenue: 1200 },
+  { name: "Bob", active: false, revenue: 980 },
+]);`}
         />
         <p className="text-sm leading-7 text-text-secondary">
           Each call still prints to the browser console. Logged receives a
           structured copy with the log level, message, and serialized arguments.
+          <span className="font-mono text-primary">console.table</span> is also captured and stored in a tabular format for dashboard viewing.
         </p>
       </section>
 

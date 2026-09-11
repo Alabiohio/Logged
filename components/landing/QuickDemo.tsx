@@ -293,10 +293,10 @@ ${currentExample.payload.map((p) => `  ${p.key}: ${p.value}`).join(",\n")}
           </div>
 
           {/* Code snippet with Typewriter Animation */}
-          <pre className="mt-3 sm:mt-4 overflow-x-auto p-1.5 sm:p-2 font-console text-[11px] sm:text-sm text-text leading-relaxed min-h-[190px] sm:min-h-[220px]">
-            <code>
-              <span className="text-primary font-bold">import</span> &#123; Logged &#125; <span className="text-primary font-bold">from</span> <span className="text-warning">&quot;@oheoco/logged&quot;</span>;{"\n\n"}
-              <span className="text-primary font-bold">const</span> logger = <span className="text-primary font-bold">new Logged</span>(&#123;{"\n"}
+          <pre className="mt-3 min-h-[190px] overflow-x-auto whitespace-pre-wrap break-all p-1.5 font-console text-[11px] leading-relaxed text-text sm:mt-4 sm:min-h-[220px] sm:p-2 sm:text-sm">
+            <code className="block break-words">
+              <span className="font-bold text-primary">import</span> &#123; Logged &#125; <span className="font-bold text-primary">from</span> <span className="text-warning">&quot;@oheoco/logged&quot;</span>;{"\n\n"}
+              <span className="font-bold text-primary">const</span> logger = <span className="font-bold text-primary">new Logged</span>(&#123;{"\n"}
               {"  "}apiKey: process.env.<span className="text-info">LOGGED_API_KEY</span>,{"\n"}
               &#125;);{"\n\n"}
               {renderTypedTokens()}

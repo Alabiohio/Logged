@@ -28,7 +28,7 @@ export default function ApiReferencePage() {
         <div className="mt-12 space-y-12 text-sm leading-7 text-text-secondary">
           <section>
             <h2 className="text-xl font-bold text-text">Base URL</h2>
-            <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+            <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
               https://logged.oheo.site/api/v1
             </pre>
           </section>
@@ -38,7 +38,7 @@ export default function ApiReferencePage() {
             <p className="mt-4">
               Authenticate requests using a bearer token in the Authorization header.
             </p>
-            <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+            <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
               Authorization: Bearer YOUR_API_KEY
             </pre>
           </section>
@@ -58,7 +58,7 @@ export default function ApiReferencePage() {
               <li><code className="text-text">source</code> (optional): One of <code className="text-text">server, client, edge</code>.</li>
               <li><code className="text-text">url, pathname, stack, timestamp</code> (optional strings).</li>
             </ul>
-            <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+            <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
 {`curl -X POST https://logged.oheo.site/api/v1/logs \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
@@ -70,7 +70,7 @@ export default function ApiReferencePage() {
   }'`}
             </pre>
             <p className="mt-4 font-bold text-text">Response</p>
-            <pre className="mt-2 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
 {`{
   "success": true,
   "id": "log_abc123"
@@ -86,7 +86,7 @@ export default function ApiReferencePage() {
             <p className="mt-2 text-text-muted">
               Provide an object with a <code className="text-text">logs</code> array. Maximum of 100 logs per batch.
             </p>
-            <pre className="mt-4 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+            <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
 {`curl -X POST https://logged.oheo.site/api/v1/logs \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
@@ -104,7 +104,7 @@ export default function ApiReferencePage() {
   }'`}
             </pre>
             <p className="mt-4 font-bold text-text">Response</p>
-            <pre className="mt-2 rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
+            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-background p-4 font-mono text-xs text-text">
 {`{
   "success": true,
   "accepted": 2,

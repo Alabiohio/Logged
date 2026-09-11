@@ -47,6 +47,12 @@ logger.info("User completed onboarding process");
 logger.success("Payment verified successfully", { amount: 49.99, currency: "USD" });
 logger.warn("Rate limit approaching", { remaining: 5 });
 logger.error("Failed to connect to database", { dbHost: "db.example.com" });
+
+// Tabular data
+logger.table("Users", [
+  { name: "Alice", active: true, revenue: 1200 },
+  { name: "Bob", active: false, revenue: 980 },
+]);
 ```
 
 ### 2. Manual Error Capture

@@ -19,8 +19,8 @@ export function CodeBlock({ code, language = "typescript" }: CodeBlockProps) {
   };
 
   return (
-    <div className="group relative my-6 rounded-2xl border border-border bg-background-secondary overflow-hidden w-full min-w-0 max-w-full">
-      <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-background-tertiary/50">
+    <div className="group relative my-6 w-full max-w-full overflow-hidden rounded-2xl border border-border bg-background-secondary">
+      <div className="flex items-center justify-between border-b border-border bg-background-tertiary/50 px-4 py-2">
         <span className="text-xs font-medium text-text-muted">{language}</span>
         <button
           onClick={handleCopy}
@@ -40,8 +40,8 @@ export function CodeBlock({ code, language = "typescript" }: CodeBlockProps) {
         </button>
       </div>
       <div className="overflow-x-auto p-4">
-        <pre className="font-mono text-sm leading-relaxed text-text whitespace-pre overflow-x-auto">
-          <code>{code}</code>
+        <pre className="min-w-0 overflow-x-auto whitespace-pre-wrap break-all font-mono text-sm leading-relaxed text-text">
+          <code className="block min-w-0 break-words">{code}</code>
         </pre>
       </div>
     </div>

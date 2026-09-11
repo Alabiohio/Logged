@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { LogLevelBadge } from "./log-level-badge";
 import { MetadataViewer } from "./metadata-viewer";
 import { StackTraceViewer } from "./stack-trace-viewer";
+import { TableViewer } from "./table-viewer";
 
 export type LogRecord = {
     id: string;
@@ -206,6 +207,21 @@ export function LogDetailsDrawer({ log, onClose }: LogDetailsDrawerProps) {
                             )}
                         </div>
                     )}
+
+                    {/* Table data */}
+                    {log.metadata &&
+                        typeof log.metadata === "object" &&
+                        "table" in log.metadata &&
+                        log.metadata.table !== undefined && (
+                            <div className="border-t border-border/50 pt-4">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <span className="block text-xs text-text-muted font-semibold uppercase tracking-wider">
+                                        Table
+                                    </span>
+                                </div>
+                                <TableViewer data={log.metadata.table} />
+                            </div>
+                        )}
 
                     {/* Metadata */}
                     {log.metadata &&

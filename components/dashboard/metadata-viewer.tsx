@@ -40,7 +40,7 @@ export function MetadataViewer({ data }: MetadataViewerProps) {
                     )}
                 </button>
             </div>
-            <pre className="bg-background-secondary rounded-xl p-4 text-xs font-mono overflow-x-auto text-text border border-border/50 leading-relaxed">
+            <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-border/50 bg-background-secondary p-4 font-mono text-xs leading-relaxed text-text">
                 {formatted}
             </pre>
         </div>

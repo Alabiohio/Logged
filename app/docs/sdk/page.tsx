@@ -62,6 +62,7 @@ const logger = new Logged({
             { name: "warn", example: 'logger.warn("API response is slow");' },
             { name: "error", example: 'logger.error("Database connection failed");' },
             { name: "debug", example: 'logger.debug("Request details", { method: "GET" });' },
+            { name: "table", example: `logger.table("Users", [\n  { name: "Alice", active: true },\n  { name: "Bob", active: false },\n]);` },
           ].map((method) => (
             <div
               key={method.name}
