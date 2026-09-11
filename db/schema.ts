@@ -114,3 +114,16 @@ export const logs = pgTable(
         index("log_project_env_idx").on(table.projectId, table.environment),
     ]
 );
+
+export const feedbacks = pgTable("feedback", {
+    id: text("id").primaryKey(),
+    category: text("category").notNull(),
+    rating: integer("rating"),
+    message: text("message").notNull(),
+    email: text("email").notNull(),
+    userId: text("user_id").references(() => users.id),
+    isAnonymous: boolean("is_anonymous").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+});
+
+

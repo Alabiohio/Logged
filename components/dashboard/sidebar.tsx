@@ -1,11 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderKanban, Settings, FileText, LogOut, Activity, X, ChevronLeft, ChevronRight, ChevronDown, User, Monitor, Database, TriangleAlert, Sun, Moon, Bell, Shield } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Settings,
+  FileText,
+  LogOut,
+  Activity,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  User,
+  Monitor,
+  Database,
+  TriangleAlert,
+  Sun,
+  Moon,
+  Bell,
+  Shield,
+  MoreHorizontal,
+  Smile,
+  Home,
+  Pencil,
+  Radio,
+  HelpCircle,
+  ExternalLink
+} from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +49,15 @@ export function Sidebar({
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { data: session } = authClient.useSession();
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const currentUser = (session?.user as { username?: string; name?: string; email?: string; image?: string }) || {};
+  const username = currentUser.username || currentUser.name || "user";
+  const email = currentUser.email || "";
 
   const navigation = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -39,6 +72,155 @@ export function Sidebar({
     await authClient.signOut();
     router.push("/login");
   };
+
+  // Close user menu popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const renderUserMenuPopover = () => (
+    <AnimatePresence>
+      {userMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+          className="absolute bottom-20 left-3 right-3 z-50 overflow-hidden rounded-3xl border border-border bg-background-secondary/95 p-4 shadow-2xl backdrop-blur-2xl lg:left-3 lg:w-[260px]"
+        >
+          {/* Header with username, email, settings gear */}
+          <div className="flex items-center justify-between pb-3 border-b border-border">
+            <div className="min-w-0 flex-1 pr-2">
+              <div className="truncate text-sm font-bold text-text" title={username}>
+                {username}
+              </div>
+              {email && (
+                <div className="truncate text-xs text-text-muted" title={email}>
+                  {email}
+                </div>
+              )}
+            </div>
+            <Link
+              href="/dashboard/settings"
+              onClick={() => {
+                setUserMenuOpen(false);
+                closeMenu();
+              }}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border bg-glass text-text-secondary transition hover:bg-glass-hover hover:text-text"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* Popover Nav items */}
+          <div className="py-2 space-y-1">
+            <Link
+              href="/feedback"
+              onClick={() => {
+                setUserMenuOpen(false);
+                closeMenu();
+              }}
+              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition hover:bg-glass hover:text-text"
+            >
+              <span className="flex items-center gap-3">
+                <Smile className="h-4 w-4 text-text-muted" />
+                Feedback
+              </span>
+            </Link>
+
+            <Link
+              href="/"
+              onClick={() => {
+                setUserMenuOpen(false);
+                closeMenu();
+              }}
+              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition hover:bg-glass hover:text-text"
+            >
+              <span className="flex items-center gap-3">
+                <Home className="h-4 w-4 text-text-muted" />
+                Home Page
+              </span>
+            </Link>
+
+            <Link
+              href="/changelog"
+              onClick={() => {
+                setUserMenuOpen(false);
+                closeMenu();
+              }}
+              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition hover:bg-glass hover:text-text"
+            >
+              <span className="flex items-center gap-3">
+                <Pencil className="h-4 w-4 text-text-muted" />
+                Changelog
+              </span>
+            </Link>
+
+            <Link
+              href="/status"
+              onClick={() => {
+                setUserMenuOpen(false);
+                closeMenu();
+              }}
+              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition hover:bg-glass hover:text-text"
+            >
+              <span className="flex items-center gap-3">
+                <Radio className="h-4 w-4 text-text-muted" />
+                Status
+              </span>
+            </Link>
+
+            <a
+              href="https://oheo.site/inquiry"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setUserMenuOpen(false)}
+              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition hover:bg-glass hover:text-text"
+            >
+              <span className="flex items-center gap-3">
+                <HelpCircle className="h-4 w-4 text-text-muted" />
+                Inquiry
+              </span>
+              <ExternalLink className="h-3.5 w-3.5 text-text-muted" />
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                setUserMenuOpen(false);
+                closeMenu();
+                handleSignOut();
+              }}
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition hover:bg-glass hover:text-red-500"
+            >
+              <span className="flex items-center gap-3">
+                <LogOut className="h-4 w-4 text-text-muted" />
+                Log Out
+              </span>
+            </button>
+          </div>
+
+          {/* Status footer */}
+          <div className="mt-2 pt-3 border-t border-border">
+            <div className="flex items-center gap-2 px-1 text-xs font-medium text-primary">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              All systems normal.
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>
@@ -103,7 +285,11 @@ export function Sidebar({
           </nav>
         </div>
 
-        <div className="border-t border-border p-4 shrink-0 flex flex-col gap-2">
+        {/* Bottom Theme Switcher & User Bar */}
+        <div ref={menuRef} className="relative border-t border-border p-4 shrink-0 flex flex-col gap-2">
+          {renderUserMenuPopover()}
+
+          {/* Theme Switcher bar */}
           <div className={`flex gap-1 p-1 rounded-2xl border border-border bg-background-secondary/50 ${isCollapsed ? "flex-col" : "items-center"}`}>
             {(["light", "system", "dark"] as const).map((t) => {
               const icons = { light: Sun, system: Monitor, dark: Moon };
@@ -132,20 +318,48 @@ export function Sidebar({
               );
             })}
           </div>
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSignOut}
-            title={isCollapsed ? "Sign Out" : undefined}
-            aria-label="Sign Out"
-            className={`group flex w-full items-center rounded-2xl border border-border bg-glass py-3 text-sm font-medium text-text-secondary transition hover:bg-glass-hover hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-              isCollapsed ? "justify-center px-0" : "gap-3 px-4"
+
+          <div
+            className={`flex items-center gap-3 rounded-2xl border border-border bg-glass p-2.5 transition hover:bg-glass-hover cursor-pointer ${
+              isCollapsed ? "justify-center px-0" : "justify-between"
             }`}
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
           >
-            <LogOut className="h-5 w-5 text-text-secondary group-hover:text-text" strokeWidth={3} aria-hidden="true" />
-            {!isCollapsed && <span className="whitespace-nowrap overflow-hidden">Sign Out</span>}
-          </motion.button>
+            <div className="flex items-center gap-3 min-w-0">
+              {currentUser.image ? (
+                <Image
+                  src={currentUser.image}
+                  alt={username}
+                  width={36}
+                  height={36}
+                  className="h-9 w-9 rounded-full object-cover shrink-0 border border-border"
+                />
+              ) : (
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-sm border border-primary/30">
+                  {username.charAt(0).toUpperCase()}
+                </div>
+              )}
+              {!isCollapsed && (
+                <span className="truncate text-sm font-semibold text-text" title={username}>
+                  {username}
+                </span>
+              )}
+            </div>
+
+            {!isCollapsed && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setUserMenuOpen(!userMenuOpen);
+                }}
+                aria-label="User menu"
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-text-secondary hover:bg-glass hover:text-text transition shrink-0"
+              >
+                <MoreHorizontal className="h-5 w-5" />
+              </button>
+            )}
+          </div>
         </div>
       </motion.aside>
 
@@ -262,7 +476,10 @@ export function Sidebar({
                 })}
               </nav>
 
-              <div className="border-t border-border p-4 shrink-0 flex flex-col gap-2">
+              {/* Bottom Mobile Theme Switcher & User Bar */}
+              <div ref={menuRef} className="relative border-t border-border p-4 shrink-0 flex flex-col gap-2">
+                {renderUserMenuPopover()}
+
                 <div className="flex gap-1 p-1 rounded-2xl border border-border bg-background-secondary/50 items-center">
                   {(["light", "system", "dark"] as const).map((t) => {
                     const icons = { light: Sun, system: Monitor, dark: Moon };
@@ -286,18 +503,42 @@ export function Sidebar({
                     );
                   })}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeMenu();
-                    handleSignOut();
-                  }}
-                  aria-label="Sign Out"
-                  className="group flex w-full items-center gap-3 rounded-2xl border border-border bg-glass px-4 py-3 text-sm font-medium text-text-secondary transition hover:bg-glass-hover hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+
+                <div
+                  className="flex items-center justify-between rounded-2xl border border-border bg-glass p-2.5 transition hover:bg-glass-hover cursor-pointer"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
-                  <LogOut className="h-5 w-5 text-text-secondary group-hover:text-text" strokeWidth={3} aria-hidden="true" />
-                  Sign Out
-                </button>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {currentUser.image ? (
+                      <Image
+                        src={currentUser.image}
+                        alt={username}
+                        width={36}
+                        height={36}
+                        className="h-9 w-9 rounded-full object-cover shrink-0 border border-border"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-sm border border-primary/30">
+                        {username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="truncate text-sm font-semibold text-text" title={username}>
+                      {username}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUserMenuOpen(!userMenuOpen);
+                    }}
+                    aria-label="User menu"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-text-secondary hover:bg-glass hover:text-text transition shrink-0"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </motion.aside>
           </div>
@@ -306,4 +547,3 @@ export function Sidebar({
     </>
   );
 }
-

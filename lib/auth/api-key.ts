@@ -12,6 +12,10 @@ export function hashApiKey(rawKey: string): string {
     return crypto.createHash("sha256").update(rawKey).digest("hex");
 }
 
+export function generateApiKey(): string {
+    return `lg${crypto.randomBytes(18).toString("hex")}`;
+}
+
 /**
  * Authenticate an inbound Bearer token.
  * Returns the matching project row and environment, or null if the key is invalid/unknown.

@@ -445,27 +445,40 @@ export default function ProjectOverviewPage() {
             <div className="space-y-4">
                 <h2 className="text-lg font-bold text-text">API Keys</h2>
                 <div className="grid gap-4 lg:grid-cols-3">
-                    {project.apiKeys?.map((apiKeyObj) => (
-                        <ApiKeyCard
-                            key={apiKeyObj.id}
-                            apiKey={apiKeyObj.key}
-                            environment={apiKeyObj.environment}
-                            projectId={project.id}
-                            onRegenerate={(env, newKey) => {
-                                setProject((p) => {
-                                    if (!p) return p;
-                                    return {
-                                        ...p,
-                                        apiKeys: p.apiKeys.map((k) =>
-                                            k.environment === env
-                                                ? { ...k, key: newKey }
-                                                : k
-                                        ),
-                                    };
-                                });
-                            }}
-                        />
-                    ))}
+                    {(["development", "staging", "production"] as const).map((environment) => {
+                        const apiKeyObj = project.apiKeys?.find((k) => k.environment === environment) ?? null;
+
+                        return (
+                            <ApiKeyCard
+                                key={environment}
+                                apiKey={apiKeyObj?.key ?? null}
+                                environment={environment}
+                                projectId={project.id}
+                                onRegenerate={(env, newKey) => {
+                                    setProject((p) => {
+                                        if (!p) return p;
+                                        const nextKeys = [...(p.apiKeys ?? [])];
+                                        const index = nextKeys.findIndex((k) => k.environment === env);
+
+                                        if (index >= 0) {
+                                            nextKeys[index] = { ...nextKeys[index], key: newKey };
+                                        } else {
+                                            nextKeys.push({
+                                                id: `${p.id}-${env}`,
+                                                environment: env,
+                                                key: newKey,
+                                            });
+                                        }
+
+                                        return {
+                                            ...p,
+                                            apiKeys: nextKeys,
+                                        };
+                                    });
+                                }}
+                            />
+                        );
+                    })}
                 </div>
             </div>
 

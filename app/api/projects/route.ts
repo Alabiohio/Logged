@@ -54,27 +54,7 @@ export async function POST(req: Request) {
             website,
         }).returning();
 
-        const environments = ["development", "staging", "production"];
-        const keysToInsert = [];
-        const rawKeys: Record<string, string> = {};
-
-        for (const env of environments) {
-            const rawKey = `lg_${env === "production" ? "live" : "test"}_${crypto.randomBytes(16).toString("hex")}`;
-            const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
-            
-            rawKeys[env] = rawKey;
-            keysToInsert.push({
-                id: uuidv4(),
-                projectId,
-                environment: env,
-                key: rawKey,
-                keyHash,
-            });
-        }
-
-        await db.insert(apiKeys).values(keysToInsert);
-
-        return NextResponse.json({ ...newProject[0], apiKeys: rawKeys }, { status: 201 });
+        return NextResponse.json({ ...newProject[0], apiKeys: [] }, { status: 201 });
     } catch (error) {
         console.error("Error creating project:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -1,16 +1,17 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { projects, apiKeys } from "@/db/schema";
+import { apiKeys } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import {
     authorizeProjectAccess,
     ProjectNotFoundError,
     ProjectForbiddenError,
     UnauthorizedProjectAccessError,
 } from "@/lib/projects";
+import { generateApiKey, hashApiKey } from "@/lib/auth/api-key";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await auth.api.getSession({
@@ -45,17 +46,37 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             throw error;
         }
 
-        const rawKey = `lg_${environment === "production" ? "live" : "test"}_${crypto.randomBytes(16).toString("hex")}`;
-        const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+        const rawKey = generateApiKey();
+        const keyHash = hashApiKey(rawKey);
 
-        const updatedKey = await db
-            .update(apiKeys)
-            .set({ key: rawKey, keyHash, updatedAt: new Date() })
-            .where(and(eq(apiKeys.projectId, id), eq(apiKeys.environment, environment)))
-            .returning();
+        const existingKey = await db.query.apiKeys.findFirst({
+            where: and(eq(apiKeys.projectId, id), eq(apiKeys.environment, environment)),
+        });
 
-        if (updatedKey.length === 0) {
-            return NextResponse.json({ error: "API Key not found for this environment" }, { status: 404 });
+        if (existingKey) {
+            const updatedKey = await db
+                .update(apiKeys)
+                .set({ key: rawKey, keyHash, updatedAt: new Date() })
+                .where(and(eq(apiKeys.projectId, id), eq(apiKeys.environment, environment)))
+                .returning();
+
+            if (updatedKey.length === 0) {
+                return NextResponse.json({ error: "API Key not found for this environment" }, { status: 404 });
+            }
+
+            return NextResponse.json({ apiKey: rawKey, environment });
+        }
+
+        const newKey = await db.insert(apiKeys).values({
+            id: uuidv4(),
+            projectId: id,
+            environment,
+            key: rawKey,
+            keyHash,
+        }).returning();
+
+        if (newKey.length === 0) {
+            return NextResponse.json({ error: "Failed to create API key" }, { status: 500 });
         }
 
         return NextResponse.json({ apiKey: rawKey, environment });
