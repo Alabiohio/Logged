@@ -6,15 +6,15 @@ import Link from "next/link";
 
 export default function CTA() {
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-20 lg:pb-32">
+    <section className="mx-auto max-w-6xl px-3 pb-20 lg:pb-32">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 30 }}
         whileInView={{ opacity: 1, scale: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] as const }}
-        className="glass overflow-hidden rounded-[28px] px-6 py-14 text-center sm:rounded-[40px] sm:p-16 shadow-2xl relative"
+        className="glass overflow-hidden rounded-[28px] px-3 py-14 text-center sm:rounded-[40px] sm:p-16 shadow-2xl relative"
       >
-        <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-hero leading-tight sm:mt-8 sm:text-5xl lg:text-6xl">
+        <h2 className="mx-auto mt-4 text-2xl font-hero leading-tight sm:mt-8 sm:text-5xl lg:text-6xl">
           <span className="font-normal">Stop</span>
           <span className="font-normal"> chasing</span>
           <span className="font-semibold"> logs</span>

@@ -13,20 +13,32 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const { data: session, isPending: sessionLoading } = authClient.useSession();
 
   useEffect(() => {
-    if (!sessionLoading) {
-      if (!session?.user) {
-        router.push("/login");
-      } else {
-        const currentUser = session.user as { username?: string };
-        if (!currentUser.username || currentUser.username.trim() === "") {
-          router.push("/set-username");
-        }
-      }
+    if (sessionLoading) return;
+
+    if (!authChecked) {
+      setAuthChecked(true);
+      return;
     }
-  }, [session, sessionLoading, router]);
+
+    if (!session?.user) {
+      const timer = setTimeout(async () => {
+        const { data } = await authClient.getSession();
+        if (!data?.user) {
+          router.replace("/login");
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+
+    const currentUser = session.user as { username?: string };
+    if (!currentUser.username || currentUser.username.trim() === "") {
+      router.replace("/set-username");
+    }
+  }, [session, sessionLoading, authChecked, router]);
 
   const openMenu = () => {
     setMobileOpen(true);

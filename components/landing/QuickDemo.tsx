@@ -200,7 +200,7 @@ ${currentExample.payload.map((p) => `  ${p.key}: ${p.value}`).join(",\n")}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="mt-3 text-2xl font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
+            className="mt-3 text-2xl font-hero font-extrabold tracking-tight text-text sm:text-4xl lg:text-5xl"
           >
             From zero to logging in minutes.
           </motion.h2>

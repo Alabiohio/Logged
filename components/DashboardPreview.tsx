@@ -229,7 +229,7 @@ export default function DashboardPreview() {
               <Card
                 title="Logs Today"
                 numericValue={logCount}
-                color="bg-emerald-500"         
+                color="bg-emerald-500"
               />
               <Card title="Errors" numericValue={14} color="bg-red-500" />
               <Card title="Warnings" numericValue={39} color="bg-amber-500" />
@@ -242,7 +242,6 @@ export default function DashboardPreview() {
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-sm sm:text-base">Recent Logs</h4>
                 </div>
-                <span className="text-[11px] font-console text-text-muted">Auto-updating</span>
               </div>
 
               {/* Fixed height container to confine animations and prevent layout shifts */}
@@ -307,9 +306,8 @@ function NavItem({
       onClick={onClick}
       whileHover={{ x: 4 }}
       whileTap={{ scale: 0.98 }}
-      className={`relative flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-        active ? "text-white" : "text-text-muted hover:text-text hover:bg-glass"
-      }`}
+      className={`relative flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${active ? "text-white" : "text-text-muted hover:text-text hover:bg-glass"
+        }`}
     >
       {active && (
         <motion.div

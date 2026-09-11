@@ -17,32 +17,43 @@ export default function SetUsernamePage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [initialized, setInitialized] = useState(false);
+    const [authChecked, setAuthChecked] = useState(false);
 
     useEffect(() => {
-        if (!sessionLoading) {
-            if (!sessionData?.user) {
-                router.push("/login");
-                return;
-            }
+        if (sessionLoading) return;
 
-            const currentUser = sessionData.user as { name?: string; username?: string; email?: string };
-
-            // If user already has a username set, send them straight to dashboard
-            if (currentUser.username && currentUser.username.trim() !== "") {
-                router.push("/dashboard");
-                return;
-            }
-
-            if (!initialized) {
-                setName(currentUser.name || "");
-                if (currentUser.email) {
-                    const derived = currentUser.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
-                    setUsername(derived);
-                }
-                setInitialized(true);
-            }
+        if (!authChecked) {
+            setAuthChecked(true);
+            return;
         }
-    }, [sessionData, sessionLoading, initialized, router]);
+
+        if (!sessionData?.user) {
+            const timer = setTimeout(async () => {
+                const { data } = await authClient.getSession();
+                if (!data?.user) {
+                    router.replace("/login");
+                }
+            }, 800);
+            return () => clearTimeout(timer);
+        }
+
+        const currentUser = sessionData.user as { name?: string; username?: string; email?: string };
+
+        // If user already has a username set, send them straight to dashboard
+        if (currentUser.username && currentUser.username.trim() !== "") {
+            router.replace("/dashboard");
+            return;
+        }
+
+        if (!initialized) {
+            setName(currentUser.name || "");
+            if (currentUser.email) {
+                const derived = currentUser.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+                setUsername(derived);
+            }
+            setInitialized(true);
+        }
+    }, [sessionData, sessionLoading, initialized, authChecked, router]);
 
     const handleSignOut = async () => {
         await authClient.signOut();

@@ -42,6 +42,16 @@ function LoginForm() {
     const isBusy = loadingMethod !== null;
     const isGithubLoading = loadingMethod === "github";
 
+    const waitForSignedInUser = async () => {
+        for (let attempt = 0; attempt < 12; attempt += 1) {
+            const { data } = await authClient.getSession();
+            const user = data?.user as Record<string, unknown> | undefined;
+            if (user) return user;
+            await new Promise((resolve) => setTimeout(resolve, 250));
+        }
+        return null;
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoadingMethod("email");
@@ -63,15 +73,25 @@ function LoginForm() {
             return;
         }
 
-        if (data?.user) {
-            const u = data.user as Record<string, unknown>;
-            if (!u.username || (typeof u.username === "string" && u.username.trim() === "")) {
-                router.push("/set-username");
-                return;
-            }
+        if (data?.url) {
+            window.location.replace(data.url);
+            return;
         }
 
-        router.push(redirectPath || "/dashboard");
+        const user = await waitForSignedInUser();
+
+        if (!user) {
+            setError("Your sign-in session is still loading. Please try again in a moment.");
+            setLoadingMethod(null);
+            return;
+        }
+
+        if (!user.username || (typeof user.username === "string" && user.username.trim() === "")) {
+            window.location.replace("/set-username");
+            return;
+        }
+
+        window.location.replace(redirectPath || "/dashboard");
     };
 
     const handleResendVerification = async () => {

@@ -23,12 +23,22 @@ function VerifyEmailContent() {
 
             if (error) {
                 setStatus("error");
-            } else {
-                setStatus("success");
-                setTimeout(() => {
-                    router.push("/set-username");
-                }, 1500);
+                return;
             }
+
+            for (let attempt = 0; attempt < 12; attempt += 1) {
+                const { data: sessionData } = await authClient.getSession();
+                if (sessionData?.user) {
+                    setStatus("success");
+                    setTimeout(() => {
+                        window.location.replace("/set-username");
+                    }, 1500);
+                    return;
+                }
+                await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+
+            setStatus("error");
         }
 
         verify();

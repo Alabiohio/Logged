@@ -20,7 +20,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
       {
-        src: "/icons/icon-512x512.png",
+        src: "/icons/desktop-icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
