@@ -53,12 +53,13 @@ export function setupAutoCapture(logger: Logged): () => void {
       // Let's assume we update `logger.ts` to have an `_internalCapture` or `captureEvent`.
       
       // Let's just use the `transport` directly.
-      (logger as any).transport.send(payload);
+      // Send payload via logger's transport
+      (logger as unknown as { transport: { send: (p: unknown) => void } }).transport.send(payload);
 
-    } catch (e) {
+    } catch (error) {
       // Never break the app
-      if ((logger as any).config?.debug) {
-        console.error("[Logged SDK] Error during auto capture:", e);
+      if ((logger as unknown as { config?: { debug?: boolean } }).config?.debug) {
+        console.error("[Logged SDK] Error during auto capture:", error);
       }
     }
   };

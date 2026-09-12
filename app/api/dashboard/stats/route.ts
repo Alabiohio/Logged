@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { projects, logs } from "@/db/schema";
-import { eq, and, desc, sql, gte } from "drizzle-orm";
+import { logs } from "@/db/schema";
+import { and, desc, sql, gte } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getProjectsForUser } from "@/lib/projects";

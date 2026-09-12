@@ -6,7 +6,7 @@ import { ingestLog, ingestBatch } from "@/lib/logs/ingest";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { db } from "@/lib/db";
 import { userPreferences, users, projects } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { sendErrorAlertEmail } from "@/lib/email";
 
 // ------------------------------------------------------------------
@@ -62,7 +62,7 @@ async function maybeSendErrorAlert(project: typeof projects.$inferSelect, level:
 
         const logUrl = `${process.env.APP_URL || "http://localhost:3000"}/dashboard/projects/${project.id}/logs`;
 
-        console.log("Sending error alert email to:", projectOwner.email, "for project:", project.name);
+        console.log("Sending error alert email to:", projectOwner.email, "for project:", project.name, "logId:", logId);
 
         await sendErrorAlertEmail({
             to: projectOwner.email,

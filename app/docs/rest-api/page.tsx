@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
@@ -15,15 +15,11 @@ function ResetPasswordForm() {
 
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
-
-    useEffect(() => {
-        if (!token) {
-            setError("Invalid or missing reset token. Please request a new password reset.");
-        }
-    }, [token]);
+    const [error, setError] = useState<string | null>(
+        !token ? "Invalid or missing reset token. Please request a new password reset." : null
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

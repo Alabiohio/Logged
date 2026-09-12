@@ -24,12 +24,14 @@ export function setupConsoleCapture(logger: Logged): () => void {
   const filter = new DuplicateFilter();
 
   // Store original methods
-  const originalConsole = {
+  const originalConsole: Record<ConsoleMethod, (...args: unknown[]) => void> = {
     log: console.log,
     info: console.info,
     warn: console.warn,
     error: console.error,
+    table: (console.table ?? console.log) as (...args: unknown[]) => void,
   };
+
 
   const handleCapture = (method: ConsoleMethod, args: unknown[]) => {
     try {
@@ -94,11 +96,11 @@ export function setupConsoleCapture(logger: Logged): () => void {
       }
       
       // We leverage the logger's transport directly like auto.ts
-      (logger as any).transport.send({ ...payload, metadata });
+      (logger as unknown as { transport: { send: (p: unknown) => void } }).transport.send({ ...payload, metadata });
 
-    } catch (e) {
-      if ((logger as any).config?.debug) {
-        originalConsole.error("[Logged SDK] Error capturing console event:", e);
+    } catch (error) {
+      if ((logger as unknown as { config?: { debug?: boolean } }).config?.debug) {
+        originalConsole.error("[Logged SDK] Error capturing console event:", error);
       }
     }
   };

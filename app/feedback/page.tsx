@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Send, CheckCircle2, Sparkles, Bug, Lightbulb, MessageCircle, Star, AlertCircle, EyeOff } from "lucide-react";
+import { Send, CheckCircle2, Bug, Lightbulb, MessageCircle, Star, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
 import { Cardio } from "ldrs/react";
@@ -20,13 +20,15 @@ export default function FeedbackPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [syncedSessionEmail, setSyncedSessionEmail] = useState<string | null>(null);
 
   // Pre-fill email from session if logged in
-  useEffect(() => {
-    if (session?.user?.email && !email) {
+  if (session?.user?.email && syncedSessionEmail !== session.user.email) {
+    setSyncedSessionEmail(session.user.email);
+    if (!email) {
       setEmail(session.user.email);
     }
-  }, [session, email]);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,7 +158,7 @@ export default function FeedbackPage() {
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setCategory(cat.id as any)}
+                      onClick={() => setCategory(cat.id as "bug" | "feature" | "general")}
                       className={`flex flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-xs font-semibold transition-all ${
                         selected
                           ? "border-primary bg-primary/10 text-primary shadow-sm"
@@ -247,7 +249,7 @@ export default function FeedbackPage() {
               />
               <label htmlFor="is-anonymous" className="text-sm font-medium text-text cursor-pointer select-none">
                 Submit feedback anonymously
-                <span className="block text-xs text-text-muted font-normal">Your user account won't be linked to this submission, and your feedback won't be made public</span>
+                <span className="block text-xs text-text-muted font-normal">Your user account won&apos;t be linked to this submission, and your feedback won&apos;t be made public</span>
 
               </label>
             </div>

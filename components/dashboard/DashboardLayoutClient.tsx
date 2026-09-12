@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Navbar } from "@/components/dashboard/navbar";
@@ -13,14 +13,18 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
+  const authCheckedRef = useRef(false);
   const { data: session, isPending: sessionLoading } = authClient.useSession();
+
+  if (!mobileOpen && drawerVisible) {
+    setDrawerVisible(false);
+  }
 
   useEffect(() => {
     if (sessionLoading) return;
 
-    if (!authChecked) {
-      setAuthChecked(true);
+    if (!authCheckedRef.current) {
+      authCheckedRef.current = true;
       return;
     }
 
@@ -38,7 +42,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
     if (!currentUser.username || currentUser.username.trim() === "") {
       router.replace("/set-username");
     }
-  }, [session, sessionLoading, authChecked, router]);
+  }, [session, sessionLoading, router]);
 
   const openMenu = () => {
     setMobileOpen(true);
@@ -49,12 +53,6 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
     setDrawerVisible(false);
     window.setTimeout(() => setMobileOpen(false), 220);
   };
-
-  useEffect(() => {
-    if (!mobileOpen) {
-      setDrawerVisible(false);
-    }
-  }, [mobileOpen]);
 
   if (sessionLoading) {
     return (

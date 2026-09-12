@@ -22,8 +22,7 @@ export class DuplicateFilter {
   private readonly maxEventsPerType = 5; // allow at most 5 similar errors per 10s
 
   shouldFilter(fingerprint: string): boolean {
-    const now = Date.now();
-    this.cleanup(now);
+    this.cleanup();
 
     const count = this.seen.get(fingerprint) || 0;
     
@@ -35,7 +34,7 @@ export class DuplicateFilter {
     return false; // allow it
   }
 
-  private cleanup(now: number) {
+  private cleanup() {
     // Only cleanup occasionally to avoid overhead
     if (Math.random() > 0.1) return;
     

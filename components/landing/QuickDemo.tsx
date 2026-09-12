@@ -116,8 +116,10 @@ export default function QuickDemo() {
       }, 10);
     } else if (isDeleting && charCount === 0) {
       // Switch to next snippet
-      setIsDeleting(false);
-      setActiveIdx((prev) => (prev + 1) % LOG_EXAMPLES.length);
+      timer = setTimeout(() => {
+        setIsDeleting(false);
+        setActiveIdx((prev) => (prev + 1) % LOG_EXAMPLES.length);
+      }, 0);
     }
 
     return () => clearTimeout(timer);

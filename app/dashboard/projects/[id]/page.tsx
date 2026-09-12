@@ -4,11 +4,10 @@ import { useEffect, useState, useTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    Settings, Trash2, Key, Plus, Check, Copy, AlertTriangle,
-    Activity, FileText, Layers, Sparkles, User, ExternalLink,
+    Trash2, AlertTriangle, FileText,
 } from "lucide-react";
 import {
-    ChevronLeft, RefreshCw, Clock, X, Search, ChevronRight, SlidersHorizontal, Loader2,
+    ChevronLeft, Clock, ChevronRight,
     ShieldX, Bug, Info, Calendar, Globe, Pencil, AlertCircle, CheckCircle2,
 } from "@/components/icons/ios";
 import { Cardio } from "ldrs/react";

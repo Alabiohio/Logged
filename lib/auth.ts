@@ -50,7 +50,7 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
-        sendResetPassword: async ({ user, url, token }) => {
+        sendResetPassword: async ({ user, token }) => {
             const resetUrl = `${APP_URL}/reset-password?token=${token}`;
             const result = await resend.emails.send({
                 from: "Logged <noreply@info.oheo.site>",

@@ -14,7 +14,7 @@ async function checkDatabase() {
   try {
     await db.execute(sql`SELECT 1`);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

@@ -90,6 +90,12 @@ export function ErrorPage({
             </Link>
           </div>
 
+          {eyebrow ? (
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
+              {eyebrow}
+            </p>
+          ) : null}
+
           <div className="mb-6 font-mono text-6xl font-black tracking-[-0.08em] text-primary md:text-7xl">
             {statusCode}
           </div>

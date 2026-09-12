@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Code, Key, Server, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
 

@@ -82,7 +82,7 @@ export class Logged {
     } else {
       try {
         message = JSON.stringify(error);
-      } catch (e) {
+      } catch {
         message = "Unserializable error";
       }
     }

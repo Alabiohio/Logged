@@ -38,11 +38,10 @@ import { trackSignOut, trackThemeChanged } from "@/lib/analytics";
 
 export function Sidebar({
   mobileOpen,
-  drawerVisible,
-  closeMenu
+  closeMenu,
 }: {
   mobileOpen: boolean;
-  drawerVisible: boolean;
+  drawerVisible?: boolean;
   closeMenu: () => void;
 }) {
   const pathname = usePathname();

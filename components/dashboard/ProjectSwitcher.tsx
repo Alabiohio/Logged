@@ -43,7 +43,6 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
 
   const fetchProjects = useCallback(async () => {
     try {
-      setLoading(true);
       const res = await fetch("/api/projects");
       if (res.ok) {
         const data = await res.json();
@@ -59,21 +58,16 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
   // Auto-focus search input & refetch project data whenever dropdown opens
   useEffect(() => {
     if (dropdownOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchProjects();
       // rAF ensures the input is mounted before we focus
       const id = requestAnimationFrame(() => searchInputRef.current?.focus());
       return () => cancelAnimationFrame(id);
-    } else {
-      setSearchQuery("");
     }
   }, [dropdownOpen, fetchProjects]);
 
   const currentProjectId = typeof params?.id === "string" ? params.id : null;
   const currentProject = projects.find((p) => p.id === currentProjectId);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
 
 
   useEffect(() => {

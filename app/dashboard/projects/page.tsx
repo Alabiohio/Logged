@@ -4,10 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { ProjectCard } from "@/components/ProjectCard";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+
+interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  logCount?: number;
+}
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 

@@ -8,10 +8,15 @@ export function LogSearch() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialSearch = searchParams.get("search") || "";
-  
-  const [search, setSearch] = useState(initialSearch);
+  const urlSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(urlSearch);
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  if (urlSearch !== prevUrlSearch) {
+    setPrevUrlSearch(urlSearch);
+    setSearch(urlSearch);
+  }
 
   // Keyboard shortcut Ctrl+K or /
   useEffect(() => {
@@ -50,12 +55,6 @@ export function LogSearch() {
     }, 400);
     return () => clearTimeout(timer);
   }, [search, pathname, router, searchParams]);
-
-  // Sync state if URL changes externally
-  useEffect(() => {
-    const urlSearch = searchParams.get("search") || "";
-    setSearch((prev) => (prev !== urlSearch ? urlSearch : prev));
-  }, [searchParams]);
 
   return (
     <div className="relative flex-1 group min-w-[240px] h-11">

@@ -44,7 +44,7 @@ export function normalizeError(error: unknown): NormalizedError {
       return {
         message: JSON.stringify(error),
       };
-    } catch (e) {
+    } catch {
       return {
         message: "Unserializable error object",
       };

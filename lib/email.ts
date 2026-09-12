@@ -136,17 +136,7 @@ export async function sendWeeklyDigestEmail({
         return breakdownIcons[level] || "#6B7280";
     }
 
-    function levelTextColor(level: string): string {
-        const colorMap: Record<string, string> = {
-            error: "#DC2626",
-            warn: "#D97706",
-            info: "#2563EB",
-            debug: "#7C3AED",
-            success: "#059669",
-            log: "#4B5563",
-        };
-        return colorMap[level] || "#4B5563";
-    }
+
 
     const projectRows = summary.projectSummaries
         .map((p) => {

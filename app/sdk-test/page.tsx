@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Logged } from "@oheoco/logged";
 import { LOGGED_BASE_URL } from "@/lib/site-config";
@@ -14,11 +14,16 @@ const logger = new Logged({
   debug: true,
 });
 
+const emptySubscribe = () => () => {};
+
 export default function SDKTestPage() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   useEffect(() => {
-    setMounted(true);
     // Enable auto capture for browser errors and unhandled rejections
     logger.auto();
 
@@ -109,7 +114,7 @@ export default function SDKTestPage() {
 
       <div className="mt-8 text-sm text-gray-500">
         <p>
-          Open your browser's DevTools to see the network requests being sent
+          Open your browser&apos;s DevTools to see the network requests being sent
           to the Logged API. You should also verify these logs appear in the Logged Dashboard.
         </p>
       </div>

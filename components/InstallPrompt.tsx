@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X, Share, Smartphone, MonitorCheck } from "lucide-react";
+import Image from "next/image";
+import { Download, X, Share, Smartphone } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,27 +17,29 @@ export function InstallPrompt() {
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    // Check if already running as installed PWA
-    if (
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as unknown as { standalone?: boolean }).standalone === true
-    ) {
-      setIsStandalone(true);
-      return;
-    }
+    queueMicrotask(() => {
+      // Check if already running as installed PWA
+      if (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as unknown as { standalone?: boolean }).standalone === true
+      ) {
+        setIsStandalone(true);
+        return;
+      }
 
-    // Check if user previously dismissed the prompt during this session
-    const dismissed = sessionStorage.getItem("logged_pwa_prompt_dismissed");
-    if (dismissed === "true") {
-      setIsDismissed(true);
-    }
+      // Check if user previously dismissed the prompt during this session
+      const dismissed = sessionStorage.getItem("logged_pwa_prompt_dismissed");
+      if (dismissed === "true") {
+        setIsDismissed(true);
+      }
 
-    // Detect iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    if (isIosDevice) {
-      setIsIOS(true);
-    }
+      // Detect iOS
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+      if (isIosDevice) {
+        setIsIOS(true);
+      }
+    });
 
     // Standard PWA beforeinstallprompt handler
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -92,14 +95,12 @@ export function InstallPrompt() {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-0.5 shadow-lg flex-shrink-0">
               <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <img
+                <Image
                   src="/icons/icon-192x192.png"
                   alt="Logged Icon"
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-md"
-                  onError={(e) => {
-                    // Fallback to logo if icon fails
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
                 />
               </div>
             </div>
@@ -156,7 +157,7 @@ export function InstallPrompt() {
                 <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]">
                   1
                 </span>
-                Tap the <Share className="w-4 h-4 text-blue-400 inline mx-1" /> <strong>Share</strong> button in Safari's menu.
+                Tap the <Share className="w-4 h-4 text-blue-400 inline mx-1" /> <strong>Share</strong> button in Safari&apos;s menu.
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]">

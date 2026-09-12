@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
@@ -21,23 +21,13 @@ function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectPath = searchParams.get("redirect");
-
-    // Detect OAuth cancellation / errors returned via query params
-    // e.g. /login?error=access_denied&error_description=...
-    useEffect(() => {
-        const oauthError = searchParams.get("error");
-        if (!oauthError) return;
-
-        // Clear the loading spinner on whichever button was clicked
-        setLoadingMethod(null);
-
-        if (oauthError === "access_denied") {
-            setError("Sign-in was cancelled. You can try again whenever you're ready.");
-        } else {
-            const description = searchParams.get("error_description");
-            setError(description || "Something went wrong during sign-in. Please try again.");
-        }
-    }, [searchParams]);
+    const oauthError = searchParams.get("error");
+    const oauthDescription = searchParams.get("error_description");
+    const oauthErrorMessage = oauthError === "access_denied"
+        ? "Sign-in was cancelled. You can try again whenever you're ready."
+        : oauthError
+            ? (oauthDescription || "Something went wrong during sign-in. Please try again.")
+            : null;
 
     const isBusy = loadingMethod !== null;
     const isGithubLoading = loadingMethod === "github";
@@ -236,9 +226,9 @@ function LoginForm() {
             </div>
 
             <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-                {error && (
-                    <div className="rounded-xl bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20">
-                        {error}
+{(error || oauthErrorMessage) && (
+                <div className="rounded-xl bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20">
+                    {error || oauthErrorMessage}
                     </div>
                 )}
 

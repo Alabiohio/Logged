@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { User, CheckCircle2, AlertCircle, ChevronRight, Sparkles, LogOut } from "lucide-react";
+import { AlertCircle, ChevronRight, Sparkles, LogOut } from "lucide-react";
 import LogoLoading from "@/components/LogoLoading";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
@@ -12,43 +12,24 @@ export default function CompleteProfilePage() {
     const { data: sessionData, isPending: sessionLoading } = authClient.useSession();
     const router = useRouter();
 
-    const [name, setName] = useState("");
-    const [username, setUsername] = useState("");
+    const currentUser = (sessionData?.user as { name?: string; username?: string; email?: string } | undefined) ?? undefined;
+    const defaultName = currentUser?.name ?? "";
+    const defaultUsername = currentUser?.username ||
+        (currentUser?.email ? currentUser.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "") : "") ||
+        (currentUser?.name ? currentUser.name.toLowerCase().replace(/[^a-z0-9_]/g, "") : "");
+
+    const [name, setName] = useState(defaultName);
+    const [username, setUsername] = useState(defaultUsername);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [initialized, setInitialized] = useState(false);
-    const [authChecked, setAuthChecked] = useState(false);
 
     useEffect(() => {
         if (sessionLoading) return;
 
-        if (!authChecked) {
-            setAuthChecked(true);
-            return;
-        }
-
         if (!sessionData?.user) {
             router.replace("/login");
-            return;
         }
-
-        if (!initialized && sessionData.user) {
-            const currentUser = sessionData.user as { name?: string; username?: string; email?: string };
-            setName(currentUser.name || "");
-
-            // Prefill username from existing username, or derive from email/name
-            if (currentUser.username) {
-                setUsername(currentUser.username);
-            } else if (currentUser.email) {
-                const derived = currentUser.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
-                setUsername(derived);
-            } else if (currentUser.name) {
-                const derived = currentUser.name.toLowerCase().replace(/[^a-z0-9_]/g, "");
-                setUsername(derived);
-            }
-            setInitialized(true);
-        }
-    }, [sessionData, sessionLoading, initialized, authChecked, router]);
+    }, [router, sessionData, sessionLoading]);
 
     const handleSignOut = async () => {
         await authClient.signOut();
@@ -103,13 +84,16 @@ export default function CompleteProfilePage() {
         }
     };
 
-    if (sessionLoading || !initialized) {
+    if (sessionLoading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background p-4">
                 <LogoLoading className="w-32 h-32" />
             </div>
         );
     }
+
+    const resolvedName = name || defaultName;
+    const resolvedUsername = username || defaultUsername;
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
@@ -149,7 +133,7 @@ export default function CompleteProfilePage() {
                                     disabled={submitting}
                                     className="block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50"
                                     placeholder="John Doe"
-                                    value={name}
+                                    value={resolvedName}
                                     onChange={(e) => setName(e.target.value)}
                                 />
                             </div>
@@ -169,7 +153,7 @@ export default function CompleteProfilePage() {
                                     disabled={submitting}
                                     className="block w-full rounded-xl border border-border bg-background-secondary pl-8 pr-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50"
                                     placeholder="johndoe"
-                                    value={username}
+                                    value={resolvedUsername}
                                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ""))}
                                 />
                             </div>

@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
     FileText,
     AlertTriangle,
     AlertCircle,
-    Search,
     Filter,
-    ChevronRight,
-    Loader2,
 } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
@@ -62,15 +60,17 @@ export default function ActivityPage() {
     const [error, setError] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
 
+    const searchParams = useSearchParams();
+
     const buildUrl = useCallback((cursor?: string | null) => {
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(searchParams.toString());
         if (cursor) {
             params.set("cursor", cursor);
         } else {
             params.delete("cursor");
         }
         return `/api/activity?${params.toString()}`;
-    }, []);
+    }, [searchParams]);
 
     const fetchActivity = useCallback(async (cursor?: string | null) => {
         try {
@@ -98,11 +98,9 @@ export default function ActivityPage() {
     }, [buildUrl]);
 
     useEffect(() => {
-        setLoading(true);
-        setError(false);
-        setData(null);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchActivity();
-    }, [window.location.search]);
+    }, [fetchActivity]);
 
     const handleLoadMore = () => {
         if (data?.pagination.hasMore && !loadingMore) {

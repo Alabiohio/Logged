@@ -2,15 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import {
-    User, Shield, Bell, Globe, Save, Loader2, AlertCircle, CheckCircle2,
+    User, Shield, Bell, Globe, Save, AlertCircle, CheckCircle2,
     Monitor, Smartphone, Laptop, Trash2, LogOut, Link2, Clock,
-    Sun, Moon, Palette, Database, TriangleAlert, Key, Copy, Check,
-    Lock, KeyRound, Tablet, HelpCircle, X, Mail, ExternalLink, RefreshCw, Eye, EyeOff, Plus, AlertTriangle
+    Database, TriangleAlert, Key, Copy, Check
 } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { authClient } from "@/lib/auth-client";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { trackSettingsSaved, trackSessionRevoked } from "@/lib/analytics";
 
@@ -137,7 +135,6 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
 
 export default function SettingsPage() {
     const { data: sessionData, isPending: sessionLoading } = authClient.useSession();
-    const { theme, setTheme } = useTheme();
     const router = useRouter();
 
     const [saving, setSaving] = useState(false);
@@ -170,10 +167,13 @@ export default function SettingsPage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
+    const currentUser = sessionData?.user as { name?: string; username?: string } | undefined;
+    const [profileNameInput, setProfileNameInput] = useState<string | null>(null);
+    const [profileUsernameInput, setProfileUsernameInput] = useState<string | null>(null);
+
     // ── Fetchers ──────────────────────────────────────────────────────────────
 
     const fetchSessions = useCallback(async () => {
-        setSessionsLoading(true);
         try {
             const res = await fetch("/api/user/sessions");
             if (res.ok) {
@@ -188,7 +188,6 @@ export default function SettingsPage() {
     }, []);
 
     const fetchAccounts = useCallback(async () => {
-        setAccountsLoading(true);
         try {
             const res = await fetch("/api/user/accounts");
             if (res.ok) {
@@ -203,7 +202,9 @@ export default function SettingsPage() {
     }, []);
 
     useEffect(() => {
-        async function fetchPreferences() {
+        if (!sessionData?.user) return;
+
+        const fetchPreferences = async () => {
             try {
                 const res = await fetch("/api/user/preferences");
                 if (res.ok) {
@@ -213,20 +214,16 @@ export default function SettingsPage() {
             } catch {
                 // silently fail
             }
-        }
+        };
 
-        if (sessionData?.user) {
-            const currentUser = sessionData.user as { name?: string; username?: string };
-            setFormData((prev) => ({
-                ...prev,
-                name: currentUser.name || "",
-                username: currentUser.username || "",
-            }));
-            fetchPreferences();
-            fetchSessions();
-            fetchAccounts();
-        }
-    }, [sessionData, fetchSessions, fetchAccounts]);
+        const timer = setTimeout(() => {
+            void fetchPreferences();
+            void fetchSessions();
+            void fetchAccounts();
+        }, 0);
+
+        return () => clearTimeout(timer);
+    }, [sessionData?.user, fetchSessions, fetchAccounts]);
 
     // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -237,9 +234,12 @@ export default function SettingsPage() {
         setSuccess(null);
 
         try {
+            const nextName = (profileNameInput ?? currentUser?.name ?? "").trim();
+            const nextUsername = ((profileUsernameInput ?? currentUser?.username ?? "") as string).trim().toLowerCase();
+
             const { error } = await authClient.updateUser({
-                name: formData.name,
-                username: formData.username.trim().toLowerCase(),
+                name: nextName,
+                username: nextUsername,
             });
             if (error) {
                 setError(error.message || "Failed to update profile");
@@ -451,8 +451,8 @@ export default function SettingsPage() {
                                 <label className="text-sm font-semibold text-text">Name</label>
                                 <input
                                     type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    value={profileNameInput ?? currentUser?.name ?? ""}
+                                    onChange={(e) => setProfileNameInput(e.target.value)}
                                     className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm text-text outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 />
                             </div>
@@ -464,8 +464,8 @@ export default function SettingsPage() {
                                     </span>
                                     <input
                                         type="text"
-                                        value={formData.username}
-                                        onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, "") })}
+                                        value={profileUsernameInput ?? currentUser?.username ?? ""}
+                                        onChange={(e) => setProfileUsernameInput(e.target.value.toLowerCase().replace(/\s+/g, ""))}
                                         className="w-full rounded-xl border border-border bg-background/50 pl-8 pr-4 py-2.5 text-sm text-text outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                                         placeholder="username"
                                     />

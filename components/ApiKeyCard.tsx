@@ -21,11 +21,13 @@ export function ApiKeyCard({ apiKey, environment, projectId, onRegenerate }: Api
   const maskedKey = apiKey ? apiKey.slice(0, 8) + "•".repeat(Math.max(0, apiKey.length - 8)) : "";
 
   const handleCopy = async () => {
+    if (!apiKey) return;
     await navigator.clipboard.writeText(apiKey);
     trackApiKeyCopied(projectId, environment);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
 
   const handleRegenerate = async () => {
     if (!hasKey && !confirmRegen) {

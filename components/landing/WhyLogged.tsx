@@ -114,48 +114,7 @@ export default function WhyLogged() {
   );
 }
 
-{/* Animation 1: Multi-Environment Switcher */}
-function IllustrationEnvironmentSwitcher() {
-  const [activeEnv, setActiveEnv] = useState(0);
-  const envs = ["Production", "Staging", "Development"];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveEnv((prev) => (prev + 1) % envs.length);
-    }, 2200);
-    return () => clearInterval(timer);
-  }, [envs.length]);
-
-  return (
-    <div className="mt-6 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-inner">
-      <div className="flex items-center gap-2 border-b border-border/40 pb-3">
-        {envs.map((env, idx) => (
-          <div
-            key={env}
-            className={`rounded-lg px-2.5 py-1 text-xs font-semibold font-console transition-all ${
-              idx === activeEnv
-                ? "bg-primary text-white shadow-md shadow-primary/20"
-                : "bg-glass text-text-muted"
-            }`}
-          >
-            {env}
-          </div>
-        ))}
-      </div>
-      <div className="mt-3 flex items-center justify-between font-console text-xs">
-        <span className="text-text-muted">Active Stream:</span>
-        <motion.span
-          key={activeEnv}
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="font-bold text-primary"
-        >
-          env:{envs[activeEnv].toLowerCase()}
-        </motion.span>
-      </div>
-    </div>
-  );
-}
 
 {/* Animation 2: Pre-error Context Flow */}
 function IllustrationContextFlow() {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, use, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ChevronLeft, RefreshCw, Clock, Loader2, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX, Search, X, SlidersHorizontal } from "@/components/icons/ios";
+import { ChevronLeft, RefreshCw, Clock, SearchX, ChevronRight, ChevronDown, Maximize2, ShieldX, Search, X, SlidersHorizontal } from "@/components/icons/ios";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
@@ -220,7 +220,6 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
   // Fetch logs (initial load or filter change)
   const fetchLogs = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
-    else setLoading(true);
 
     try {
       const res = await fetch(`/api/projects/${projectId}/logs?${buildQuery()}`);
@@ -269,6 +268,7 @@ function LogExplorerContent({ projectId }: { projectId: string }) {
 
   // Re-fetch when search params change (filters, search)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLogs();
   }, [fetchLogs]);
 

@@ -29,7 +29,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-text">1. Acceptance of Terms</h2>
             <p className="mt-4">
-              By accessing or using Logged's services, you agree to be bound by these
+              By accessing or using Logged&apos;s services, you agree to be bound by these
               Terms of Service. If you do not agree to these terms, please do not use
               our services.
             </p>
@@ -58,7 +58,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-text">4. Acceptable Use</h2>
             <p className="mt-4">
               You agree not to use the service for any unlawful purpose, to transmit
-              malicious code, to interfere with the service's operation, or to attempt
+              malicious code, to interfere with the service&apos;s operation, or to attempt
               to gain unauthorized access to any portion of the service or any systems
               connected to it.
             </p>

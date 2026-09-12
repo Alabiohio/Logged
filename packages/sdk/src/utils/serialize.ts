@@ -41,8 +41,11 @@ export function serialize(value: unknown, seen = new WeakSet()): unknown {
   for (const key in value) {
     if (Object.prototype.hasOwnProperty.call(value, key)) {
       try {
-        serializedObject[key] = serialize((value as any)[key], seen);
-      } catch (err) {
+        serializedObject[key] = serialize(
+          (value as Record<string, unknown>)[key],
+          seen
+        );
+      } catch {
         serializedObject[key] = "[Unserializable]";
       }
     }

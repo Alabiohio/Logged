@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Code, Zap, Bug, Monitor, Terminal } from "lucide-react";
+import { Code, Bug, Monitor, Terminal } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
 

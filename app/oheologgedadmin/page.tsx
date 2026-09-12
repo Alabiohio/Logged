@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Database, FileText, FolderKanban, Mail, MessageSquareText, ShieldAlert, TriangleAlert, Users } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Database, FileText, FolderKanban, Mail, MessageSquareText, TriangleAlert, Users } from "lucide-react";
 import { count, desc, eq } from "drizzle-orm";
 
 import { auth } from "@/lib/auth";

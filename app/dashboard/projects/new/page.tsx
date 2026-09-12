@@ -44,7 +44,7 @@ export default function NewProjectPage() {
 
         trackProjectCreated(form.name);
         router.push(`/dashboard/projects/${data.id}`)
-      } catch (err) {
+      } catch {
         setError("Failed to create project. Please try again.");
       }
     });

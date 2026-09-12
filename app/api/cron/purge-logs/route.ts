@@ -1,8 +1,6 @@
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { userPreferences, logs, projects } from "@/db/schema";
 import { eq, lt, and } from "drizzle-orm";
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 /**

@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { User, AlertCircle, ChevronRight, ShieldCheck, LogOut } from "lucide-react";
+import { AlertCircle, ChevronRight, LogOut } from "lucide-react";
 import LogoLoading from "@/components/LogoLoading";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
+
+function deriveUsernameFromEmail(email: string) {
+    return email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+}
 
 export default function SetUsernamePage() {
     const { data: sessionData, isPending: sessionLoading } = authClient.useSession();
@@ -16,16 +20,15 @@ export default function SetUsernamePage() {
     const [name, setName] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [initialized, setInitialized] = useState(false);
-    const [authChecked, setAuthChecked] = useState(false);
 
+    const currentUser = sessionData?.user as { name?: string; username?: string; email?: string } | undefined;
+    const derivedUsername = currentUser?.email ? deriveUsernameFromEmail(currentUser.email) : "";
+    const effectiveName = name || currentUser?.name || "";
+    const effectiveUsername = username || derivedUsername;
+
+    // This redirect is for missing/expired sessions; it does not update local state.
     useEffect(() => {
         if (sessionLoading) return;
-
-        if (!authChecked) {
-            setAuthChecked(true);
-            return;
-        }
 
         if (!sessionData?.user) {
             const timer = setTimeout(async () => {
@@ -37,23 +40,26 @@ export default function SetUsernamePage() {
             return () => clearTimeout(timer);
         }
 
-        const currentUser = sessionData.user as { name?: string; username?: string; email?: string };
-
-        // If user already has a username set, send them straight to dashboard
-        if (currentUser.username && currentUser.username.trim() !== "") {
+        if (currentUser?.username && currentUser.username.trim() !== "") {
             router.replace("/dashboard");
-            return;
         }
+    }, [sessionLoading, sessionData?.user, currentUser?.username, router]);
 
-        if (!initialized) {
-            setName(currentUser.name || "");
-            if (currentUser.email) {
-                const derived = currentUser.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
-                setUsername(derived);
-            }
-            setInitialized(true);
-        }
-    }, [sessionData, sessionLoading, initialized, authChecked, router]);
+    if (sessionLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-background p-4">
+                <LogoLoading className="w-32 h-32" />
+            </div>
+        );
+    }
+
+    if (!sessionData?.user) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-background p-4">
+                <LogoLoading className="w-32 h-32" />
+            </div>
+        );
+    }
 
     const handleSignOut = async () => {
         await authClient.signOut();
@@ -64,8 +70,8 @@ export default function SetUsernamePage() {
         e.preventDefault();
         setError(null);
 
-        const cleanedUsername = username.trim().toLowerCase();
-        const cleanedName = name.trim();
+        const cleanedUsername = effectiveUsername.trim().toLowerCase();
+        const cleanedName = effectiveName.trim();
 
         if (!cleanedUsername) {
             setError("Username is required.");
@@ -102,14 +108,6 @@ export default function SetUsernamePage() {
             setSubmitting(false);
         }
     };
-
-    if (sessionLoading || !initialized) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-background p-4">
-                <LogoLoading className="w-32 h-32" />
-            </div>
-        );
-    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
@@ -149,7 +147,7 @@ export default function SetUsernamePage() {
                                     disabled={submitting}
                                     className="block w-full rounded-xl border border-border bg-background-secondary pl-8 pr-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50"
                                     placeholder="johndoe"
-                                    value={username}
+                                    value={effectiveUsername}
                                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ""))}
                                 />
                             </div>
@@ -166,7 +164,7 @@ export default function SetUsernamePage() {
                                     disabled={submitting}
                                     className="block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50"
                                     placeholder="John Doe"
-                                    value={name}
+                                    value={effectiveName}
                                     onChange={(e) => setName(e.target.value)}
                                 />
                             </div>

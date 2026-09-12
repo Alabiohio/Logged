@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Logged } from "@oheoco/logged";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -14,11 +14,16 @@ const logger = new Logged({
   debug: true,
 });
 
+const emptySubscribe = () => () => {};
+
 export default function ConsoleTestPage() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   useEffect(() => {
-    setMounted(true);
     // Enable console capture for testing Phase 8
     logger.interceptConsole();
 
@@ -51,7 +56,7 @@ export default function ConsoleTestPage() {
   };
 
   const handleCircularObject = () => {
-    const obj: any = { name: "Circular" };
+    const obj: Record<string, unknown> = { name: "Circular" };
     obj.self = obj;
     console.log("Circular object:", obj);
   };
@@ -139,7 +144,7 @@ export default function ConsoleTestPage() {
 
       <div className="mt-8 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg">
         <p>
-          Open your browser's DevTools to see the network requests being sent
+          Open your browser&apos;s DevTools to see the network requests being sent
           to the Logged API. You should also verify these logs appear in the Logged Dashboard.
         </p>
       </div>

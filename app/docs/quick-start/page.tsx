@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FolderKanban, Download, Settings, Send, BarChart3, ChevronRight, CheckCircle2 } from "lucide-react";
-import { Callout } from "@/components/docs/callout";
+import { FolderKanban, Download, Settings, Send, BarChart3, ChevronRight } from "lucide-react";
 import { CodeBlock } from "@/components/docs/code-block";
 
 export const metadata: Metadata = {

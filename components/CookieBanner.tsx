@@ -17,8 +17,11 @@ export function CookieBanner() {
     // Check if user already saved preferences
     const stored = getStoredCookieConsent();
     if (stored) {
-      setPreferences(stored);
-      setIsVisible(false);
+      const timer = setTimeout(() => {
+        setPreferences(stored);
+        setIsVisible(false);
+      }, 0);
+      return () => clearTimeout(timer);
     } else {
       // Delay initial render slightly for smooth slide-in
       const timer = setTimeout(() => {

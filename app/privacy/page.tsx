@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-bold text-text">1. Introduction</h2>
             <p className="mt-4">
-              Logged ("we", "our", or "us") is committed to protecting your privacy.
+              Logged (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy.
               This Privacy Policy explains how we collect, use, disclose, and safeguard
               your information when you use our error monitoring and logging platform.
             </p>
