@@ -41,21 +41,7 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
     });
   }, []);
 
-  // Auto-focus search input when dropdown opens
-  useEffect(() => {
-    if (dropdownOpen) {
-      // rAF ensures the input is mounted before we focus
-      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
-      return () => cancelAnimationFrame(id);
-    } else {
-      setSearchQuery("");
-    }
-  }, [dropdownOpen]);
-
-  const currentProjectId = typeof params?.id === "string" ? params.id : null;
-  const currentProject = projects.find((p) => p.id === currentProjectId);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/projects");
@@ -68,11 +54,27 @@ export function ProjectSwitcher({ variant = "navbar" }: ProjectSwitcherProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Auto-focus search input & refetch project data whenever dropdown opens
+  useEffect(() => {
+    if (dropdownOpen) {
+      fetchProjects();
+      // rAF ensures the input is mounted before we focus
+      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
+      return () => cancelAnimationFrame(id);
+    } else {
+      setSearchQuery("");
+    }
+  }, [dropdownOpen, fetchProjects]);
+
+  const currentProjectId = typeof params?.id === "string" ? params.id : null;
+  const currentProject = projects.find((p) => p.id === currentProjectId);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
+
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

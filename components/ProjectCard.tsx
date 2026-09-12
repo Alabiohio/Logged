@@ -30,11 +30,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
       className="group block rounded-3xl border border-border bg-glass p-6 transition-all hover:bg-glass-hover hover:border-primary/30"
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <FolderKanban className="h-6 w-6" />
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <FolderKanban className="h-6 w-6 shrink-0" />
           </div>
-          <div className="min-w-0 overflow-hidden">
+          <div className="min-w-0 overflow-hidden flex-1">
             <h3 className="font-bold text-text group-hover:text-primary transition-colors truncate">
               {project.name}
             </h3>
@@ -46,6 +46,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
       </div>
+
 
       <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
         <div className="flex items-center gap-6">
