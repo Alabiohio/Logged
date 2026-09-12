@@ -696,7 +696,7 @@ export default function SettingsPage() {
                                                             type="button"
                                                             onClick={() => handleRevokeSession(s.token)}
                                                             disabled={revokingToken === s.token}
-                                                            className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-error/20 bg-error/5 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/15 disabled:opacity-50"
+                                                            className="shrink-0 self-start sm:self-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-error/20 bg-error/5 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/15 disabled:opacity-50"
                                                         >
                                                             {revokingToken === s.token ? (
                                                                 <Cardio size="36" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
