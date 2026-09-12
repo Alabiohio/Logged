@@ -1,4 +1,5 @@
 type LogLevel = "log" | "info" | "success" | "warn" | "error" | "debug";
+type TableData = Record<string, unknown> | Array<Record<string, unknown>> | unknown[];
 interface LogMetadata {
     [key: string]: unknown;
 }
@@ -35,6 +36,7 @@ declare class Logged {
     warn(message: string, metadata?: LogMetadata): void;
     error(message: string, metadata?: LogMetadata): void;
     debug(message: string, metadata?: LogMetadata): void;
+    table(message: string, data: TableData, metadata?: LogMetadata): void;
     capture(error: unknown, metadata?: LogMetadata): void;
     auto(): void;
     stopAutoCapture(): void;

@@ -25,12 +25,24 @@ bun add @oheoco/logged
 ```typescript
 import { Logged } from "@oheoco/logged";
 
-
-
 const logger = new Logged({
   apiKey: "YOUR_PROJECT_API_KEY",
   environment: "production",
 });
+```
+
+### Browser script tag usage
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@oheoco/logged/dist/logged.global.js"></script>
+<script>
+  const logger = new Logged({
+    apiKey: "YOUR_PROJECT_API_KEY",
+    environment: "production",
+  });
+
+  logger.info("Page loaded");
+</script>
 ```
 
 ---

@@ -1,0 +1,56 @@
+tsup/8.5.1
+
+Usage:
+  $ tsup [...files]
+
+Commands:
+  [...files]  Bundle files
+
+For more info, run any command with the `--help` flag:
+  $ tsup --help
+
+Options:
+  --entry.* <file>             Use a key-value pair as entry files 
+  -d, --out-dir <dir>          Output directory (default: dist)
+  --format <format>            Bundle format, "cjs", "iife", "esm" (default: cjs)
+  --minify [terser]            Minify bundle 
+  --minify-whitespace          Minify whitespace 
+  --minify-identifiers         Minify identifiers 
+  --minify-syntax              Minify syntax 
+  --keep-names                 Keep original function and class names in minified code 
+  --target <target>            Bundle target, "es20XX" or "esnext" (default: es2017)
+  --legacy-output              Output different formats to different folder instead of using different extensions 
+  --dts [entry]                Generate declaration file 
+  --dts-resolve                Resolve externals types used for d.ts files 
+  --dts-only                   Emit declaration files only 
+  --experimental-dts [entry]   Generate declaration file (experimental) 
+  --sourcemap [inline]         Generate external sourcemap, or inline source: --sourcemap inline 
+  --watch [path]               Watch mode, if path is not specified, it watches the current folder ".". Repeat "--watch" for more than one path 
+  --ignore-watch <path>        Ignore custom paths in watch mode 
+  --onSuccess <command>        Execute command after successful build, specially useful for watch mode 
+  --env.* <value>              Define compile-time env variables 
+  --inject <file>              Replace a global variable with an import from another file 
+  --define.* <value>           Define compile-time constants 
+  --external <name>            Mark specific packages / package.json (dependencies and peerDependencies) as external 
+  --global-name <name>         Global variable name for iife format 
+  --jsxFactory <jsxFactory>    Name of JSX factory function (default: React.createElement)
+  --jsxFragment <jsxFragment>  Name of JSX fragment function (default: React.Fragment)
+  --replaceNodeEnv             Replace process.env.NODE_ENV 
+  --no-splitting               Disable code splitting (default: true)
+  --clean                      Clean output directory 
+  --silent                     Suppress non-error logs (excluding "onSuccess" process output) 
+  --pure <express>             Mark specific expressions as pure 
+  --metafile                   Emit esbuild metafile (a JSON file) 
+  --platform <platform>        Target platform (default: node)
+  --loader <ext=loader>        Specify the loader for a file extension 
+  --tsconfig <filename>        Use a custom tsconfig 
+  --config <filename>          Use a custom config file 
+  --no-config                  Disable config file (default: true)
+  --shims                      Enable cjs and esm shims 
+  --inject-style               Inject style tag to document head 
+  --treeshake [strategy]       Using Rollup for treeshaking instead, "recommended" or "smallest" or "safest" 
+  --publicDir [dir]            Copy public directory to output directory 
+  --killSignal <signal>        Signal to kill child process, "SIGTERM" or "SIGKILL" 
+  --cjsInterop                 Enable cjs interop 
+  -h, --help                   Display this message 
+  -v, --version                Display version number 

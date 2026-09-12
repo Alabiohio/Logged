@@ -129,7 +129,7 @@ function normalizeError(error) {
       return {
         message: JSON.stringify(error)
       };
-    } catch (e) {
+    } catch {
       return {
         message: "Unserializable error object"
       };
@@ -156,8 +156,7 @@ var DuplicateFilter = class {
   maxEventsPerType = 5;
   // allow at most 5 similar errors per 10s
   shouldFilter(fingerprint) {
-    const now = Date.now();
-    this.cleanup(now);
+    this.cleanup();
     const count = this.seen.get(fingerprint) || 0;
     if (count >= this.maxEventsPerType) {
       return true;
@@ -165,7 +164,7 @@ var DuplicateFilter = class {
     this.seen.set(fingerprint, count + 1);
     return false;
   }
-  cleanup(now) {
+  cleanup() {
     if (Math.random() > 0.1) return;
     if (this.seen.size > 100) {
       this.seen.clear();
@@ -204,9 +203,9 @@ function setupAutoCapture(logger) {
         metadata.errorName = normalized.name;
       }
       logger.transport.send(payload);
-    } catch (e) {
+    } catch (error2) {
       if (logger.config?.debug) {
-        console.error("[Logged SDK] Error during auto capture:", e);
+        console.error("[Logged SDK] Error during auto capture:", error2);
       }
     }
   };
@@ -253,8 +252,11 @@ function serialize(value, seen = /* @__PURE__ */ new WeakSet()) {
   for (const key in value) {
     if (Object.prototype.hasOwnProperty.call(value, key)) {
       try {
-        serializedObject[key] = serialize(value[key], seen);
-      } catch (err) {
+        serializedObject[key] = serialize(
+          value[key],
+          seen
+        );
+      } catch {
         serializedObject[key] = "[Unserializable]";
       }
     }
@@ -266,12 +268,13 @@ function safeSerializeArgs(args) {
 }
 
 // src/browser/console.ts
-var CONSOLE_METHODS = ["log", "info", "warn", "error"];
+var CONSOLE_METHODS = ["log", "info", "warn", "error", "table"];
 var LEVEL_MAP = {
   log: "log",
   info: "info",
   warn: "warn",
-  error: "error"
+  error: "error",
+  table: "info"
 };
 function setupConsoleCapture(logger) {
   if (typeof window === "undefined" || typeof console === "undefined") {
@@ -283,7 +286,8 @@ function setupConsoleCapture(logger) {
     log: console.log,
     info: console.info,
     warn: console.warn,
-    error: console.error
+    error: console.error,
+    table: console.table ?? console.log
   };
   const handleCapture = (method, args) => {
     try {
@@ -298,6 +302,8 @@ function setupConsoleCapture(logger) {
       } else if (firstArg instanceof Error) {
         message = firstArg.message;
         stack = firstArg.stack;
+      } else if (method === "table") {
+        message = "Console table";
       }
       const context = getBrowserContext();
       const fingerprint = generateErrorFingerprint(
@@ -317,13 +323,22 @@ function setupConsoleCapture(logger) {
       const metadata = {
         consoleArguments: serializedArgs
       };
+      if (method === "table") {
+        const tableData = serializedArgs[0];
+        if (tableData !== void 0) {
+          metadata.table = tableData;
+        }
+        if (args[1] !== void 0) {
+          metadata.tableColumns = serializedArgs[1];
+        }
+      }
       if (firstArg instanceof Error && firstArg.name) {
         metadata.errorName = firstArg.name;
       }
       logger.transport.send({ ...payload, metadata });
-    } catch (e) {
+    } catch (error) {
       if (logger.config?.debug) {
-        originalConsole.error("[Logged SDK] Error capturing console event:", e);
+        originalConsole.error("[Logged SDK] Error capturing console event:", error);
       }
     }
   };
@@ -382,6 +397,13 @@ var Logged = class {
   debug(message, metadata) {
     this.send("debug", message, metadata);
   }
+  table(message, data, metadata) {
+    const payloadMetadata = {
+      ...metadata ?? {},
+      table: data
+    };
+    this.send("info", message, payloadMetadata);
+  }
   capture(error, metadata) {
     if (!this.config.apiKey) return;
     let message = "Unknown error";
@@ -396,7 +418,7 @@ var Logged = class {
     } else {
       try {
         message = JSON.stringify(error);
-      } catch (e) {
+      } catch {
         message = "Unserializable error";
       }
     }
