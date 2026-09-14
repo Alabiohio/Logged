@@ -19,7 +19,6 @@ interface LogPayload {
 interface LoggedConfig {
     apiKey: string;
     environment?: string;
-    baseUrl?: string;
     debug?: boolean;
 }
 

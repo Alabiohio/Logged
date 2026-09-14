@@ -1,6 +1,6 @@
 const DEFAULT_APP_URL = "http://localhost:3000";
 
-const readEnv = (key: string) => {
+const getServerEnv = (key: string) => {
   if (typeof process === "undefined") {
     return undefined;
   }
@@ -9,12 +9,14 @@ const readEnv = (key: string) => {
 };
 
 export const APP_URL =
-  readEnv("NEXT_PUBLIC_APP_URL") ||
-  readEnv("APP_URL") ||
-  readEnv("BETTER_AUTH_URL") ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  getServerEnv("APP_URL") ||
+  getServerEnv("BETTER_AUTH_URL") ||
+  (typeof window !== "undefined" ? window.location.origin : undefined) ||
   DEFAULT_APP_URL;
 
 export const LOGGED_BASE_URL =
-  readEnv("NEXT_PUBLIC_LOGGED_BASE_URL") ||
-  readEnv("LOGGED_BASE_URL") ||
+  process.env.NEXT_PUBLIC_LOGGED_BASE_URL ||
+  getServerEnv("LOGGED_BASE_URL") ||
+  (typeof window !== "undefined" ? window.location.origin : undefined) ||
   APP_URL;

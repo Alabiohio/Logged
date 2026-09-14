@@ -1,25 +1,17 @@
 import { LogPayload, LoggedConfig } from "./types";
 
-const DEFAULT_BASE_URL =
-  typeof process !== "undefined" && process.env?.NEXT_PUBLIC_LOGGED_BASE_URL
-    ? process.env.NEXT_PUBLIC_LOGGED_BASE_URL
-    : "http://localhost:3000";
+const LOGGED_ENDPOINT = "https://logged.oheo.site/api/v1/logs";
 
 export class Transport {
   private config: LoggedConfig;
-  private endpoint: string;
 
   constructor(config: LoggedConfig) {
     this.config = config;
-    const baseUrl = config.baseUrl || DEFAULT_BASE_URL;
-    // ensure no trailing slash, then append /api/v1/logs
-    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    this.endpoint = `${normalizedBase}/api/v1/logs`;
   }
 
   async send(payload: LogPayload): Promise<void> {
     try {
-      const response = await fetch(this.endpoint, {
+      const response = await fetch(LOGGED_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,7 +22,12 @@ export class Transport {
 
       if (!response.ok) {
         if (this.config.debug) {
-          const text = await response.text();
+          let text = await response.text();
+          if (text.trim().startsWith("<")) {
+            text = "[HTML Response / Not Found]";
+          } else if (text.length > 300) {
+            text = text.slice(0, 300) + "...";
+          }
           console.error(`[Logged SDK] Failed to send log: ${response.status} ${response.statusText} - ${text}`);
         }
       }
@@ -41,3 +38,4 @@ export class Transport {
     }
   }
 }
+

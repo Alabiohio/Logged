@@ -1,17 +1,13 @@
 // src/transport.ts
-var DEFAULT_BASE_URL = typeof process !== "undefined" && process.env?.NEXT_PUBLIC_LOGGED_BASE_URL ? process.env.NEXT_PUBLIC_LOGGED_BASE_URL : "http://localhost:3000";
+var LOGGED_ENDPOINT = "https://logged.oheo.site/api/v1/logs";
 var Transport = class {
   config;
-  endpoint;
   constructor(config) {
     this.config = config;
-    const baseUrl = config.baseUrl || DEFAULT_BASE_URL;
-    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    this.endpoint = `${normalizedBase}/api/v1/logs`;
   }
   async send(payload) {
     try {
-      const response = await fetch(this.endpoint, {
+      const response = await fetch(LOGGED_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -21,7 +17,12 @@ var Transport = class {
       });
       if (!response.ok) {
         if (this.config.debug) {
-          const text = await response.text();
+          let text = await response.text();
+          if (text.trim().startsWith("<")) {
+            text = "[HTML Response / Not Found]";
+          } else if (text.length > 300) {
+            text = text.slice(0, 300) + "...";
+          }
           console.error(`[Logged SDK] Failed to send log: ${response.status} ${response.statusText} - ${text}`);
         }
       }
@@ -266,11 +267,13 @@ function setupConsoleCapture(logger) {
   const handleCapture = (method, args) => {
     try {
       if (args.length === 0) return;
-      const level = LEVEL_MAP[method];
+      const firstArg = args[0];
+      if (typeof firstArg === "string" && firstArg.startsWith("[Logged SDK]")) {
+        return;
+      }
       const serializedArgs = safeSerializeArgs(args);
       let message = "Console log";
       let stack;
-      const firstArg = args[0];
       if (typeof firstArg === "string") {
         message = firstArg;
       } else if (firstArg instanceof Error) {
@@ -280,6 +283,7 @@ function setupConsoleCapture(logger) {
         message = "Console table";
       }
       const context = getBrowserContext();
+      const level = LEVEL_MAP[method];
       const fingerprint = generateErrorFingerprint(
         `${level}:${message}`,
         stack,

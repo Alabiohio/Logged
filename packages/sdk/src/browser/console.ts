@@ -37,14 +37,16 @@ export function setupConsoleCapture(logger: Logged): () => void {
     try {
       if (args.length === 0) return;
 
-      const level = LEVEL_MAP[method];
+      const firstArg = args[0];
+      if (typeof firstArg === "string" && firstArg.startsWith("[Logged SDK]")) {
+        return;
+      }
       const serializedArgs = safeSerializeArgs(args);
       
       // Determine message: use first argument if it's a string or error, otherwise stringify or use default
       let message = "Console log";
       let stack: string | undefined;
 
-      const firstArg = args[0];
       if (typeof firstArg === "string") {
         message = firstArg;
       } else if (firstArg instanceof Error) {
@@ -56,6 +58,7 @@ export function setupConsoleCapture(logger: Logged): () => void {
 
       // Add context
       const context = getBrowserContext();
+      const level = LEVEL_MAP[method];
 
       // Simple deduplication based on fingerprinting
       // Fingerprint includes level, message, and pathname to avoid over-filtering

@@ -31,6 +31,5 @@ export interface LogPayload {
 export interface LoggedConfig {
   apiKey: string;
   environment?: string;
-  baseUrl?: string;
   debug?: boolean;
 }
