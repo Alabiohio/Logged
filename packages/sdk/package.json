@@ -1,6 +1,6 @@
 {
   "name": "@oheoco/logged",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Simple, lightweight application logging and error monitoring SDK",
   "license": "MIT",
   "main": "./dist/index.js",
