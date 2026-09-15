@@ -67,7 +67,7 @@ const logger = new Logged({
         <h2 className="text-2xl font-bold text-text">Configuration options</h2>
         <p className="text-sm text-text-secondary">
           The <code className="font-mono text-primary">Logged</code> constructor accepts the
-          following options:
+          following options in the current SDK:
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -87,21 +87,19 @@ const logger = new Logged({
               <tr>
                 <td className="py-3 pr-4 font-mono text-primary text-xs">environment</td>
                 <td className="py-3 pr-4 text-text-secondary">No</td>
-                <td className="py-3 text-text-secondary">Application environment, for example development, staging, or production.</td>
-              </tr>
-              <tr>
-                <td className="py-3 pr-4 font-mono text-primary text-xs">baseUrl</td>
-                <td className="py-3 pr-4 text-text-secondary">No</td>
-                <td className="py-3 text-text-secondary">Logged API URL. Defaults to <code className="font-mono text-primary">NEXT_PUBLIC_LOGGED_BASE_URL</code> or <code className="font-mono text-primary">http://localhost:3000</code>.</td>
+                <td className="py-3 text-text-secondary">Application environment, such as development, staging, or production.</td>
               </tr>
               <tr>
                 <td className="py-3 pr-4 font-mono text-primary text-xs">debug</td>
                 <td className="py-3 pr-4 text-text-secondary">No</td>
-                <td className="py-3 text-text-secondary">Enable SDK debug logging to the browser or Node console.</td>
+                <td className="py-3 text-text-secondary">Enable extra SDK logging for failed network requests and internal capture errors.</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p className="text-sm text-text-secondary">
+          The SDK always posts to the Logged ingestion endpoint and does not currently expose a custom <code className="font-mono text-primary">baseUrl</code> option in the constructor.
+        </p>
       </section>
 
       <section className="space-y-4">

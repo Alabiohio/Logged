@@ -17,6 +17,7 @@ const navigation = [
     title: "SDK",
     items: [
       { name: "Logger", href: "/docs/sdk" },
+      { name: "Configuration", href: "/docs/sdk/configuration" },
       { name: "Capture Errors", href: "/docs/sdk/capture" },
       { name: "Browser Auto Capture", href: "/docs/sdk/auto" },
       { name: "Console Capture", href: "/docs/sdk/console" },
@@ -61,8 +62,8 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 w-full overflow-x-hidden">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-border bg-background-secondary/70 backdrop-blur-xl transform transition-transform duration-200 ease-out lg:translate-x-0 lg:static lg:block ${mobileOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+          className={`fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-border bg-background-secondary/70 backdrop-blur-xl transform transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:static lg:block ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+          `}
         >
           <div className="flex h-full flex-col">
             <div className="hidden lg:flex h-16 items-center gap-2 border-b border-border px-6">

@@ -116,7 +116,7 @@ export default function DocsPage() {
           </Link>
 
           <Link
-            href="/docs/examples/nextjs"
+            href="/docs/examples"
             className="group rounded-2xl border border-border bg-background p-6 transition hover:border-primary/30 hover:shadow-sm"
           >
             <h3 className="text-lg font-bold text-text group-hover:text-primary transition-colors">

@@ -109,10 +109,39 @@ logger.interceptConsole();
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `apiKey` | `string` | **Required** | Your Logged Project API Key. |
-| `environment` | `string` | `"development"` | Application environment tag (e.g. `production`, `staging`, `development`). |
-| `baseUrl` | `string` | `http://localhost:3000` or `NEXT_PUBLIC_LOGGED_BASE_URL` | Optional custom backend ingestion API base URL. |
-| `debug` | `boolean` | `false` | Enable SDK debug logging to console. |
+| `apiKey` | `string` | **Required** | Your Logged project API key. |
+| `environment` | `string` | `undefined` | Adds a project environment label such as `development`, `staging`, or `production`. |
+| `debug` | `boolean` | `false` | Enables extra SDK logging for failed requests and internal capture errors. |
+
+> The SDK currently sends logs to the default Logged ingestion endpoint and does not expose a custom `baseUrl` constructor option.
+
+### Browser globals and script tag usage
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@oheoco/logged/dist/logged.global.js"></script>
+<script>
+  const logger = new Logged({
+    apiKey: "YOUR_PROJECT_API_KEY",
+    environment: "production",
+  });
+
+  logger.auto();
+  logger.interceptConsole();
+</script>
+```
+
+The browser build also exposes `window.Logged` and `window.logged`. If a script tag includes `data-api-key`, the SDK auto-creates a logger and enables auto capture and console capture unless you disable them with `data-auto="false"` or `data-console="false"`.
+
+### Debugging
+
+```typescript
+const logger = new Logged({
+  apiKey: "YOUR_PROJECT_API_KEY",
+  debug: true,
+});
+```
+
+With `debug: true`, the SDK logs failed transport requests and any internal capture exceptions to the console.
 
 ---
 

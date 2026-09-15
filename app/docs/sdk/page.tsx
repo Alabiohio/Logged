@@ -78,17 +78,51 @@ const logger = new Logged({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold text-text">Metadata</h2>
+        <h2 className="text-2xl font-bold text-text">Metadata and structured context</h2>
         <p className="text-sm leading-7 text-text-secondary">
-          Attach structured metadata to any log for richer debugging context.
+          Attach structured metadata to any log for richer debugging context. The SDK accepts a plain object and forwards it as part of the event payload.
         </p>
         <CodeBlock
           language="typescript"
           code={`logger.info("User logged in", {
   userId: "123",
   role: "admin",
+  requestId: "req_456",
 });`}
         />
+        <p className="text-sm leading-7 text-text-secondary">
+          For tables, the SDK stores the dataset in <code className="font-mono text-primary">metadata.table</code> so it can be inspected in the dashboard.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-text">Browser globals and script tags</h2>
+        <CodeBlock
+          language="html"
+          code={`<script src="https://cdn.jsdelivr.net/npm/@oheoco/logged/dist/logged.global.js"></script>
+<script>
+  const logger = new Logged({
+    apiKey: "YOUR_PROJECT_API_KEY",
+    environment: "production",
+  });
+
+  logger.auto();
+  logger.interceptConsole();
+</script>`}
+        />
+        <p className="text-sm leading-7 text-text-secondary">
+          The browser build also exposes <code className="font-mono text-primary">window.Logged</code> and <code className="font-mono text-primary">window.logged</code>. If a script tag includes <code className="font-mono text-primary">data-api-key</code>, the SDK can auto-create a logger instance and start auto capture or console capture unless disabled with <code className="font-mono text-primary">data-auto="false"</code> or <code className="font-mono text-primary">data-console="false"</code>.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-text">Common usage patterns</h2>
+        <ul className="list-disc space-y-2 pl-5 text-sm text-text-secondary">
+          <li>Use <code className="font-mono text-primary">logger.capture()</code> around async work and external API calls.</li>
+          <li>Enable <code className="font-mono text-primary">logger.auto()</code> in browser apps to capture uncaught errors and rejected promises.</li>
+          <li>Enable <code className="font-mono text-primary">logger.interceptConsole()</code> during debugging to forward browser logs without stripping existing console output.</li>
+          <li>Keep the API key on the server when possible; if it must live in browser code, use a public project key and avoid exposing secrets.</li>
+        </ul>
       </section>
 
       <section className="grid gap-6 sm:grid-cols-2">
