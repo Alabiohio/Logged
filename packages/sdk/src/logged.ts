@@ -1,24 +1,15 @@
 import { Logged } from "./logger";
 
-declare global {
-  interface Window {
-    Logged: typeof Logged;
-    logged?: Logged;
-  }
-
-  var Logged: typeof import("./logger").Logged;
-  var logged: Logged | undefined;
-}
-
+// Expose as a global for CDN / script tag usage
 if (typeof window !== "undefined") {
-  window.Logged = Logged;
+  (window as unknown as { Logged: typeof Logged }).Logged = Logged;
 }
 
 if (typeof globalThis !== "undefined") {
   (globalThis as typeof globalThis & { Logged: typeof Logged }).Logged = Logged;
 }
 
-// Auto-initialize if data-api-key or data-key is present on script tag
+// Auto-initialize when data-api-key is present on the script tag
 if (typeof document !== "undefined") {
   const script =
     document.currentScript ||
@@ -31,24 +22,18 @@ if (typeof document !== "undefined") {
       script.getAttribute("data-key");
 
     if (apiKey) {
-      const autoCapture = script.getAttribute("data-auto") !== "false";
+      const autoCapture  = script.getAttribute("data-auto")    !== "false";
       const consoleCapture = script.getAttribute("data-console") !== "false";
-      const debug = script.getAttribute("data-debug") === "true";
+      const debug        = script.getAttribute("data-debug")   === "true";
 
       const instance = new Logged({ apiKey, debug });
-      if (autoCapture) {
-        instance.auto();
-      }
-      if (consoleCapture) {
-        instance.interceptConsole();
-      }
+      if (autoCapture)    instance.auto();
+      if (consoleCapture) instance.interceptConsole();
 
       if (typeof window !== "undefined") {
-        window.logged = instance;
+        (window as unknown as { logged: Logged }).logged = instance;
       }
     }
   }
 }
 
-export { Logged };
-export default Logged;
