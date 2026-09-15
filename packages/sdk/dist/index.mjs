@@ -439,6 +439,10 @@ var Logged = class {
     }
   }
 };
+
+// src/index.ts
+var index_default = Logged;
 export {
-  Logged
+  Logged,
+  index_default as default
 };

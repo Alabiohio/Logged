@@ -43,4 +43,4 @@ declare class Logged {
     stopConsoleInterception(): void;
 }
 
-export { type LogLevel, type LogMetadata, type LogPayload, Logged, type LoggedConfig };
+export { type LogLevel, type LogMetadata, type LogPayload, Logged, type LoggedConfig, Logged as default };
