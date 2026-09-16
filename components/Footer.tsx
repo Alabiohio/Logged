@@ -52,18 +52,18 @@ export default function Footer() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
+      className="overflow-hidden rounded-[28px] border border-border bg-glass shadow-sm backdrop-blur-2xl"
       style={{
         background: "var(--glass)",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",
-        borderTop: "1px solid var(--border)",
       }}
     >
       {/* Emerald gradient top-accent bar */}
       <div
         style={{
           height: "2px",
-          background: "linear-gradient(90deg, transparent, #10B981 40%, #34D399 60%, transparent)",
+          background: "linear-gradient(90deg, transparent, #111723 40%, #111723 60%, transparent)",
           opacity: 0.6,
         }}
       />
