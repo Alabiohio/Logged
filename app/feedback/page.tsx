@@ -77,7 +77,7 @@ export default function FeedbackPage() {
 
   return (
     <main id="main-content" className="relative min-h-screen overflow-x-hidden pt-24 bg-background text-text">
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none isolate will-change-transform">
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none isolate">
         <div className="absolute left-[-120px] top-20 h-80 w-80 rounded-full bg-primary/20 blur-[80px]" />
         <div className="absolute right-[-100px] top-40 h-96 w-96 rounded-full bg-info/15 blur-[80px]" />
         <div className="absolute bottom-0 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary-light/20 blur-[80px]" />
