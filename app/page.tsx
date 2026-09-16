@@ -23,10 +23,12 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main id="main-content" className="relative min-h-screen overflow-hidden bg-background">
+    <main id="main-content" className="relative min-h-screen overflow-x-hidden bg-background">
       {/* Ambient background glows */}
-      <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-info/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none isolate will-change-transform">
+        <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-info/15 rounded-full blur-3xl" />
+      </div>
 
       <Navbar />
       <Hero />
