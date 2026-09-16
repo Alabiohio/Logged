@@ -190,6 +190,15 @@ p {
   border: 1px solid var(--border);
 }
 
+@media (max-width: 767px) {
+  .glass,
+  [class*="backdrop-blur"],
+  [class*="bg-glass"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 @utility glass-hover {
   &:hover {
     background: var(--glass-hover);
