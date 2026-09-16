@@ -4,7 +4,6 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Send, CheckCircle2, Bug, Lightbulb, MessageCircle, Star, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
@@ -77,35 +76,20 @@ export default function FeedbackPage() {
 
   return (
     <main id="main-content" className="relative min-h-screen overflow-x-hidden pt-24 bg-background text-text">
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none isolate">
-        <div className="absolute left-[-120px] top-20 h-80 w-80 rounded-full bg-primary/20 blur-[80px]" />
-        <div className="absolute right-[-100px] top-40 h-96 w-96 rounded-full bg-info/15 blur-[80px]" />
-        <div className="absolute bottom-0 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary-light/20 blur-[80px]" />
-      </div>
-
       <Navbar />
 
       <div className="mx-auto max-w-3xl px-6 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <h1 className="text-4xl font-black tracking-tight text-text sm:text-5xl">
             Help Us Improve Logged
           </h1>
           <p className="mt-4 text-base !font-console text-text-secondary max-w-xl mx-auto">
             Have a suggestion, spotted a bug, or want to request a feature? Let us know below—we read every response!
           </p>
-        </motion.div>
+        </div>
 
         {submitted ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-12 rounded-3xl border border-border bg-glass p-10 text-center backdrop-blur-xl shadow-xl"
-          >
+          <div className="mt-12 rounded-3xl border border-border bg-glass p-10 text-center backdrop-blur-xl shadow-xl">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary mb-4">
               <CheckCircle2 className="h-8 w-8" />
             </div>
@@ -127,12 +111,9 @@ export default function FeedbackPage() {
             >
               Send Another Feedback
             </button>
-          </motion.div>
+          </div>
         ) : (
-          <motion.form
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+          <form
             onSubmit={handleSubmit}
             className="mt-12 space-y-8 px-3 py-8"
           >
@@ -159,7 +140,7 @@ export default function FeedbackPage() {
                       key={cat.id}
                       type="button"
                       onClick={() => setCategory(cat.id as "bug" | "feature" | "general")}
-                      className={`flex flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-xs font-semibold transition-all ${
+                      className={`flex flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-xs font-semibold transition-colors ${
                         selected
                           ? "border-primary bg-primary/10 text-primary shadow-sm"
                           : "border-border bg-glass text-text-secondary hover:border-primary/40 hover:text-text"
@@ -189,14 +170,14 @@ export default function FeedbackPage() {
                       onClick={() => setRating(star)}
                       onMouseEnter={() => setHoverRating(star)}
                       aria-label={`Rate ${star} out of 5 stars`}
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-all duration-200 ${
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-[color,background-color,border-color,box-shadow] duration-200 ${
                         isFilled
                           ? "border-amber-400 bg-amber-400/10 text-amber-400 scale-105 shadow-md"
                           : "border-border bg-glass text-text-muted hover:border-amber-400/50 hover:text-amber-400/70"
                       }`}
                     >
                       <Star
-                        className={`h-6 w-6 transition-all ${
+                        className={`h-6 w-6 transition-colors ${
                           isFilled ? "fill-amber-400 text-amber-400" : "fill-transparent"
                         }`}
                       />
@@ -218,7 +199,7 @@ export default function FeedbackPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your.email@example.com"
-                className="w-full rounded-2xl border border-border bg-background/60 p-3.5 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full rounded-2xl border border-border bg-background/60 p-3.5 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-[border-color,box-shadow]"
               />
             </div>
 
@@ -234,7 +215,7 @@ export default function FeedbackPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Tell us what's on your mind..."
-                className="w-full rounded-2xl border border-border bg-background/60 p-4 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                className="w-full rounded-2xl border border-border bg-background/60 p-4 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-[border-color,box-shadow] resize-none"
               />
             </div>
 
@@ -258,7 +239,7 @@ export default function FeedbackPage() {
             <button
               type="submit"
               disabled={loading || !message.trim() || !email.trim()}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-white transition hover:bg-primary-hover disabled:opacity-50 shadow-md"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-hover disabled:opacity-50 shadow-md"
             >
               {loading ? (
                 <Cardio size="35" color="currentColor" speed="1.5" stroke="3" bgOpacity="0.1" />
@@ -269,7 +250,7 @@ export default function FeedbackPage() {
                 </>
               )}
             </button>
-          </motion.form>
+          </form>
         )}
       </div>
 
