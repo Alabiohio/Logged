@@ -295,8 +295,8 @@ ${currentExample.payload.map((p) => `  ${p.key}: ${p.value}`).join(",\n")}
           </div>
 
           {/* Code snippet with Typewriter Animation */}
-          <pre className="mt-3 min-h-[190px] overflow-x-auto whitespace-pre-wrap break-all p-1.5 font-console text-[11px] leading-relaxed text-text sm:mt-4 sm:min-h-[220px] sm:p-2 sm:text-sm">
-            <code className="block break-words">
+          <pre className="mt-3 h-[220px] overflow-x-auto overflow-y-auto whitespace-pre p-1.5 font-console text-[11px] leading-relaxed text-text sm:mt-4 sm:h-[270px] sm:p-2 sm:text-sm">
+            <code className="block">
               <span className="font-bold text-primary">import</span> &#123; Logged &#125; <span className="font-bold text-primary">from</span> <span className="text-warning">&quot;@oheoco/logged&quot;</span>;{"\n\n"}
               <span className="font-bold text-primary">const</span> logger = <span className="font-bold text-primary">new Logged</span>(&#123;{"\n"}
               {"  "}apiKey: process.env.<span className="text-info">LOGGED_API_KEY</span>,{"\n"}

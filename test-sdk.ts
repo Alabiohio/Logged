@@ -1,6 +1,5 @@
 import { Logged } from "@oheoco/logged";
 import dotenv from "dotenv";
-import { LOGGED_BASE_URL } from "./lib/site-config";
 
 dotenv.config({ path: ".env.local" });
 

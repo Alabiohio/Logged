@@ -4,7 +4,6 @@ import { useEffect, useSyncExternalStore } from "react";
 import { Logged } from "@oheoco/logged";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { LOGGED_BASE_URL } from "@/lib/site-config";
 
 const apiKey = process.env.NEXT_PUBLIC_LOGGED_API_KEY || "test_api_key";
 

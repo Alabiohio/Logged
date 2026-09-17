@@ -111,7 +111,7 @@ const logger = new Logged({
 </script>`}
         />
         <p className="text-sm leading-7 text-text-secondary">
-          The browser build also exposes <code className="font-mono text-primary">window.Logged</code> and <code className="font-mono text-primary">window.logged</code>. If a script tag includes <code className="font-mono text-primary">data-api-key</code>, the SDK can auto-create a logger instance and start auto capture or console capture unless disabled with <code className="font-mono text-primary">data-auto="false"</code> or <code className="font-mono text-primary">data-console="false"</code>.
+          The browser build also exposes <code className="font-mono text-primary">window.Logged</code> and <code className="font-mono text-primary">window.logged</code>. If a script tag includes <code className="font-mono text-primary">data-api-key</code>, the SDK can auto-create a logger instance and start auto capture or console capture unless disabled with <code className="font-mono text-primary">data-auto=&quot;false&quot;</code> or <code className="font-mono text-primary">data-console=&quot;false&quot;</code>.
         </p>
       </section>
 
