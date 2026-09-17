@@ -646,7 +646,7 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-6">
-                            <div id="security-sessions" className="scroll-mt-24 rounded-2xl border border-border bg-background/20 py-4">
+                            <div id="security-sessions" className="scroll-mt-24 rounded-2xl border border-border bg-background/20 px-3 py-4">
                                 <div className="mb-3 flex items-center justify-between">
                                     <h3 className="text-sm font-black uppercase tracking-[0.12em] text-text-secondary">Active Sessions</h3>
                                 </div>
@@ -664,7 +664,7 @@ export default function SettingsPage() {
                                             return (
                                                 <div
                                                     key={s.id}
-                                                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-border bg-background/30 py-4"
+                                                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-border bg-background/30 px-3 py-4"
                                                 >
                                                     <div className="flex items-center gap-3 min-w-0">
                                                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-glass text-text-secondary">

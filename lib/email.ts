@@ -59,7 +59,7 @@ export async function sendErrorAlertEmail({
 
                                     <!-- Name -->
                                     <td valign="middle">
-                                        <span style="font-size:20px; line-height:28px; font-weight:700; letter-spacing:-0.4px; color:#111827;">
+                                        <span style="font-size:20px; line-height:28px; font-weight:700; letter-spacing:-0.4px; color:#46525B;">
                                             Logged
                                         </span>
                                     </td>
@@ -197,7 +197,7 @@ export async function sendErrorAlertEmail({
                                                 </td>
 
                                                 <td valign="middle">
-                                                    <span style="font-size:13px; line-height:20px; font-weight:600; color:#374151;">
+                                                    <span style="font-size:13px; line-height:20px; font-weight:600; color:#46525B;">
                                                         Logged
                                                     </span>
                                                 </td>
