@@ -1,0 +1,173 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronRight, Menu, X } from "lucide-react";
+
+export const navigation = [
+  {
+    title: "Getting Started",
+    items: [
+      { name: "Installation", href: "/docs/installation" },
+      { name: "Quick Start", href: "/docs/quick-start" },
+    ],
+  },
+  {
+    title: "SDK",
+    items: [
+      { name: "Logger", href: "/docs/sdk" },
+      { name: "Configuration", href: "/docs/sdk/configuration" },
+      { name: "Capture Errors", href: "/docs/sdk/capture" },
+      { name: "Browser Auto Capture", href: "/docs/sdk/auto" },
+      { name: "Console Capture", href: "/docs/sdk/console" },
+    ],
+  },
+  {
+    title: "REST API",
+    items: [{ name: "Overview", href: "/docs/rest-api" }],
+  },
+  {
+    title: "Examples",
+    items: [
+      { name: "Next.js", href: "/docs/examples/nextjs" },
+      { name: "React", href: "/docs/examples/react" },
+      { name: "JavaScript", href: "/docs/examples/javascript" },
+    ],
+  },
+];
+
+function DocsNav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  const allRoutes = navigation.flatMap((section) => section.items.map((item) => item.href));
+
+  return (
+    <nav className="space-y-6">
+      {navigation.map((section) => (
+        <div key={section.title}>
+          <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            {section.title}
+          </h3>
+          <ul className="space-y-1">
+            {section.items.map((item) => {
+              const isActive =
+                allRoutes
+                  .filter((route) => pathname === route || pathname.startsWith(`${route}/`))
+                  .sort((a, b) => b.length - a.length)[0] === item.href;
+
+              return (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={`group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-text-secondary hover:bg-glass hover:text-text"
+                    }`}
+                  >
+                    {isActive && <ChevronRight className="h-4 w-4" strokeWidth={4} />}
+                    {item.name}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+export function DocsSidebar({
+  pathname,
+  mobileOpen,
+  onClose,
+}: {
+  pathname: string;
+  mobileOpen: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <aside className="hidden h-full w-72 shrink-0 border-r border-border bg-background-secondary/70 backdrop-blur-xl lg:flex lg:flex-col">
+        <div className="flex h-full flex-col">
+          <div className="flex h-16 items-center gap-2 border-b border-border px-6">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/logo/logo.png" alt="Logged logo" width={28} height={28} className="h-7 w-7 object-contain" />
+              <span className="text-lg font-black tracking-tight text-text-secondary">Logged Docs</span>
+            </Link>
+          </div>
+
+          <div className="flex-1 overflow-y-auto py-6 px-3">
+            <DocsNav pathname={pathname} onNavigate={onClose} />
+          </div>
+
+          <div className="border-t border-border p-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm text-text-muted transition hover:text-text"
+            >
+              <ChevronRight className="h-4 w-4 rotate-180" />
+              Back to site
+            </Link>
+          </div>
+        </div>
+      </aside>
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-border bg-background-secondary/70 backdrop-blur-xl transition-transform duration-200 ease-out lg:hidden ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          <div className="flex h-16 items-center gap-2 border-b border-border px-6">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/logo/logo.png" alt="Logged logo" width={28} height={28} className="h-7 w-7 object-contain" />
+              <span className="text-lg font-black tracking-tight text-text-secondary">Logged Docs</span>
+            </Link>
+          </div>
+
+          <div className="flex-1 overflow-y-auto py-6 px-3">
+            <DocsNav pathname={pathname} onNavigate={onClose} />
+          </div>
+
+          <div className="border-t border-border p-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm text-text-muted transition hover:text-text"
+            >
+              <ChevronRight className="h-4 w-4 rotate-180" />
+              Back to site
+            </Link>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+export function DocsMobileHeader({
+  mobileOpen,
+  onToggle,
+}: {
+  mobileOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="sticky top-0 z-40 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+      <div className="flex items-center justify-between">
+        <Link href="/docs" className="flex items-center gap-2">
+          <Image src="/logo/logo.png" alt="Logged logo" width={28} height={28} className="h-7 w-7 object-contain" />
+          <span className="text-base font-black tracking-tight text-text-secondary">Logged Docs</span>
+        </Link>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-glass text-text-secondary transition hover:bg-glass-hover"
+          aria-label={mobileOpen ? "Close docs menu" : "Open docs menu"}
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </div>
+    </div>
+  );
+}

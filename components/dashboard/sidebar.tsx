@@ -254,7 +254,12 @@ export function Sidebar({
         <div className="flex-1 overflow-y-auto py-6 px-3">
           <nav aria-label="Main dashboard navigation" className="space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+              const activeMatch = navigation
+                .map((navItem) => navItem.href)
+                .filter((route) => pathname === route || pathname.startsWith(`${route}/`))
+                .sort((a, b) => b.length - a.length)[0];
+              const isActive = activeMatch === item.href;
+
               return (
                 <Link
                   key={item.name}
@@ -404,7 +409,11 @@ export function Sidebar({
 
               <nav aria-label="Mobile dashboard navigation" className="space-y-2 px-2 flex-1">
                 {navigation.map((item) => {
-                  const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+                  const activeMatch = navigation
+                    .map((navItem) => navItem.href)
+                    .filter((route) => pathname === route || pathname.startsWith(`${route}/`))
+                    .sort((a, b) => b.length - a.length)[0];
+                  const isActive = activeMatch === item.href;
                   const isSettings = item.name === "Settings";
 
                   return (

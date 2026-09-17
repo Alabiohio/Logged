@@ -25,20 +25,18 @@ export function StatCard({
     onClick,
 }: StatCardProps) {
     const cardContent = (
-        <div className={`glass rounded-[var(--radius-lg)] p-5 shadow-sm space-y-3 h-full transition-all duration-200 ${
-            href || onClick ? "hover:border-primary/40 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer group" : ""
+        <div className={`rounded-[var(--radius-lg)] border border-border bg-background-secondary p-5 shadow-sm space-y-3 h-full ${
+            href || onClick ? "hover:border-primary/40 cursor-pointer group" : ""
         }`}>
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <p className={`text-2xl font-black text-text ${href || onClick ? "group-hover:text-primary transition-colors" : ""}`}>
+                    <p className={`text-2xl font-black text-text ${href || onClick ? "group-hover:text-primary" : ""}`}>
                         {value}
                     </p>
                     <p className="text-sm text-text-secondary">{label}</p>
                 </div>
                 <div
-                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconBg} ${iconColor} ${
-                        href || onClick ? "group-hover:scale-110 transition-transform" : ""
-                    }`}
+                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconBg} ${iconColor}`}
                 >
                     <Icon className="h-5 w-5" />
                 </div>
@@ -71,4 +69,3 @@ export function StatCard({
 
     return cardContent;
 }
-
