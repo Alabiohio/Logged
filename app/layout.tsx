@@ -39,14 +39,35 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://logged.oheo.site",
+  ),
   manifest: "/manifest.webmanifest",
   title: {
-    default: "Logged | Error Monitoring for Modern Apps",
+    default: "Logged | Logs & Debugging for Modern Applications",
     template: "%s | Logged",
   },
   description:
     "Track errors, inspect logs, and understand product issues in real time with Logged.",
+  applicationName: "Logged",
+  authors: [{ name: "Oheo", url: "https://oheo.site" }],
+  creator: "Oheo",
+  publisher: "Oheo",
+  category: "technology",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   keywords: [
     "error monitoring",
     "application logs",
@@ -56,15 +77,21 @@ export const metadata: Metadata = {
     "Logged",
     "PWA",
   ],
-  applicationName: "Logged",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Logged",
+    startupImage: "/icons/apple-touch-icon.png",
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
   },
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
       { url: "/logo/logo.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
@@ -72,18 +99,28 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Logged | Error Monitoring for Modern Apps",
+    title: "Logged | Logs & Debugging for Modern Applications",
     description:
       "Track errors, inspect logs, and understand product issues in real time with Logged.",
     url: "/",
     siteName: "Logged",
     type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/dcim/banner.png",
+        width: 1200,
+        height: 630,
+        alt: "Logged application monitoring logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Logged | Error Monitoring for Modern Apps",
+    title: "Logged | Logs & Debugging for Modern Applications",
     description:
       "Track errors, inspect logs, and understand product issues in real time with Logged.",
+    images: ["/dcim/banner.png"],
   },
 };
 

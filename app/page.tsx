@@ -15,7 +15,7 @@ import ProcessPipeline from "@/components/landing/ProcessPipeline";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Logged | Error Monitoring for Modern Apps",
+    absolute: "Logged | Logs & Debugging for Modern Applications",
   },
   description:
     "Track errors, inspect logs, and understand product issues in real time with Logged.",
