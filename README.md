@@ -1,8 +1,14 @@
 # Logged
 
+[![npm version](https://img.shields.io/npm/v/@oheoco/logged?logo=npm)](https://www.npmjs.com/package/@oheoco/logged)
+[![npm downloads](https://img.shields.io/npm/dm/@oheoco/logged?logo=npm)](https://www.npmjs.com/package/@oheoco/logged)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](packages/sdk/LICENSE)
+
 Logged is an application logging and error-monitoring platform for modern web applications. It gives each project environment-specific API keys, accepts structured logs through an HTTP API or JavaScript/TypeScript SDK, and provides an authenticated dashboard for searching and investigating application activity.
 
-Hosted instance: [logged.oheo.site](https://logged.oheo.site)
+Hosted instance: [logged.oheo.site](https://logged.oheo.site) · [Sign in](https://logged.oheo.site/login) · [Create an account](https://logged.oheo.site/register)
+
+Useful links: [Dashboard](https://logged.oheo.site/dashboard) · [Quick start](https://logged.oheo.site/docs/quick-start) · [SDK documentation](https://logged.oheo.site/docs/sdk) · [REST API reference](https://logged.oheo.site/docs/rest-api) · [npm package](https://www.npmjs.com/package/@oheoco/logged) · [GitHub repository](https://github.com/Alabiohio/Logged)
 
 ## What Logged provides
 
@@ -408,7 +414,7 @@ Logged is under active development. The hosted dashboard, authenticated project 
 
 ## License
 
-The SDK package is released under the MIT License. See `packages/sdk/LICENSE` for the package license text.
+The SDK package is released under the [MIT License](packages/sdk/LICENSE). See the [SDK package README](packages/sdk/README.md) for package-specific documentation.
 # Logged
 
 Logged is an application logging and error-monitoring platform for modern web applications. It gives each project environment-specific API keys, accepts structured logs through an HTTP API or JavaScript/TypeScript SDK, and provides an authenticated dashboard for searching and investigating application activity.
