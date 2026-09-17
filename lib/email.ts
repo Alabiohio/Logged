@@ -206,7 +206,7 @@ export async function sendErrorAlertEmail({
                                         </table>
 
                                         <p style="margin:8px 0 16px 0; font-size:12px; line-height:18px; color:#9ca3af;">
-                                            Developer observability by
+                                            Offered by
                                             <a
                                                 href="https://oheo.site"
                                                 target="_blank"
@@ -576,7 +576,7 @@ export async function sendWeeklyDigestEmail({
                                         </table>
 
                                         <p style="margin:8px 0 16px 0; font-size:12px; line-height:18px; color:#9ca3af;">
-                                            Developer observability by
+                                            Offered by
                                             <a
                                                 href="https://oheo.site"
                                                 target="_blank"
