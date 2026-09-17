@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
 
@@ -283,7 +285,7 @@ Content-Type: application/json`}
         <h2 className="text-2xl font-bold text-text">cURL example</h2>
         <CodeBlock
           language="bash"
-          code={`curl -X POST https://localhost:3000/api/v1/logs \\
+          code={`curl -X POST https://logged.oheo.site/api/v1/logs \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -293,9 +295,39 @@ Content-Type: application/json`}
   }'`}
         />
         <p className="text-sm leading-7 text-text-secondary">
-          Replace <code className="font-mono text-primary">localhost:3000</code> with
-          your Logged API host if different.
+          The public Logged ingestion endpoint is <code className="font-mono text-primary">https://logged.oheo.site/api/v1/logs</code>.
+          The SDK also targets this endpoint by default; it does not currently expose a custom <code className="font-mono text-primary">baseUrl</code> option.
         </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-text">Continue learning</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Link href="/docs/quick-start" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">Quick Start</p>
+            <p className="mt-2 text-sm text-text-secondary">Send your first log in minutes.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              Read more
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+          <Link href="/docs/sdk" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">SDK</p>
+            <p className="mt-2 text-sm text-text-secondary">Capture errors and console output automatically.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              Explore
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+          <Link href="/docs/examples" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">Examples</p>
+            <p className="mt-2 text-sm text-text-secondary">See Next.js, React, and plain JS patterns.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              Browse examples
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+        </div>
       </section>
     </div>
   );

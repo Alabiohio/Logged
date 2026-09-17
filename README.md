@@ -58,6 +58,14 @@ Watch logs appear instantly as they are received.
 
 Send logs from any application using a simple HTTP API.
 
+The public ingestion endpoint is:
+
+```bash
+https://logged.oheo.site/api/v1/logs
+```
+
+The SDK targets this same endpoint by default and does not currently support a custom `baseUrl` override.
+
 ### Lightweight SDK
 
 Integrate Logged into your JavaScript or TypeScript applications with just a few lines of code.

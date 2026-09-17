@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
 
@@ -77,6 +77,36 @@ const logger = new Logged({
 logger.info("Application started");
 logger.capture(new Error("Something failed"));`}
         />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-text">Continue learning</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Link href="/docs/examples/react" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">React</p>
+            <p className="mt-2 text-sm text-text-secondary">See how to wire the SDK into a UI app.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              View example
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+          <Link href="/docs/examples/nextjs" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">Next.js</p>
+            <p className="mt-2 text-sm text-text-secondary">Use the same setup in a client-side App Router app.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              Browse guide
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+          <Link href="/docs/rest-api" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">REST API</p>
+            <p className="mt-2 text-sm text-text-secondary">Send logs directly without installing the SDK.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              View API
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+        </div>
       </section>
     </div>
   );

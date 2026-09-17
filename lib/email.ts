@@ -21,50 +21,238 @@ export async function sendErrorAlertEmail({
             to,
             subject: `[${projectName}] New error detected`,
             html: `
-                <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #F9FAFB;">
-                    <div style="background-color: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
-                        <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); padding: 40px 32px; text-align: center;">
-                            <h1 style="color: #FFFFFF; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.025em;">Logged</h1>
-                            <div style="margin-top: 12px; display: inline-block; background-color: rgba(239, 68, 68, 0.15); color: #FCA5A5; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">
-                                Error Alert
-                            </div>
-                        </div>
-                        <div style="padding: 40px 32px;">
-                            <p style="color: #334155; font-size: 16px; margin: 0 0 20px 0; line-height: 1.6;">
-                                Hi <strong>${userName}</strong>,
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Logged — Error Alert</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f4f5f7; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#111827;">
+
+    <!-- Outer wrapper -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5f7; margin:0; padding:0;">
+        <tr>
+            <td align="center" style="padding:48px 20px;">
+
+                <!-- Main container -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; margin:0 auto;">
+
+                    <!-- Brand -->
+                    <tr>
+                        <td style="padding:0 0 20px 4px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+
+                                    <!-- Logo -->
+                                    <td valign="middle" style="padding-right:9px;">
+                                        <img
+                                            src="https://your-domain.com/logged-logo.png"
+                                            width="28"
+                                            height="28"
+                                            alt="Logged"
+                                            style="display:block; width:28px; height:28px; border:0; outline:none; text-decoration:none; border-radius:7px;"
+                                        >
+                                    </td>
+
+                                    <!-- Name -->
+                                    <td valign="middle">
+                                        <span style="font-size:20px; line-height:28px; font-weight:700; letter-spacing:-0.4px; color:#111827;">
+                                            Logged
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Main card -->
+                    <tr>
+                        <td style="background-color:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
+
+                            <!-- Header -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding:32px 36px 28px 36px; border-bottom:1px solid #f0f1f3;">
+
+                                        <!-- Status -->
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="background-color:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:5px 9px;">
+                                                    <span style="font-size:11px; line-height:16px; font-weight:700; color:#b91c1c; letter-spacing:0.04em; text-transform:uppercase;">
+                                                        Error detected
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <h1 style="margin:18px 0 8px 0; padding:0; font-size:24px; line-height:32px; font-weight:700; letter-spacing:-0.5px; color:#111827;">
+                                            A new error was detected
+                                        </h1>
+
+                                        <p style="margin:0; padding:0; font-size:14px; line-height:22px; color:#6b7280;">
+                                            Logged detected an error in your project and is notifying you so you can investigate it.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Content -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding:32px 36px 36px 36px;">
+
+                                        <!-- Greeting -->
+                                        <p style="margin:0 0 18px 0; font-size:15px; line-height:24px; color:#374151;">
+                                            Hi <strong style="color:#111827;">${userName}</strong>,
+                                        </p>
+
+                                        <p style="margin:0 0 28px 0; font-size:15px; line-height:24px; color:#4b5563;">
+                                            An error was detected in
+                                            <strong style="color:#111827;">${projectName}</strong>.
+                                            Here’s what Logged captured:
+                                        </p>
+
+                                        <!-- Error block -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                                            <tr>
+                                                <td style="background-color:#fafafa; border:1px solid #e5e7eb; border-radius:8px; padding:18px 20px;">
+
+                                                    <p style="margin:0 0 10px 0; font-size:11px; line-height:16px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em;">
+                                                        Error message
+                                                    </p>
+
+                                                    <p style="margin:0; font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size:13px; line-height:21px; color:#1f2937; word-break:break-word;">
+                                                        ${errorMessage}
+                                                    </p>
+
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- CTA -->
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="border-radius:7px; background-color:#111827;">
+                                                    <a
+                                                        href="${logUrl}"
+                                                        style="display:inline-block; padding:12px 18px; font-size:14px; line-height:20px; font-weight:600; color:#ffffff; text-decoration:none; border-radius:7px;"
+                                                    >
+                                                        View error details
+                                                        <span style="padding-left:5px;">→</span>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Supporting text -->
+                                        <p style="margin:20px 0 0 0; font-size:12px; line-height:19px; color:#9ca3af;">
+                                            You can review the full log, stack trace, and related information from your Logged dashboard.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Footer -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="background-color:#fafafa; border-top:1px solid #f0f1f3; padding:28px 36px;">
+
+                                        <p style="margin:0 0 10px 0; font-size:13px; line-height:20px; color:#6b7280;">
+                                            Receiving too many notifications?
+                                            <a
+                                                href="${process.env.APP_URL || "http://localhost:3000"}/dashboard/settings"
+                                                style="color:#374151; font-weight:600; text-decoration:underline;"
+                                            >
+                                                Manage notification settings
+                                            </a>
+                                        </p>
+
+                                        <!-- Divider -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;">
+                                            <tr>
+                                                <td style="height:1px; background-color:#e5e7eb; font-size:0; line-height:0;">
+                                                    &nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Footer branding -->
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+
+                                                <td valign="middle" style="padding-right:8px;">
+                                                    <img
+                                                        src="https://your-domain.com/logged-logo.png"
+                                                        width="20"
+                                                        height="20"
+                                                        alt="Logged"
+                                                        style="display:block; width:20px; height:20px; border:0; outline:none; text-decoration:none; border-radius:5px;"
+                                                    >
+                                                </td>
+
+                                                <td valign="middle">
+                                                    <span style="font-size:13px; line-height:20px; font-weight:600; color:#374151;">
+                                                        Logged
+                                                    </span>
+                                                </td>
+
+                                            </tr>
+                                        </table>
+
+                                        <p style="margin:8px 0 16px 0; font-size:12px; line-height:18px; color:#9ca3af;">
+                                            Developer observability by
+                                            <a
+                                                href="https://oheo.site"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style="color:#6b7280; font-weight:600; text-decoration:none;"
+                                            >
+                                                Oheo
+                                            </a>
+                                        </p>
+
+                                        <p style="margin:0; font-size:11px; line-height:17px; color:#b0b5bd;">
+                                            © ${new Date().getFullYear()} Logged. All rights reserved.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Bottom spacing -->
+                    <tr>
+                        <td style="height:24px; font-size:0; line-height:0;">
+                            &nbsp;
+                        </td>
+                    </tr>
+
+                    <!-- Automated email notice -->
+                    <tr>
+                        <td align="center">
+                            <p style="margin:0; font-size:11px; line-height:17px; color:#b0b5bd;">
+                                This is an automated notification from Logged.
                             </p>
-                            <p style="color: #475569; font-size: 16px; margin: 0 0 28px 0; line-height: 1.6;">
-                                Our monitors have detected a new error in your project <strong style="color: #0F172A; background-color: #F1F5F9; padding: 2px 6px; border-radius: 4px;">${projectName}</strong>. Here are the details:
-                            </p>
-                            
-                            <div style="background-color: #FEF2F2; border-left: 4px solid #EF4444; border-radius: 0 8px 8px 0; padding: 20px; margin: 0 0 32px 0;">
-                                <p style="color: #991B1B; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px 0; font-weight: 700;">Error Details</p>
-                                <p style="color: #7F1D1D; font-size: 14px; margin: 0; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; word-break: break-word; line-height: 1.6;">
-                                    ${errorMessage}
-                                </p>
-                            </div>
-                            
-                            <div style="text-align: center;">
-                                <a href="${logUrl}" style="background-color: #0F172A; color: #FFFFFF; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; transition: background-color 0.2s; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);">
-                                    View Log Details &rarr;
-                                </a>
-                            </div>
-                        </div>
-                        <div style="background-color: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 32px; text-align: center;">
-                            <p style="color: #64748B; font-size: 14px; margin: 0 0 12px 0; line-height: 1.5;">
-                                Want to change what you get alerted about?
-                                <br />
-                                Manage your <a href="${process.env.APP_URL || "http://localhost:3000"}/dashboard/settings" style="color: #3B82F6; font-weight: 500; text-decoration: none;">Notification Settings</a>.
-                            </p>
-                            <div style="height: 1px; background-color: #E2E8F0; width: 40px; margin: 24px auto;"></div>
-                            <h2 style="color: #0F172A; font-weight: 700; font-size: 16px; margin: 0 0 8px 0; letter-spacing: -0.01em;">Logged</h2>
-                            <p style="color: #94A3B8; font-size: 13px; margin: 0 0 20px 0;">Offered by <a href='https://oheo.site' target="_blank" rel="noopener noreferrer" style="color: #3B82F6; font-weight: 500; text-decoration: none;">Oheo</a></p>
-                            <p style="color: #CBD5E1; font-size: 12px; margin: 0;">
-                                &copy; ${new Date().getFullYear()} Logged. All rights reserved.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
             `,
         });
     } catch (error) {
@@ -215,9 +403,8 @@ export async function sendWeeklyDigestEmail({
 
                             <!-- Per-Project Breakdown -->
                             <h2 style="color: #0F172A; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">Project Breakdown</h2>
-                            ${
-                                summary.projectSummaries.length > 0
-                                    ? `<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 28px;">
+                            ${summary.projectSummaries.length > 0
+                    ? `<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 28px;">
                                         <thead>
                                             <tr>
                                                 <th style="text-align: left; padding: 12px 16px; color: #94A3B8; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Project</th>
@@ -228,13 +415,12 @@ export async function sendWeeklyDigestEmail({
                                         </thead>
                                         <tbody>${projectRows}</tbody>
                                     </table>`
-                                    : '<p style="color: #94A3B8; font-size: 14px; margin: 0 0 28px 0;">No log activity this week.</p>'
-                            }
+                    : '<p style="color: #94A3B8; font-size: 14px; margin: 0 0 28px 0;">No log activity this week.</p>'
+                }
 
                             <!-- Recent Errors -->
-                            ${
-                                summary.recentErrors.length > 0
-                                    ? `<h2 style="color: #0F172A; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">Recent Errors</h2>
+                            ${summary.recentErrors.length > 0
+                    ? `<h2 style="color: #0F172A; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">Recent Errors</h2>
                                        <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 28px;">
                                            <thead>
                                                <tr>
@@ -245,8 +431,8 @@ export async function sendWeeklyDigestEmail({
                                            </thead>
                                            <tbody>${recentErrorItems}</tbody>
                                        </table>`
-                                    : ""
-                            }
+                    : ""
+                }
 
                             <!-- CTA -->
                             <div style="text-align: center; padding: 0 0 12px 0;">

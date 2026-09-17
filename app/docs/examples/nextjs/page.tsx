@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Callout } from "@/components/docs/callout";
 import { CodeBlock } from "@/components/docs/code-block";
 
@@ -113,6 +113,36 @@ export function CheckoutButton() {
   return <button onClick={handleCheckout}>Pay now</button>;
 }`}
         />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-text">Continue learning</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Link href="/docs/examples/react" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">React</p>
+            <p className="mt-2 text-sm text-text-secondary">Use the same SDK in a Vite or CRA app.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              View example
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+          <Link href="/docs/examples/javascript" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">JavaScript</p>
+            <p className="mt-2 text-sm text-text-secondary">Use Logged without a framework or React setup.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              Browse guide
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+          <Link href="/docs/sdk/auto" className="rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-background-secondary">
+            <p className="text-sm font-semibold text-text">Auto Capture</p>
+            <p className="mt-2 text-sm text-text-secondary">Add automatic browser error collection.</p>
+            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              Learn more
+              <ChevronRight className="h-4 w-4" strokeWidth={4} />
+            </div>
+          </Link>
+        </div>
       </section>
     </div>
   );

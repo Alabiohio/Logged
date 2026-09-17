@@ -20,6 +20,14 @@ bun add @oheoco/logged
 
 ## Quickstart
 
+The SDK sends logs to the Logged ingestion endpoint at:
+
+```bash
+https://logged.oheo.site/api/v1/logs
+```
+
+It does not currently expose a custom `baseUrl` constructor option.
+
 ### Initialize the SDK
 
 ```typescript
