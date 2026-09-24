@@ -75,7 +75,6 @@ export default function AdminBillingControl() {
           billingEnabled: data.billingEnabled,
           paymentProvider: data.paymentProvider,
           paystackPlusPlanCode: data.paystackPlusPlanCode,
-          paystackWebhookSecret: data.paystackWebhookSecret,
         });
         setSuccess("Billing configuration saved.");
       } else {
@@ -240,7 +239,7 @@ export default function AdminBillingControl() {
       {/* Paystack Plan Configuration */}
       <div className="space-y-4 pt-2 border-t border-border/50">
         <div className="flex items-center gap-2">
-          <Key className="h-4 w-4 text-primary" />
+          <Hash className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-bold text-text">Paystack Plan Configuration</h3>
         </div>
         <p className="text-xs text-text-secondary">
