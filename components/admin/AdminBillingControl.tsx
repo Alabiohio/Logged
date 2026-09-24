@@ -3,15 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   CreditCard,
-  Zap,
   CheckCircle2,
   AlertCircle,
   Globe,
   Power,
-  Key,
   Hash,
-  Eye,
-  EyeOff,
   Save,
 } from "lucide-react";
 import { Cardio } from "ldrs/react";
@@ -21,7 +17,6 @@ interface AdminBillingSettings {
   billingEnabled: boolean;
   paymentProvider: string;
   paystackPlusPlanCode: string;
-  paystackWebhookSecret: string;
 }
 
 const PROVIDERS = [
@@ -39,8 +34,6 @@ export default function AdminBillingControl() {
 
   // Editable fields state
   const [planCodeInput, setPlanCodeInput] = useState("");
-  const [webhookSecretInput, setWebhookSecretInput] = useState("");
-  const [showSecret, setShowSecret] = useState(false);
   const [savingPlanConfig, setSavingPlanConfig] = useState(false);
 
   const fetchSettings = useCallback(async () => {
@@ -51,7 +44,6 @@ export default function AdminBillingControl() {
         const data = await res.json() as AdminBillingSettings;
         setSettings(data);
         setPlanCodeInput(data.paystackPlusPlanCode ?? "");
-        setWebhookSecretInput(data.paystackWebhookSecret ?? "");
       } else {
         const err = await res.json().catch(() => ({}));
         setError((err as { error?: string }).error || "Failed to load admin billing settings");
@@ -106,7 +98,6 @@ export default function AdminBillingControl() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paystackPlusPlanCode: planCodeInput,
-          ...(webhookSecretInput.trim() !== "" && { paystackWebhookSecret: webhookSecretInput }),
         }),
       });
       const data = await res.json() as AdminBillingSettings & { success?: boolean; error?: string };
@@ -114,7 +105,6 @@ export default function AdminBillingControl() {
         setSettings((prev) => prev ? {
           ...prev,
           paystackPlusPlanCode: data.paystackPlusPlanCode,
-          paystackWebhookSecret: data.paystackWebhookSecret,
         } : prev);
         setSuccess("Paystack plan configuration saved successfully.");
       } else {
@@ -266,47 +256,16 @@ export default function AdminBillingControl() {
             <label className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
               <Hash className="h-3.5 w-3.5" /> Plus Plan Code
             </label>
-            <div className="flex gap-2">
-              <input
-                id="paystackPlusPlanCode"
-                type="text"
-                value={planCodeInput}
-                onChange={(e) => setPlanCodeInput(e.target.value)}
-                placeholder="e.g. PLN_xxxxxxxxxxxx"
-                className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-mono text-text outline-none focus:border-primary transition"
-              />
-            </div>
+            <input
+              id="paystackPlusPlanCode"
+              type="text"
+              value={planCodeInput}
+              onChange={(e) => setPlanCodeInput(e.target.value)}
+              placeholder="e.g. PLN_xxxxxxxxxxxx"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-mono text-text outline-none focus:border-primary transition"
+            />
             <p className="text-[10px] text-text-muted">
               This is passed to Paystack on checkout so users are enrolled in the correct recurring plan.
-            </p>
-          </div>
-
-          {/* Webhook Secret */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
-              <Key className="h-3.5 w-3.5" /> Webhook Secret Key
-            </label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  id="paystackWebhookSecret"
-                  type={showSecret ? "text" : "password"}
-                  value={webhookSecretInput}
-                  onChange={(e) => setWebhookSecretInput(e.target.value)}
-                  placeholder="sk_live_... or sk_test_..."
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 pr-10 text-xs font-mono text-text outline-none focus:border-primary transition"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSecret((v) => !v)}
-                  className="absolute right-2.5 top-2 text-text-muted hover:text-text transition"
-                >
-                  {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-            <p className="text-[10px] text-text-muted">
-              Your Paystack Secret Key used to verify webhook signatures (HMAC SHA-512). Leave blank to keep the existing value.
             </p>
           </div>
 
