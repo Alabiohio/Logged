@@ -73,7 +73,7 @@ export async function POST() {
       email: session.user.email,
       amount: plusPlan.price,
       planCode: plusPlan.paystackPlanCode || undefined,
-      callbackUrl: `${baseUrl}/settings/billing?checkout=success`,
+      callbackUrl: `${baseUrl}/dashboard/settings/billing?checkout=success`,
       metadata: {
         userId,
         planId: "plus",
