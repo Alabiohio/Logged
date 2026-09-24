@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, numeric, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -125,5 +125,91 @@ export const feedbacks = pgTable("feedback", {
     isAnonymous: boolean("is_anonymous").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow()
 });
+
+export const settings = pgTable("settings", {
+    id: text("id").primaryKey(),
+    key: text("key").notNull().unique(),
+    value: text("value").notNull(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+export const plans = pgTable("plans", {
+    id: text("id").primaryKey(),
+    name: text("name").notNull().unique(),
+    displayName: text("display_name").notNull(),
+    description: text("description"),
+    price: integer("price").notNull(),
+    currency: text("currency").notNull().default("NGN"),
+    interval: text("interval"),
+    includedLogs: integer("included_logs").notNull(),
+    projectLimit: integer("project_limit").notNull(),
+    retentionDays: integer("retention_days").notNull(),
+    paystackPlanCode: text("paystack_plan_code"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+export const subscriptions = pgTable("subscriptions", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id),
+    planId: text("plan_id").notNull().references(() => plans.id),
+    status: text("status").notNull(),
+    paystackCustomerCode: text("paystack_customer_code"),
+    paystackSubscriptionCode: text("paystack_subscription_code"),
+    paystackPlanCode: text("paystack_plan_code"),
+    currentPeriodStart: timestamp("current_period_start"),
+    currentPeriodEnd: timestamp("current_period_end"),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+    paygEnabled: boolean("payg_enabled").notNull().default(true),
+    paygSpendingLimit: integer("payg_spending_limit"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+}, (table) => [
+    uniqueIndex("subscriptions_user_id_idx").on(table.userId)
+]);
+
+export const usage = pgTable("usage", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id),
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+    logsCount: integer("logs_count").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+}, (table) => [
+    uniqueIndex("usage_user_period_start_idx").on(table.userId, table.periodStart)
+]);
+
+export const paygUsage = pgTable("payg_usage", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id),
+    subscriptionId: text("subscription_id").notNull().references(() => subscriptions.id),
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+    includedLogs: integer("included_logs").notNull(),
+    actualLogs: integer("actual_logs").notNull(),
+    billableLogs: integer("billable_logs").notNull(),
+    billableUnits: numeric("billable_units", { precision: 10, scale: 4 }).notNull(),
+    amount: integer("amount").notNull(),
+    currency: text("currency").notNull().default("NGN"),
+    status: text("status").notNull(),
+    paystackRef: text("paystack_ref"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+export const billingEvents = pgTable("billing_events", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").references(() => users.id),
+    eventType: text("event_type").notNull(),
+    provider: text("provider").notNull(),
+    providerEventId: text("provider_event_id").notNull().unique(),
+    payload: text("payload"),
+    processedAt: timestamp("processed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+}, (table) => [
+    index("billing_events_provider_event_id_idx").on(table.providerEventId)
+]);
+
 
 

@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { userPreferences, users, projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { sendErrorAlertEmail } from "@/lib/email";
+import { canAcceptLog } from "@/lib/billing/entitlements";
 
 // ------------------------------------------------------------------
 // Constants
@@ -137,6 +138,20 @@ export async function POST(request: NextRequest) {
         return errorResponse(429, "RATE_LIMITED", "Too many requests.", rlHeaders);
     }
 
+    // ── 4b. Plan limit / Entitlement check ──────────────────────────
+    const entitlement = await canAcceptLog(project.userId);
+    if (!entitlement.allowed) {
+        let msg = "Log limit reached.";
+        if (entitlement.reason === "PLAN_LIMIT_REACHED") {
+            msg = "Free plan limit reached. Upgrade your plan.";
+        } else if (entitlement.reason === "PAYG_DISABLED") {
+            msg = "Log limit reached. Enable PAYG to continue.";
+        } else if (entitlement.reason === "PAYG_LIMIT_REACHED") {
+            msg = "Monthly PAYG spending limit reached.";
+        }
+        return errorResponse(429, entitlement.reason || "LIMIT_REACHED", msg, rlHeaders);
+    }
+
     // ── 5. Parse body ───────────────────────────────────────────────
     let body: unknown;
     try {
@@ -174,7 +189,7 @@ export async function POST(request: NextRequest) {
         }
 
         const normalized = normalizeBatch(valid, project, environment, request);
-        const ids = await ingestBatch(normalized).catch(() => null);
+        const ids = await ingestBatch(normalized, project.userId).catch(() => null);
 
         if (!ids) {
             return NextResponse.json({ success: false, error: "Failed to store logs." }, { status: 500, headers: corsHeaders() });
@@ -200,7 +215,7 @@ export async function POST(request: NextRequest) {
         }
 
         const normalized = normalizeLog(validation.data, project, environment, request);
-        const id = await ingestLog(normalized).catch(() => null);
+        const id = await ingestLog(normalized, project.userId).catch(() => null);
 
         if (!id) {
             return NextResponse.json({ success: false, error: "Failed to store log." }, { status: 500, headers: corsHeaders() });
@@ -214,3 +229,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+

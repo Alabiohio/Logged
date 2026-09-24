@@ -10,14 +10,20 @@ const MAX_RETRIES = 4;
 const BASE_DELAY_MS = 150;
 
 function isTransientError(err: unknown): boolean {
-  const msg = err instanceof Error ? err.message : String(err);
+  if (!err) return false;
+  const errObj = err as { message?: string; cause?: unknown; stack?: string };
+  const causeMsg = errObj.cause ? (errObj.cause instanceof Error ? errObj.cause.message : String(errObj.cause)) : "";
+  const fullText = `${errObj.message || ""} ${causeMsg} ${errObj.stack || ""} ${String(err)}`.toLowerCase();
+
   return (
-    msg.includes('fetch failed') ||
-    msg.includes('Error connecting to database') ||
-    msg.includes('ECONNRESET') ||
-    msg.includes('ETIMEDOUT') ||
-    msg.includes('socket hang up') ||
-    msg.includes('UND_ERR') // undici connection pool errors
+    fullText.includes("fetch failed") ||
+    fullText.includes("error connecting to database") ||
+    fullText.includes("econnreset") ||
+    fullText.includes("etimedout") ||
+    fullText.includes("socket hang up") ||
+    fullText.includes("und_err") ||
+    fullText.includes("econnrefused") ||
+    fullText.includes("neondberror")
   );
 }
 

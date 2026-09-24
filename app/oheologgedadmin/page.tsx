@@ -7,6 +7,7 @@ import { count, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { feedbacks, logs, projects, users } from "@/db/schema";
+import AdminBillingControl from "@/components/admin/AdminBillingControl";
 
 function getAdminEmails(): string[] {
     const envValue = [
@@ -156,6 +157,11 @@ export default async function OheoLoggedAdminPage() {
                             <p className="mt-4 text-sm text-text-muted break-words">{detail}</p>
                         </div>
                     ))}
+                </section>
+
+                {/* Billing & Gateway Controls */}
+                <section className="mb-8">
+                    <AdminBillingControl />
                 </section>
 
                 <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">

@@ -4,8 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import {
     User, Shield, Bell, Globe, Save, AlertCircle, CheckCircle2,
     Monitor, Smartphone, Laptop, Trash2, LogOut, Link2, Clock,
-    Database, TriangleAlert, Key, Copy, Check
+    Database, TriangleAlert, Key, Copy, Check, CreditCard
 } from "lucide-react";
+import Link from "next/link";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { authClient } from "@/lib/auth-client";
@@ -349,8 +350,10 @@ export default function SettingsPage() {
         label: string;
         icon: typeof User;
         parent?: string;
+        href?: string;
     }> = [
         { id: "profile", label: "Profile", icon: User },
+        { id: "billing", label: "Billing & Plans", icon: CreditCard, href: "/dashboard/settings/billing" },
         { id: "notifications", label: "Notifications", icon: Bell },
         { id: "security", label: "Security", icon: Shield },
         { id: "security-sessions", label: "Active Sessions", icon: Monitor, parent: "security" },
@@ -416,24 +419,52 @@ export default function SettingsPage() {
 
                 <div className="hidden lg:block glass rounded-[var(--radius-lg)] p-3 shadow-sm">
                     <nav aria-label="Settings categories" className="flex flex-wrap gap-2">
-                        {settingsSections.map(({ id, label, icon: Icon, parent }) => (
-                            <a
-                                key={id}
-                                href={`#${id}`}
-                                className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${
-                                    parent
-                                        ? "border-dashed border-border bg-background/20 text-text-secondary hover:border-primary/40 hover:text-text"
-                                        : "border-border bg-background/30 text-text-secondary hover:border-primary/40 hover:bg-primary/5 hover:text-text"
-                                }`}
-                            >
-                                <Icon className="h-3.5 w-3.5" />
-                                {label}
-                            </a>
-                        ))}
+                        {settingsSections.map(({ id, label, icon: Icon, parent, href }) => {
+                            const className = `inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${
+                                parent
+                                    ? "border-dashed border-border bg-background/20 text-text-secondary hover:border-primary/40 hover:text-text"
+                                    : "border-border bg-background/30 text-text-secondary hover:border-primary/40 hover:bg-primary/5 hover:text-text"
+                            }`;
+                            if (href) {
+                                return (
+                                    <Link key={id} href={href} className={className}>
+                                        <Icon className="h-3.5 w-3.5" />
+                                        {label}
+                                    </Link>
+                                );
+                            }
+                            return (
+                                <a key={id} href={`#${id}`} className={className}>
+                                    <Icon className="h-3.5 w-3.5" />
+                                    {label}
+                                </a>
+                            );
+                        })}
                     </nav>
                 </div>
 
                 <form onSubmit={handleSave} className="space-y-8">
+                    {/* ── Billing Card ──────────────────────────────────────── */}
+                    <div id="billing" className="glass rounded-[var(--radius-lg)] p-4 sm:p-6 shadow-sm scroll-mt-24 border border-primary/20">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
+                                    <CreditCard className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-black text-text">Billing & Subscription</h2>
+                                    <p className="text-xs text-text-secondary">Manage plans, view usage meters, configure PAYG, and view invoices.</p>
+                                </div>
+                            </div>
+                            <Link
+                                href="/dashboard/settings/billing"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:bg-primary-hover shadow-sm"
+                            >
+                                Open Billing Portal →
+                            </Link>
+                        </div>
+                    </div>
+
                     {/* ── Profile ─────────────────────────────────────────── */}
                     <div id="profile" className="glass rounded-[var(--radius-lg)] p-4 sm:p-6 shadow-sm scroll-mt-24">
                         <div className="flex items-center gap-3 mb-6">

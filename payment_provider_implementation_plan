@@ -1,0 +1,73 @@
+# Implementation Plan — Decoupled Payment Provider Strategy Pattern
+
+This plan outlines abstracting payment gateway implementations behind a unified **Payment Provider Interface** (Strategy Pattern). This structure decouples the core billing system from any specific payment gateway (such as Paystack) and allows switching or adding providers (e.g. Paystack, Stripe, Flutterwave) dynamically via configuration.
+
+## Proposed Changes
+
+### Payment Provider Abstraction Layer
+
+#### [NEW] [types.ts](file:///c:/Users/ohioa/Projects/React/logged/lib/billing/providers/types.ts)
+Define the unified `PaymentProvider` contract:
+```ts
+export interface PaymentProvider {
+  name: string;
+  createCustomer(params: { email: string; name?: string }): Promise<{ customerCode: string }>;
+  initializeCheckout(params: {
+    email: string;
+    amount: number;
+    planCode?: string;
+    callbackUrl?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{ authorizationUrl: string; reference: string }>;
+  chargeAuthorization(params: {
+    authorizationCode: string;
+    email: string;
+    amount: number;
+    metadata?: Record<string, unknown>;
+  }): Promise<{ reference: string }>;
+  cancelSubscription(subscriptionCode: string, token?: string): Promise<boolean>;
+  verifyWebhookSignature(rawBody: string, signature: string | null): boolean;
+  parseWebhookEvent(rawBody: string): {
+    eventType: string;
+    providerEventId: string;
+    userId?: string;
+    customerCode?: string;
+    subscriptionCode?: string;
+    planCode?: string;
+    metadata?: Record<string, unknown>;
+    raw: unknown;
+  };
+}
+```
+
+#### [NEW] [paystack.ts](file:///c:/Users/ohioa/Projects/React/logged/lib/billing/providers/paystack.ts)
+Implement `PaystackPaymentProvider` adhering to `PaymentProvider`, wrapping underlying `lib/paystack/` calls.
+
+#### [NEW] [index.ts](file:///c:/Users/ohioa/Projects/React/logged/lib/billing/providers/index.ts)
+- Maintain provider registry (`paystack` by default, expandable to `stripe`, `flutterwave`, etc.).
+- Export `getPaymentProvider(name?: string)` which resolves provider based on DB setting `payment_provider` or env var `PAYMENT_PROVIDER` (defaulting to `"paystack"`).
+
+### Integration Refactoring
+
+#### [MODIFY] [route.ts (Checkout API)](file:///c:/Users/ohioa/Projects/React/logged/app/api/billing/checkout/route.ts)
+- Use `getPaymentProvider()` to create customer and initialize checkout URLs.
+
+#### [MODIFY] [route.ts (Cancel API)](file:///c:/Users/ohioa/Projects/React/logged/app/api/billing/cancel/route.ts)
+- Use `getPaymentProvider()` to handle gateway subscription cancellation.
+
+#### [MODIFY] [payg-settlement.ts](file:///c:/Users/ohioa/Projects/React/logged/lib/billing/payg-settlement.ts)
+- Use `getPaymentProvider()` to execute authorization charges during PAYG settlement.
+
+#### [MODIFY] [route.ts (Webhook Handler)](file:///c:/Users/ohioa/Projects/React/logged/app/api/webhooks/paystack/route.ts)
+- Refactor webhook handler to delegate signature verification and event parsing to `getPaymentProvider("paystack")`.
+
+---
+
+## Verification Plan
+
+### Automated / Integration Verification
+1. **Provider Test Script** (`scratch/test-payment-providers.ts`):
+   - Test `getPaymentProvider()` registry lookup.
+   - Test `PaystackPaymentProvider` customer creation, checkout initialization, signature verification, and event parsing.
+   - Test provider switching mechanics.
+2. Re-run M5 and M6 test suites (`scratch/test-m5.ts` and `scratch/test-m6.ts`) to ensure zero regressions.

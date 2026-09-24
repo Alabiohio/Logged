@@ -5,6 +5,7 @@ import { db } from "./db";
 import { APP_URL } from "./site-config";
 import * as schema from "./../db/schema";
 import { Resend } from "resend";
+import { ensureFreeSub } from "./billing/subscription";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,6 +19,19 @@ export const auth = betterAuth({
             verification: schema.verifications
         }
     }),
+    databaseHooks: {
+        user: {
+            create: {
+                after: async (user) => {
+                    try {
+                        await ensureFreeSub(user.id);
+                    } catch (error) {
+                        console.error(`Failed to create free subscription for user ${user.id}:`, error);
+                    }
+                },
+            },
+        },
+    },
     user: {
         deleteUser: {
             enabled: true,

@@ -28,7 +28,8 @@ import {
   Pencil,
   Radio,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  CreditCard
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
@@ -461,6 +462,7 @@ export function Sidebar({
                         >
                           {[
                             { id: "profile", label: "Profile", icon: User },
+                            { id: "billing", label: "Billing & Plans", icon: CreditCard, href: "/dashboard/settings/billing" },
                             { id: "notifications", label: "Notifications", icon: Bell },
                             { id: "security", label: "Security", icon: Shield },
                             { id: "security-sessions", label: "Active Sessions", icon: Monitor, parent: "security" },
@@ -469,7 +471,7 @@ export function Sidebar({
                           ].map((section) => (
                             <Link
                               key={section.id}
-                              href={`/dashboard/settings#${section.id}`}
+                              href={section.href || `/dashboard/settings#${section.id}`}
                               onClick={closeMenu}
                               className={`flex items-center gap-2 py-1.5 text-sm transition-colors hover:text-text rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${section.parent ? "ml-4 text-text-muted text-xs" : "text-text-secondary"}`}
                             >
