@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CreditCard,
   CheckCircle2,
@@ -132,6 +133,43 @@ export default function BillingPage() {
   useEffect(() => {
     void fetchBilling();
   }, [fetchBilling]);
+
+  // Auto-verify payment when Paystack redirects back with ?reference= or ?trxref=
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const reference = searchParams.get("reference") || searchParams.get("trxref");
+    const checkout = searchParams.get("checkout");
+    if (!reference && checkout !== "success") return;
+
+    const verifyPayment = async () => {
+      if (reference) {
+        try {
+          const res = await fetch(`/api/billing/verify?reference=${reference}`);
+          const json = await res.json();
+          if (res.ok && json.success) {
+            setSuccess("🎉 Payment successful! Your account has been upgraded to Plus.");
+          } else {
+            // Webhook may have already handled it — just refresh silently
+          }
+        } catch {
+          // Best-effort: webhook handles the actual upgrade
+        }
+      } else {
+        setSuccess("🎉 Payment received! Your plan will be updated shortly.");
+      }
+      // Always refresh billing data after returning from checkout
+      await fetchBilling();
+    };
+
+    void verifyPayment();
+    // Remove query params from URL without triggering a reload
+    const url = new URL(window.location.href);
+    url.searchParams.delete("reference");
+    url.searchParams.delete("trxref");
+    url.searchParams.delete("checkout");
+    window.history.replaceState({}, "", url.toString());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCheckout = async () => {
     setActionLoading(true);

@@ -68,16 +68,23 @@ export async function POST() {
       }
     }
 
-    // Read plan code from admin-configured DB setting first, fall back to plans table
-    const planCodeSettingRow = await db.select().from(settings).where(eq(settings.key, "paystack_plus_plan_code")).limit(1);
-    const resolvedPlanCode =
-      planCodeSettingRow[0]?.value?.trim() || plusPlan.paystackPlanCode || undefined;
+    // Read plan code from admin-configured DB setting first, fall back to plans table row.
+    // Only pass it if it's a real non-empty value — sending an invalid code causes a Paystack 404.
+    const planCodeSettingRow = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.key, "paystack_plus_plan_code"))
+      .limit(1);
+
+    const dbSettingCode = planCodeSettingRow[0]?.value?.trim() ?? "";
+    const planTableCode = (plusPlan.paystackPlanCode ?? "").trim();
+    const resolvedPlanCode = (dbSettingCode || planTableCode) || undefined;
 
     const baseUrl = process.env.APP_URL || "http://localhost:3000";
     const transaction = await provider.initializeCheckout({
       email: session.user.email,
       amount: plusPlan.price,
-      planCode: resolvedPlanCode,
+      planCode: resolvedPlanCode,        // undefined = one-time charge, fine — webhook upgrades the account
       callbackUrl: `${baseUrl}/dashboard/settings/billing?checkout=success`,
       metadata: {
         userId,
@@ -91,6 +98,7 @@ export async function POST() {
       authorizationUrl: transaction.authorizationUrl,
       checkoutUrl: transaction.authorizationUrl,
       reference: transaction.reference,
+      planCodeUsed: resolvedPlanCode ?? null,   // helpful for debugging
     });
   } catch (error) {
     console.error("Error creating checkout transaction:", error);
