@@ -58,6 +58,32 @@ async function upsertSetting(key: string, value: string) {
   }
 }
 
+function parseSettings(allSettings: { key: string; value: string }[]) {
+  let billingEnabled = false;
+  let paymentProvider = "paystack";
+  let paystackPlusPlanCode = "";
+  let paystackWebhookSecret = "";
+
+  for (const s of allSettings) {
+    switch (s.key) {
+      case "billing_enabled":
+        billingEnabled = s.value.toLowerCase() === "true";
+        break;
+      case "payment_provider":
+        paymentProvider = s.value.toLowerCase();
+        break;
+      case "paystack_plus_plan_code":
+        paystackPlusPlanCode = s.value;
+        break;
+      case "paystack_webhook_secret":
+        paystackWebhookSecret = s.value;
+        break;
+    }
+  }
+
+  return { billingEnabled, paymentProvider, paystackPlusPlanCode, paystackWebhookSecret };
+}
+
 export async function GET() {
   const isAdmin = await verifyAdmin();
   if (!isAdmin) {
@@ -66,21 +92,9 @@ export async function GET() {
 
   try {
     const allSettings = await db.select().from(settings);
-    let billingEnabled = false;
-    let paymentProvider = "paystack";
+    const parsed = parseSettings(allSettings);
 
-    for (const s of allSettings) {
-      if (s.key === "billing_enabled") {
-        billingEnabled = s.value.toLowerCase() === "true";
-      } else if (s.key === "payment_provider") {
-        paymentProvider = s.value.toLowerCase();
-      }
-    }
-
-    return NextResponse.json({
-      billingEnabled,
-      paymentProvider,
-    });
+    return NextResponse.json(parsed);
   } catch (error) {
     console.error("Error fetching admin billing settings:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -104,22 +118,20 @@ export async function PATCH(request: Request) {
       await upsertSetting("payment_provider", body.paymentProvider.trim().toLowerCase());
     }
 
-    const allSettings = await db.select().from(settings);
-    let billingEnabled = false;
-    let paymentProvider = "paystack";
-
-    for (const s of allSettings) {
-      if (s.key === "billing_enabled") {
-        billingEnabled = s.value.toLowerCase() === "true";
-      } else if (s.key === "payment_provider") {
-        paymentProvider = s.value.toLowerCase();
-      }
+    if (typeof body.paystackPlusPlanCode === "string") {
+      await upsertSetting("paystack_plus_plan_code", body.paystackPlusPlanCode.trim());
     }
+
+    if (typeof body.paystackWebhookSecret === "string" && body.paystackWebhookSecret.trim() !== "") {
+      await upsertSetting("paystack_webhook_secret", body.paystackWebhookSecret.trim());
+    }
+
+    const allSettings = await db.select().from(settings);
+    const parsed = parseSettings(allSettings);
 
     return NextResponse.json({
       success: true,
-      billingEnabled,
-      paymentProvider,
+      ...parsed,
     });
   } catch (error) {
     console.error("Error updating admin billing settings:", error);

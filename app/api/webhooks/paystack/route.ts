@@ -1,10 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { billingEvents, subscriptions, users } from "@/db/schema";
+import { billingEvents, subscriptions, users, settings } from "@/db/schema";
 import { setSubscriptionPlan, expireSubscription } from "@/lib/billing/subscription";
 import { getPaymentProvider } from "@/lib/billing/providers";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,12 +13,29 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-paystack-signature");
     const provider = await getPaymentProvider("paystack");
 
-    // Verify HMAC signature via provider
-    if (!provider.verifyWebhookSignature(rawBody, signature)) {
+    // Resolve webhook secret: DB setting takes priority over env var
+    const secretSettingRow = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.key, "paystack_webhook_secret"))
+      .limit(1);
+    const webhookSecret =
+      secretSettingRow[0]?.value?.trim() ||
+      process.env.PAYSTACK_SECRET_KEY ||
+      process.env.PAYSTACK_WEBHOOK_SECRET;
+
+    // Verify HMAC signature manually with resolved secret
+    if (!webhookSecret || !signature) {
+      console.warn("Paystack webhook: missing secret or signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+    const expectedHash = crypto.createHmac("sha512", webhookSecret).update(rawBody).digest("hex");
+    if (expectedHash !== signature) {
       console.warn("Paystack webhook signature verification failed");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
+    void provider; // provider still used below for parseWebhookEvent
     const parsedEvent = provider.parseWebhookEvent(rawBody);
     const { eventType, providerEventId } = parsedEvent;
 

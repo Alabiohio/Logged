@@ -55,7 +55,7 @@ export class PaystackPaymentProvider implements PaymentProvider {
   }
 
   verifyWebhookSignature(rawBody: string, signature: string | null): boolean {
-    const secret = process.env.PAYSTACK_WEBHOOK_SECRET;
+    const secret = process.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_WEBHOOK_SECRET;
     if (!secret || !signature) {
       return false;
     }
