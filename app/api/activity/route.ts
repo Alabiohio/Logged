@@ -4,7 +4,6 @@ import { logs, projects } from "@/db/schema";
 import { eq, and, desc, sql, or, ilike, gte, lte, lt, type SQL } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { getProjectsForUser } from "@/lib/projects";
 
 export async function GET() {
     const session = await auth.api.getSession({
@@ -16,7 +15,10 @@ export async function GET() {
     }
 
     try {
-        const userProjects = await getProjectsForUser(session.user.id);
+        const userProjects = await db
+            .select({ id: projects.id, name: projects.name })
+            .from(projects)
+            .where(eq(projects.userId, session.user.id));
         const projectIds = userProjects.map((p) => p.id);
 
         if (projectIds.length === 0) {

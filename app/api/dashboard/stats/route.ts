@@ -1,10 +1,9 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { logs } from "@/db/schema";
-import { and, desc, sql, gte } from "drizzle-orm";
+import { logs, projects } from "@/db/schema";
+import { and, desc, eq, sql, gte } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { getProjectsForUser } from "@/lib/projects";
 
 export async function GET() {
     const session = await auth.api.getSession({
@@ -19,7 +18,12 @@ export async function GET() {
 
     try {
         // Get all user projects
-        const userProjects = await getProjectsForUser(userId);
+        // Load project metadata only. Counting every project's logs here makes the dashboard
+        // wait on the full logs table before it can render its bounded recent-log preview.
+        const userProjects = await db
+            .select({ id: projects.id, name: projects.name })
+            .from(projects)
+            .where(eq(projects.userId, userId));
 
         const projectIds = userProjects.map((p) => p.id);
 
