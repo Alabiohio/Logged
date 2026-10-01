@@ -27,12 +27,37 @@ module.exports = __toCommonJS(index_exports);
 
 // src/transport.ts
 var LOGGED_ENDPOINT = "https://logged.oheo.site/api/v1/logs";
-var Transport = class {
+var Transport = class _Transport {
   config;
+  queue = [];
+  flushTimer;
+  flushing = false;
+  static BATCH_SIZE = 100;
+  static FLUSH_DELAY_MS = 100;
   constructor(config) {
     this.config = config;
   }
-  async send(payload) {
+  send(payload) {
+    this.queue.push(payload);
+    if (this.queue.length >= _Transport.BATCH_SIZE) {
+      if (this.flushTimer) clearTimeout(this.flushTimer);
+      this.flushTimer = void 0;
+      void this.flush();
+      return;
+    }
+    this.scheduleFlush();
+  }
+  scheduleFlush() {
+    if (this.flushTimer || this.queue.length === 0) return;
+    this.flushTimer = setTimeout(() => {
+      this.flushTimer = void 0;
+      void this.flush();
+    }, _Transport.FLUSH_DELAY_MS);
+  }
+  async flush() {
+    if (this.flushing || this.queue.length === 0) return;
+    this.flushing = true;
+    const batch = this.queue.splice(0, _Transport.BATCH_SIZE);
     try {
       const response = await fetch(LOGGED_ENDPOINT, {
         method: "POST",
@@ -40,22 +65,27 @@ var Transport = class {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.config.apiKey}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ logs: batch })
       });
-      if (!response.ok) {
-        if (this.config.debug) {
-          let text = await response.text();
-          if (text.trim().startsWith("<")) {
-            text = "[HTML Response / Not Found]";
-          } else if (text.length > 300) {
-            text = text.slice(0, 300) + "...";
-          }
-          console.error(`[Logged SDK] Failed to send log: ${response.status} ${response.statusText} - ${text}`);
+      if (!response.ok && this.config.debug) {
+        let text = await response.text();
+        if (text.trim().startsWith("<")) {
+          text = "[HTML Response / Not Found]";
+        } else if (text.length > 300) {
+          text = text.slice(0, 300) + "...";
         }
+        console.error(`[Logged SDK] Failed to send log batch: ${response.status} ${response.statusText} - ${text}`);
       }
     } catch (error) {
       if (this.config.debug) {
-        console.error("[Logged SDK] Network error while sending log:", error);
+        console.error("[Logged SDK] Network error while sending log batch:", error);
+      }
+    } finally {
+      this.flushing = false;
+      if (this.queue.length >= _Transport.BATCH_SIZE) {
+        void this.flush();
+      } else {
+        this.scheduleFlush();
       }
     }
   }
