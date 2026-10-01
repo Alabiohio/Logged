@@ -26,6 +26,7 @@ export type BillingConfig = {
     logsPerUnit: number;
     pricePerUnit: number; // in NGN
   };
+  paygAllowedPlans: "plus" | "free_plus";
 };
 
 export async function getBillingEnabled(): Promise<boolean> {
@@ -56,6 +57,7 @@ export async function getBillingConfig(): Promise<BillingConfig> {
       plus: { ...BILLING_DEFAULTS.plus },
     },
     payg: { ...BILLING_DEFAULTS.payg },
+    paygAllowedPlans: "plus",
   };
 
   try {
@@ -80,6 +82,11 @@ export async function getBillingConfig(): Promise<BillingConfig> {
           break;
         case "payg_price_per_unit":
           config.payg.pricePerUnit = parseInt(s.value, 10) || BILLING_DEFAULTS.payg.pricePerUnit;
+          break;
+        case "payg_allowed_plans":
+          if (s.value === "plus" || s.value === "free_plus") {
+            config.paygAllowedPlans = s.value;
+          }
           break;
       }
     }

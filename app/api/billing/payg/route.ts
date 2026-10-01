@@ -8,6 +8,7 @@ import { ensureFreeSub } from "@/lib/billing/subscription";
 import { db } from "@/lib/db";
 import { subscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getOrCreateWallet, PAYG_UNIT_AMOUNT } from "@/lib/billing/wallet";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -65,6 +66,22 @@ export async function PATCH(request: Request) {
     };
 
     if (typeof body.paygEnabled === "boolean") {
+      const limits = await getUserLimits(userId);
+      if (body.paygEnabled && !limits.paygAvailable) {
+        return NextResponse.json(
+          { error: "PAYG is not available for your current plan." },
+          { status: 403 }
+        );
+      }
+      if (body.paygEnabled) {
+        const wallet = await getOrCreateWallet(userId);
+        if (wallet.status !== "active" || wallet.balance < PAYG_UNIT_AMOUNT) {
+          return NextResponse.json(
+            { error: `Deposit at least NGN ${PAYG_UNIT_AMOUNT} to enable PAYG.` },
+            { status: 403 }
+          );
+        }
+      }
       updateData.paygEnabled = body.paygEnabled;
     }
 

@@ -22,14 +22,15 @@ export async function getUserLimits(userId: string) {
   }
 
   const config = await getBillingConfig();
-  const planName = subWithPlan?.plan.name.toLowerCase() === "plus" ? "plus" : "free";
+  const planName: "free" | "plus" = subWithPlan?.plan.name.toLowerCase() === "plus" ? "plus" : "free";
   const planConfig = config.plans[planName];
 
   const maxProjects = subWithPlan?.plan.projectLimit ?? planConfig.projects;
   const maxLogsPerMonth = subWithPlan?.plan.includedLogs ?? planConfig.logsPerMonth;
   const retentionDays = subWithPlan?.plan.retentionDays ?? planConfig.retentionDays;
 
-  const paygEnabled = subWithPlan?.subscription.paygEnabled ?? true;
+  const paygAvailable = planName === "plus" || config.paygAllowedPlans === "free_plus";
+  const paygEnabled = paygAvailable && (subWithPlan?.subscription.paygEnabled ?? true);
   const paygSpendingLimit = subWithPlan?.subscription.paygSpendingLimit ?? null;
 
   return {
@@ -38,12 +39,14 @@ export async function getUserLimits(userId: string) {
     maxLogsPerMonth,
     retentionDays,
     paygEnabled,
+    paygAvailable,
     paygSpendingLimit,
   };
 }
 
 export async function canAcceptLog(
-  userId: string
+  userId: string,
+  additionalLogs = 0
 ): Promise<{ allowed: boolean; reason?: string; overageMode?: "payg" }> {
   const billingEnabled = await getBillingEnabled();
   if (!billingEnabled) {
@@ -62,8 +65,9 @@ export async function canAcceptLog(
     .limit(1);
 
   const logsCount = usageRows.length > 0 ? usageRows[0].logsCount : 0;
+  const projectedLogsCount = logsCount + Math.max(0, additionalLogs);
 
-  if (logsCount < limits.maxLogsPerMonth) {
+  if (projectedLogsCount <= limits.maxLogsPerMonth) {
     return { allowed: true };
   }
 
@@ -75,7 +79,7 @@ export async function canAcceptLog(
   // Check PAYG spending limit if set
   if (limits.paygSpendingLimit !== null) {
     const { isOverPaygSpendingLimit } = await import("./usage");
-    const overLimit = await isOverPaygSpendingLimit(userId);
+    const overLimit = await isOverPaygSpendingLimit(userId, additionalLogs);
     if (overLimit) {
       return { allowed: false, reason: "PAYG_LIMIT_REACHED" };
     }
@@ -85,7 +89,14 @@ export async function canAcceptLog(
 }
 
 
-export async function canCreateProject(userId: string): Promise<{ allowed: boolean }> {
+export async function canCreateProject(userId: string): Promise<{
+  allowed: boolean;
+  currentPlan?: "free" | "plus";
+  currentLimit?: number;
+  projectCount?: number;
+  nextPlan?: "plus";
+  nextLimit?: number;
+}> {
   const billingEnabled = await getBillingEnabled();
   if (!billingEnabled) {
     return { allowed: true };
@@ -96,8 +107,57 @@ export async function canCreateProject(userId: string): Promise<{ allowed: boole
   const result = await db
     .select({ count: count() })
     .from(projects)
-    .where(eq(projects.userId, userId));
+    .where(and(eq(projects.userId, userId), eq(projects.isArchived, false)));
 
-  const projectCount = result[0]?.count ?? 0;
-  return { allowed: projectCount < limits.maxProjects };
+  const activeProjectCount = result[0]?.count ?? 0;
+  const nextPlan = limits.planName === "free" ? "plus" : undefined;
+  const nextLimit = nextPlan ? (await getBillingConfig()).plans[nextPlan].projects : undefined;
+
+  return {
+    allowed: activeProjectCount < limits.maxProjects,
+    currentPlan: limits.planName,
+    currentLimit: limits.maxProjects,
+    projectCount: activeProjectCount,
+    ...(nextPlan ? { nextPlan, nextLimit } : {}),
+  };
 }
+
+/**
+ * Syncs project archive status based on the user's current plan limits.
+ * When billing is enabled or a plan downgrades, excess active projects
+ * (beyond maxProjects) are automatically archived starting from the oldest.
+ */
+export async function syncUserProjectLimits(userId: string) {
+  const billingEnabled = await getBillingEnabled();
+  if (!billingEnabled) {
+    // If billing is disabled, unarchive all projects
+    await db
+      .update(projects)
+      .set({ isArchived: false, updatedAt: new Date() })
+      .where(eq(projects.userId, userId));
+    return;
+  }
+
+  const limits = await getUserLimits(userId);
+
+  // Fetch all user projects ordered by creation date (oldest first)
+  const userProjects = await db
+    .select({ id: projects.id, isArchived: projects.isArchived })
+    .from(projects)
+    .where(eq(projects.userId, userId))
+    .orderBy(projects.createdAt);
+
+  // First maxProjects remain active, remaining projects get archived
+  for (let i = 0; i < userProjects.length; i++) {
+    const proj = userProjects[i];
+    const shouldBeArchived = i >= limits.maxProjects;
+
+    if (proj.isArchived !== shouldBeArchived) {
+      await db
+        .update(projects)
+        .set({ isArchived: shouldBeArchived, updatedAt: new Date() })
+        .where(eq(projects.id, proj.id));
+    }
+  }
+}
+

@@ -17,6 +17,7 @@ interface AdminBillingSettings {
   billingEnabled: boolean;
   paymentProvider: string;
   paystackPlusPlanCode: string;
+  paygAllowedPlans: "plus" | "free_plus";
 }
 
 const PROVIDERS = [
@@ -75,6 +76,7 @@ export default function AdminBillingControl() {
           billingEnabled: data.billingEnabled,
           paymentProvider: data.paymentProvider,
           paystackPlusPlanCode: data.paystackPlusPlanCode,
+          paygAllowedPlans: data.paygAllowedPlans,
         });
         setSuccess("Billing configuration saved.");
       } else {
@@ -282,6 +284,26 @@ export default function AdminBillingControl() {
             )}
           </button>
         </div>
+      </div>
+
+      {/* PAYG Availability */}
+      <div className="space-y-3 pt-2 border-t border-border/50">
+        <div className="flex items-center gap-2">
+          <Power className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-bold text-text">PAYG Availability</h3>
+        </div>
+        <p className="text-xs text-text-secondary">
+          Choose which plans can use prepaid PAYG after their included log allowance is exhausted.
+        </p>
+        <select
+          value={settings?.paygAllowedPlans ?? "plus"}
+          onChange={(event) => handleUpdate({ paygAllowedPlans: event.target.value as "plus" | "free_plus" })}
+          disabled={updating}
+          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-text outline-none focus:border-primary transition"
+        >
+          <option value="plus">Plus users only</option>
+          <option value="free_plus">Free and Plus users</option>
+        </select>
       </div>
     </div>
   );

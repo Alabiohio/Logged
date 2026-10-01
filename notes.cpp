@@ -4,12 +4,8 @@
 // L298N MOTOR PINS
 // ==========================
 
-#define IN1 5
-#define IN2 6
-#define IN3 7
-#define IN4 8
-#define ENA 3
-#define ENB 10
+#define RIGHT 7
+#define LEFT 8
 
 // ==========================
 // HC-SR04 PINS
@@ -26,10 +22,8 @@
 void setup() {
 
   // Motor pins
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
+  pinMode(RIGHT, OUTPUT);
+  pinMode(LEFT, OUTPUT);
 
   // Ultrasonic sensor
   pinMode(CENTER_TRIG, OUTPUT);
@@ -235,14 +229,9 @@ void avoidObstacle() {
 // ==========================
 
 void forward() {
-
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, 255);
-
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENB, 255);
+  Serial.println("Moving forward");
+  digitalWrite(RIGHT, HIGH);
+  digitalWrite(LEFT, HIGH);
 }
 
 
@@ -253,14 +242,10 @@ void forward() {
 void turnLeft() {
 
   Serial.println("Turning Left");
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  analogWrite(ENA, 0);
 
 
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENB, 255);
+  digitalWrite(RIGHT, LOW);
+  digitalWrite(LEFT, HIGH);
 }
 
 
@@ -269,14 +254,8 @@ void turnLeft() {
 // ==========================
 
 void turnRight() {
-
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, 225);
-
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  analogWrite(ENB, 0);
+  digitalWrite(RIGHT, HIGH);
+  digitalWrite(LEFT, LOW);
 }
 
 
@@ -285,23 +264,11 @@ void turnRight() {
 // ==========================
 
 void stopRobot() {
-
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, 0);
-
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENB, 0);
+  digitalWrite(RIGHT, HIGH);
+  digitalWrite(LEFT, HIGH);
 }
 
 void reverseRobot() {
-
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  analogWrite(ENA,225);
-
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  analogWrite(ENB,225);
+  digitalWrite(RIGHT, LOW);
+  digitalWrite(LEFT, HIGH);
 }

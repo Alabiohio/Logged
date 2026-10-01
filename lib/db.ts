@@ -1,60 +1,13 @@
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { Pool } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
 import * as schema from '../db/schema';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not set');
 }
 
-const MAX_RETRIES = 4;
-const BASE_DELAY_MS = 150;
-
-function isTransientError(err: unknown): boolean {
-  if (!err) return false;
-  const errObj = err as { message?: string; cause?: unknown; stack?: string };
-  const causeMsg = errObj.cause ? (errObj.cause instanceof Error ? errObj.cause.message : String(errObj.cause)) : "";
-  const fullText = `${errObj.message || ""} ${causeMsg} ${errObj.stack || ""} ${String(err)}`.toLowerCase();
-
-  return (
-    fullText.includes("fetch failed") ||
-    fullText.includes("error connecting to database") ||
-    fullText.includes("econnreset") ||
-    fullText.includes("etimedout") ||
-    fullText.includes("socket hang up") ||
-    fullText.includes("und_err") ||
-    fullText.includes("econnrefused") ||
-    fullText.includes("neondberror")
-  );
-}
-
-async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastError = err;
-      if (!isTransientError(err) || attempt === MAX_RETRIES - 1) throw err;
-      // Exponential backoff + jitter to prevent concurrent retries thundering-herding
-      const jitter = Math.random() * BASE_DELAY_MS;
-      await new Promise((r) => setTimeout(r, BASE_DELAY_MS * 2 ** attempt + jitter));
-    }
-  }
-  throw lastError;
-}
-
-const rawSql = neon(process.env.DATABASE_URL, {
-  // Disable keepalive so Node.js/undici doesn't serve stale pooled connections —
-  // this is the main cause of "fetch failed" errors on an otherwise warm database.
-  fetchOptions: { keepalive: false },
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
 
-// Proxy every call through the retry wrapper so transient failures are
-// transparently retried before bubbling up to better-auth or route handlers.
-const sql = new Proxy(rawSql, {
-  apply(_target, _thisArg, args) {
-    return withRetry(() => (rawSql as unknown as (...a: unknown[]) => Promise<unknown>)(...args));
-  },
-}) as typeof rawSql;
-
-export const db = drizzle({ client: sql, schema });
+export const db = drizzle({ client: pool, schema });

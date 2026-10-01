@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyTransaction } from "@/lib/paystack/transactions";
 import { setSubscriptionPlan } from "@/lib/billing/subscription";
+import { creditWalletDeposit } from "@/lib/billing/wallet";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -24,6 +25,38 @@ export async function GET(request: NextRequest) {
     const tx = await verifyTransaction(reference);
 
     if (tx.status === "success") {
+      const metadata = tx.metadata;
+      if (metadata?.userId !== session.user.id) {
+        return NextResponse.json({ error: "Transaction does not belong to this account" }, { status: 403 });
+      }
+
+      if (metadata.type === "wallet_deposit") {
+        const metadataAmount = Number(metadata.amount);
+        const amount = Number.isInteger(metadataAmount) && metadataAmount > 0
+          ? metadataAmount
+          : Math.floor(tx.amount / 100);
+        if (amount <= 0) {
+          return NextResponse.json({ error: "Invalid wallet deposit amount" }, { status: 400 });
+        }
+
+        await creditWalletDeposit({
+          userId: session.user.id,
+          amount,
+          providerReference: tx.reference,
+          idempotencyKey: `deposit:paystack:${tx.reference}`,
+        });
+
+        return NextResponse.json({
+          success: true,
+          type: "wallet_deposit",
+          message: "Wallet deposit received successfully",
+        });
+      }
+
+      if (metadata.planId !== "plus") {
+        return NextResponse.json({ error: "Transaction is not a Plus checkout" }, { status: 400 });
+      }
+
       await setSubscriptionPlan(session.user.id, "plus", {
         customerCode: tx.customer?.customer_code,
         planCode: tx.plan_object?.plan_code,
@@ -33,6 +66,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
+        type: "plus_subscription",
         message: "Subscription upgraded successfully",
         plan: "plus",
       });

@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { getProjectsForUser } from "@/lib/projects";
+import { canCreateProject, syncUserProjectLimits } from "@/lib/billing/entitlements";
 
 export async function GET() {
     const session = await auth.api.getSession({
@@ -16,6 +17,7 @@ export async function GET() {
     }
 
     try {
+        await syncUserProjectLimits(session.user.id);
         const userProjects = await getProjectsForUser(session.user.id);
 
         return NextResponse.json(userProjects);
@@ -35,6 +37,17 @@ export async function POST(req: Request) {
     }
 
     try {
+        const projectCheck = await canCreateProject(session.user.id);
+        if (!projectCheck.allowed) {
+            return NextResponse.json(
+                {
+                    error: "Project limit reached for your plan.",
+                    code: "PROJECT_LIMIT_REACHED",
+                    ...projectCheck,
+                },
+                { status: 403 }
+            );
+        }
         const body = await req.json();
         const { name, description, website } = body;
 

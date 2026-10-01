@@ -12,6 +12,7 @@ import "ldrs/react/Cardio.css";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { trackSettingsSaved, trackSessionRevoked } from "@/lib/analytics";
+import { Modal } from "@/components/ui/Modal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -80,21 +81,12 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
 }) {
     const [input, setInput] = useState("");
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={onCancel}
-            />
-            <div className="relative glass rounded-[var(--radius-lg)] p-6 shadow-lg w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-error/10">
-                        <TriangleAlert className="h-5 w-5 text-error" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-black text-text">Delete Account</h3>
-                        <p className="text-xs text-text-secondary">This cannot be undone</p>
-                    </div>
-                </div>
+        <Modal
+            title="Delete Account"
+            subtitle="This cannot be undone"
+            icon={<TriangleAlert className="h-5 w-5 text-error" />}
+            onClose={onCancel}
+        >
                 <p className="text-sm text-text-secondary mb-4">
                     All your projects, logs, and API keys will be permanently deleted.
                     Type <span className="font-mono font-bold text-error">delete</span> to confirm.
@@ -127,8 +119,7 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
                         )}
                     </button>
                 </div>
-            </div>
-        </div>
+        </Modal>
     );
 }
 

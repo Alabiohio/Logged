@@ -5,14 +5,33 @@ import { getUserLimits } from "./entitlements";
 import { eq, and, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
-export function getCurrentPeriod(): { periodStart: Date; periodEnd: Date } {
-  const now = new Date();
-  const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
-  
+export function getPeriodForDate(date: Date = new Date()): { periodStart: Date; periodEnd: Date } {
+  const periodStart = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 0, 0, 0, 0));
+
   // Last millisecond of current UTC month
-  const periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+  const periodEnd = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59, 999));
 
   return { periodStart, periodEnd };
+}
+
+export function getCurrentPeriod(): { periodStart: Date; periodEnd: Date } {
+  return getPeriodForDate();
+}
+
+export function getPreviousPeriod(): { periodStart: Date; periodEnd: Date } {
+  const previousMonth = new Date();
+  previousMonth.setUTCMonth(previousMonth.getUTCMonth() - 1, 1);
+  return getPeriodForDate(previousMonth);
+}
+
+export async function getUsageForPeriod(userId: string, periodStart: Date) {
+  const rows = await db
+    .select()
+    .from(usage)
+    .where(and(eq(usage.userId, userId), eq(usage.periodStart, periodStart)))
+    .limit(1);
+
+  return rows[0] ?? null;
 }
 
 export async function getCurrentUsage(userId: string) {
@@ -94,8 +113,25 @@ export async function getPaygAccrual(userId: string) {
     getBillingConfig(),
   ]);
 
-  const logsCount = currentUsage.logsCount;
-  const extraLogs = Math.max(0, logsCount - limits.maxLogsPerMonth);
+  return calculatePaygAccrual(currentUsage.logsCount, limits.maxLogsPerMonth, config);
+}
+
+export async function getPaygAccrualForPeriod(userId: string, periodStart: Date) {
+  const [periodUsage, limits, config] = await Promise.all([
+    getUsageForPeriod(userId, periodStart),
+    getUserLimits(userId),
+    getBillingConfig(),
+  ]);
+
+  return calculatePaygAccrual(periodUsage?.logsCount ?? 0, limits.maxLogsPerMonth, config);
+}
+
+function calculatePaygAccrual(
+  logsCount: number,
+  includedLogs: number,
+  config: Awaited<ReturnType<typeof getBillingConfig>>
+) {
+  const extraLogs = Math.max(0, logsCount - includedLogs);
   const logsPerUnit = config.payg.logsPerUnit || 10_000;
   const pricePerUnit = config.payg.pricePerUnit || 500;
 
@@ -110,12 +146,20 @@ export async function getPaygAccrual(userId: string) {
   };
 }
 
-export async function isOverPaygSpendingLimit(userId: string): Promise<boolean> {
+export async function isOverPaygSpendingLimit(userId: string, additionalLogs = 0): Promise<boolean> {
   const limits = await getUserLimits(userId);
   if (limits.paygSpendingLimit === null) {
     return false;
   }
-  const accrual = await getPaygAccrual(userId);
+  const [currentUsage, config] = await Promise.all([
+    getCurrentUsage(userId),
+    getBillingConfig(),
+  ]);
+  const accrual = calculatePaygAccrual(
+    currentUsage.logsCount + additionalLogs,
+    limits.maxLogsPerMonth,
+    config
+  );
   return accrual.estimatedAmount >= limits.paygSpendingLimit;
 }
 

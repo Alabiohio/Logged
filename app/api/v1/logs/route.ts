@@ -129,6 +129,10 @@ export async function POST(request: NextRequest) {
     }
     const { project, environment } = authResult;
 
+    if (project.isArchived) {
+        return errorResponse(403, "PROJECT_ARCHIVED", "This project is archived due to plan limits. Upgrade your plan to reactivate it.");
+    }
+
     // ── 4. Rate limit (keyed on hash, not raw key) ──────────────────
     const keyHash = hashApiKey(rawKey);
     const rl = checkRateLimit(keyHash);
@@ -188,8 +192,27 @@ export async function POST(request: NextRequest) {
             return errorResponse(400, "INVALID_LOG", "All logs in the batch failed validation.", rlHeaders);
         }
 
+        const batchEntitlement = await canAcceptLog(project.userId, valid.length);
+        if (!batchEntitlement.allowed) {
+            const message = batchEntitlement.reason === "PAYG_DISABLED"
+                ? "Log limit reached. Enable PAYG to continue."
+                : batchEntitlement.reason === "PAYG_LIMIT_REACHED"
+                    ? "Monthly PAYG spending limit reached."
+                    : "Log limit reached.";
+            return errorResponse(429, batchEntitlement.reason || "LIMIT_REACHED", message, rlHeaders);
+        }
+
         const normalized = normalizeBatch(valid, project, environment, request);
-        const ids = await ingestBatch(normalized, project.userId).catch(() => null);
+        const ids = await ingestBatch(normalized, project.userId).catch((error) => {
+            if (error instanceof Error && error.message === "PAYG wallet balance is insufficient") {
+                return "PAYG_WALLET_INSUFFICIENT";
+            }
+            return null;
+        });
+
+        if (ids === "PAYG_WALLET_INSUFFICIENT") {
+            return errorResponse(402, "PAYG_WALLET_INSUFFICIENT", "PAYG wallet balance is insufficient.", rlHeaders);
+        }
 
         if (!ids) {
             return NextResponse.json({ success: false, error: "Failed to store logs." }, { status: 500, headers: corsHeaders() });
@@ -215,7 +238,16 @@ export async function POST(request: NextRequest) {
         }
 
         const normalized = normalizeLog(validation.data, project, environment, request);
-        const id = await ingestLog(normalized, project.userId).catch(() => null);
+        const id = await ingestLog(normalized, project.userId).catch((error) => {
+            if (error instanceof Error && error.message === "PAYG wallet balance is insufficient") {
+                return "PAYG_WALLET_INSUFFICIENT";
+            }
+            return null;
+        });
+
+        if (id === "PAYG_WALLET_INSUFFICIENT") {
+            return errorResponse(402, "PAYG_WALLET_INSUFFICIENT", "PAYG wallet balance is insufficient.", rlHeaders);
+        }
 
         if (!id) {
             return NextResponse.json({ success: false, error: "Failed to store log." }, { status: 500, headers: corsHeaders() });

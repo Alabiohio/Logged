@@ -2,9 +2,12 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getUserSubscription, ensureFreeSub } from "@/lib/billing/subscription";
-import { getUserLimits, getUserPlan } from "@/lib/billing/entitlements";
+import { getUserLimits, getUserPlan, syncUserProjectLimits } from "@/lib/billing/entitlements";
 import { getCurrentUsage, getPaygAccrual } from "@/lib/billing/usage";
 import { getBillingEnabled } from "@/lib/billing/config";
+import { db } from "@/lib/db";
+import { projects } from "@/db/schema";
+import { and, count, eq } from "drizzle-orm";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -17,19 +20,26 @@ export async function GET() {
 
   try {
     const userId = session.user.id;
+    await syncUserProjectLimits(userId);
     let subWithPlan = await getUserSubscription(userId);
     if (!subWithPlan) {
       await ensureFreeSub(userId);
       subWithPlan = await getUserSubscription(userId);
     }
 
-    const [planCode, limits, currentUsage, paygAccrual, billingEnabled] = await Promise.all([
+    const [planCode, limits, currentUsage, paygAccrual, billingEnabled, projectCountResult] = await Promise.all([
       getUserPlan(userId),
       getUserLimits(userId),
       getCurrentUsage(userId),
       getPaygAccrual(userId),
       getBillingEnabled(),
+      db
+        .select({ count: count() })
+        .from(projects)
+        .where(and(eq(projects.userId, userId), eq(projects.isArchived, false))),
     ]);
+
+    const projectCount = projectCountResult[0]?.count ?? 0;
 
     return NextResponse.json({
       plan: {
@@ -61,6 +71,7 @@ export async function GET() {
       },
       limits: {
         maxProjects: limits.maxProjects,
+        projectCount,
         retentionDays: limits.retentionDays,
       },
       payg: {

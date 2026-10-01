@@ -18,7 +18,8 @@ import {
   Database,
   FolderKanban,
   Clock,
-  Check
+  Check,
+  WalletCards
 } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
@@ -54,7 +55,9 @@ interface UsageInfo {
 
 interface LimitsInfo {
   maxProjects: number;
+  projectCount: number;
   retentionDays: number;
+  paygAvailable: boolean;
 }
 
 interface PaygAccrual {
@@ -86,6 +89,21 @@ interface BillingData {
   payg: PaygInfo;
 }
 
+interface WalletInfo {
+  balance: number;
+  currency: string;
+  status: string;
+}
+
+interface WalletTransaction {
+  id: string;
+  type: string;
+  amount: number;
+  balanceAfter: number;
+  status: string;
+  createdAt: string;
+}
+
 export default function BillingPage() {
   const [data, setData] = useState<BillingData | null>(null);
   const [paygDetails, setPaygDetails] = useState<PaygInfo | null>(null);
@@ -94,6 +112,10 @@ export default function BillingPage() {
   const [paygUpdating, setPaygUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [wallet, setWallet] = useState<WalletInfo | null>(null);
+  const [depositAmount, setDepositAmount] = useState("500");
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
 
   // PAYG limit edit state
   const [editingLimit, setEditingLimit] = useState(false);
@@ -123,12 +145,50 @@ export default function BillingPage() {
         setPaygDetails(paygJson);
         setLimitInput(paygJson.spendingLimit !== null ? String(paygJson.spendingLimit) : "");
       }
+
+      const resWallet = await fetch("/api/billing/wallet");
+      if (resWallet.ok) {
+        setWallet(await resWallet.json());
+      }
+      const resWalletTransactions = await fetch("/api/billing/wallet/transactions");
+      if (resWalletTransactions.ok) {
+        const walletData = await resWalletTransactions.json();
+        setWalletTransactions(walletData.transactions ?? []);
+      }
     } catch {
       setError("Network error loading billing data.");
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const handleDeposit = async () => {
+    const amount = Number(depositAmount);
+    if (!Number.isInteger(amount) || amount < 500) {
+      setError("Deposit amount must be at least NGN 500.");
+      return;
+    }
+
+    setDepositLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/billing/wallet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+      const json = await res.json();
+      if (json.authorizationUrl) {
+        window.location.assign(json.authorizationUrl);
+      } else {
+        setError(json.error || "Unable to start wallet deposit.");
+      }
+    } catch {
+      setError("Unable to start wallet deposit.");
+    } finally {
+      setDepositLoading(false);
+    }
+  };
 
   useEffect(() => {
     void fetchBilling();
@@ -139,7 +199,8 @@ export default function BillingPage() {
   useEffect(() => {
     const reference = searchParams.get("reference") || searchParams.get("trxref");
     const checkout = searchParams.get("checkout");
-    if (!reference && checkout !== "success") return;
+    const walletDeposit = searchParams.get("wallet") === "success";
+    if (!reference && checkout !== "success" && !walletDeposit) return;
 
     const verifyPayment = async () => {
       if (reference) {
@@ -147,7 +208,9 @@ export default function BillingPage() {
           const res = await fetch(`/api/billing/verify?reference=${reference}`);
           const json = await res.json();
           if (res.ok && json.success) {
-            setSuccess("🎉 Payment successful! Your account has been upgraded to Plus.");
+            setSuccess(json.type === "wallet_deposit"
+              ? "Wallet deposit received successfully. Your balance is ready for PAYG."
+              : "Payment successful! Your account has been upgraded to Plus.");
           } else {
             // Webhook may have already handled it — just refresh silently
           }
@@ -155,7 +218,9 @@ export default function BillingPage() {
           // Best-effort: webhook handles the actual upgrade
         }
       } else {
-        setSuccess("🎉 Payment received! Your plan will be updated shortly.");
+        setSuccess(walletDeposit
+          ? "Payment received! Your wallet balance will update shortly."
+          : "Payment received! Your plan will be updated shortly.");
       }
       // Always refresh billing data after returning from checkout
       await fetchBilling();
@@ -167,6 +232,7 @@ export default function BillingPage() {
     url.searchParams.delete("reference");
     url.searchParams.delete("trxref");
     url.searchParams.delete("checkout");
+    url.searchParams.delete("wallet");
     window.history.replaceState({}, "", url.toString());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -310,12 +376,22 @@ export default function BillingPage() {
   // Usage percentages
   const logsCount = usage?.logsCount ?? 0;
   const maxLogs = usage?.maxLogs ?? 10000;
-  const logsPercentage = Math.min(Math.round((logsCount / maxLogs) * 100), 100);
+  const logsPercentage = maxLogs > 0
+    ? Math.min(Math.round((logsCount / maxLogs) * 100), 100)
+    : 0;
   const isLogsWarning = logsPercentage >= 80 && logsPercentage < 100;
   const isLogsMaxed = logsCount >= maxLogs;
 
-  const projectCount = 0; // projects can be counted dynamically or pulled
   const maxProjects = limits?.maxProjects ?? 2;
+  const projectCount = limits?.projectCount ?? 0;
+  const projectsPercentage = maxProjects > 0
+    ? Math.min(Math.round((projectCount / maxProjects) * 100), 100)
+    : 0;
+  const retentionDays = limits?.retentionDays ?? 7;
+  const maxRetentionDays = 30;
+  const retentionPercentage = Math.min(Math.round((retentionDays / maxRetentionDays) * 100), 100);
+  const walletBalance = wallet?.balance ?? 0;
+  const canFundPayg = walletBalance >= 500;
 
   // PAYG Accruals
   const extraLogs = payg?.extraLogs ?? payg?.accrual?.extraLogs ?? 0;
@@ -370,6 +446,60 @@ export default function BillingPage() {
           <span>{success}</span>
         </div>
       )}
+
+      <section className="glass rounded-[var(--radius-lg)] p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <WalletCards className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-text">PAYG Wallet</h2>
+              <p className="text-xs text-text-secondary">Deposit funds before enabling prepaid PAYG.</p>
+            </div>
+          </div>
+          <div className="text-left sm:text-right">
+            <p className="text-xs text-text-muted">Available balance</p>
+            <p className="text-xl font-black text-text">NGN {(wallet?.balance ?? 0).toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <input
+            type="number"
+            min="500"
+            step="500"
+            value={depositAmount}
+            onChange={(event) => setDepositAmount(event.target.value)}
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm font-mono text-text outline-none focus:border-primary sm:w-40"
+            aria-label="Deposit amount in NGN"
+          />
+          <button
+            type="button"
+            onClick={handleDeposit}
+            disabled={depositLoading || wallet?.status !== "active"}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50"
+          >
+            {depositLoading ? "Opening checkout..." : "Deposit funds"}
+          </button>
+        </div>
+        {walletTransactions.length > 0 && (
+          <div className="mt-5 border-t border-border/50 pt-4">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">Recent wallet activity</p>
+            <div className="space-y-2">
+              {walletTransactions.slice(0, 5).map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between text-xs">
+                  <span className="text-text-secondary">
+                    {transaction.type === "deposit" ? "Wallet deposit" : "PAYG usage"}
+                  </span>
+                  <span className={transaction.amount >= 0 ? "font-mono font-bold text-success" : "font-mono font-bold text-text"}>
+                    {transaction.amount >= 0 ? "+" : ""}NGN {Math.abs(transaction.amount).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Master Billing OFF Notice */}
       {!isBillingEnabled && (
@@ -451,18 +581,21 @@ export default function BillingPage() {
             <div className="space-y-2 p-3.5 rounded-2xl bg-background/30 border border-border/40">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-text-secondary flex items-center gap-1.5">
-                  <FolderKanban className="h-3.5 w-3.5 text-primary" /> Max Projects
+                  <FolderKanban className="h-3.5 w-3.5 text-primary" /> Projects Used
                 </span>
                 <span className="font-mono font-bold text-text">
-                  {maxProjects} Projects
+                  {projectCount} / {maxProjects}
                 </span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-border/60 overflow-hidden">
-                <div className="h-full bg-primary/70 transition-all duration-500" style={{ width: isPlus ? "50%" : "100%" }} />
+                <div
+                  className={`h-full transition-all duration-500 ${projectsPercentage >= 100 ? "bg-error" : "bg-primary/70"}`}
+                  style={{ width: `${projectsPercentage}%` }}
+                />
               </div>
               <div className="flex justify-between items-center text-[10px] text-text-muted">
-                <span>Active Cap</span>
-                <span>{isPlus ? "Up to 10" : "Up to 2"}</span>
+                <span>Active Projects</span>
+                <span>{projectsPercentage}% Used</span>
               </div>
             </div>
 
@@ -473,15 +606,15 @@ export default function BillingPage() {
                   <Clock className="h-3.5 w-3.5 text-primary" /> Data Retention
                 </span>
                 <span className="font-mono font-bold text-text">
-                  {limits?.retentionDays ?? 7} Days
+                  {retentionDays} Days
                 </span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-border/60 overflow-hidden">
-                <div className="h-full bg-primary/50 transition-all duration-500" style={{ width: isPlus ? "100%" : "23%" }} />
+                <div className="h-full bg-primary/50 transition-all duration-500" style={{ width: `${retentionPercentage}%` }} />
               </div>
               <div className="flex justify-between items-center text-[10px] text-text-muted">
                 <span>Automatic Purge</span>
-                <span>{isPlus ? "30 Days" : "7 Days"}</span>
+                <span>{retentionPercentage}% of maximum</span>
               </div>
             </div>
           </div>
@@ -697,6 +830,28 @@ export default function BillingPage() {
               >
                 PAYG Coming Soon
               </button>
+            ) : !limits?.paygAvailable ? (
+              <button
+                onClick={handleCheckout}
+                disabled={actionLoading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover active:scale-98 transition shadow-sm disabled:opacity-50"
+              >
+                {actionLoading ? (
+                  <Cardio size="28" color="white" speed="1.5" stroke="3" bgOpacity="0.1" />
+                ) : (
+                  <>
+                    Upgrade to Enable PAYG <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            ) : !canFundPayg ? (
+              <button
+                onClick={handleDeposit}
+                disabled={depositLoading || wallet?.status !== "active"}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
+              >
+                Deposit to Enable PAYG
+              </button>
             ) : payg?.enabled ? (
               <button
                 onClick={() => handleTogglePayg(false)}
@@ -791,7 +946,7 @@ export default function BillingPage() {
           )}
 
           {/* Accrual Summary Grid */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="p-4 rounded-2xl bg-background/40 border border-border/50 space-y-1">
               <span className="text-[11px] font-semibold text-text-muted uppercase">Extra Overflow Logs</span>
               <div className="text-xl font-black text-text font-mono">
@@ -814,6 +969,14 @@ export default function BillingPage() {
                 ₦{estimatedAmount.toLocaleString()}
               </div>
               <p className="text-[10px] text-text-secondary">Settled at period end</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-background/40 border border-border/50 space-y-1">
+              <span className="text-[11px] font-semibold text-text-muted uppercase">Available Wallet Balance</span>
+              <div className="text-xl font-black text-text font-mono">
+                NGN {walletBalance.toLocaleString()}
+              </div>
+              <p className="text-[10px] text-text-secondary">Available for immediate PAYG deductions</p>
             </div>
           </div>
 

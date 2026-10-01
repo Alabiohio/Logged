@@ -13,6 +13,7 @@ import {
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { ApiKeyCard } from "@/components/ApiKeyCard";
+import { Modal } from "@/components/ui/Modal";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { StatCardSkeleton, LogRowSkeleton } from "@/components/dashboard/skeleton";
@@ -578,16 +579,15 @@ export default function ProjectOverviewPage() {
 
             {/* Delete Confirmation Modal */}
             {deleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => setDeleteModal(false)}
-                    />
-                    <div className="relative z-10 w-full max-w-md rounded-3xl border border-error/30 bg-background p-8 shadow-xl space-y-5">
-                        <div className="flex items-center gap-3 text-error">
-                            <Trash2 className="h-6 w-6" />
-                            <h2 className="text-xl font-black">Delete Project</h2>
-                        </div>
+                <Modal
+                    title="Delete Project"
+                    subtitle="This cannot be undone"
+                    icon={<Trash2 className="h-5 w-5 text-error" />}
+                    onClose={() => {
+                        setDeleteModal(false);
+                        setDeleteInput("");
+                    }}
+                >
                         <p className="text-sm text-text-secondary leading-relaxed">
                             This will permanently delete{" "}
                             <span className="font-semibold text-text">
@@ -595,10 +595,10 @@ export default function ProjectOverviewPage() {
                             </span>{" "}
                             and all associated logs. This action cannot be undone.
                         </p>
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-text">
+                        <div className="mt-6 space-y-3">
+                            <label className="text-sm font-semibold text-text mb-4">
                                 Type{" "}
-                                <span className="font-mono bg-background-tertiary px-1.5 py-0.5 rounded text-error">
+                                <span className="font-mono bg-background-tertiary px-1.5 rounded text-error">
                                     {project.name}
                                 </span>{" "}
                                 to confirm
@@ -608,10 +608,10 @@ export default function ProjectOverviewPage() {
                                 value={deleteInput}
                                 onChange={(e) => setDeleteInput(e.target.value)}
                                 placeholder={project.name}
-                                className="w-full rounded-2xl border border-border bg-glass px-4 py-2.5 text-sm text-text outline-none focus:border-error focus:ring-2 focus:ring-error/20"
+                                className="w-full rounded-2xl border border-border bg-glass px-4 py-3 text-sm text-text outline-none focus:border-error focus:ring-2 focus:ring-error/20"
                             />
                         </div>
-                        <div className="flex items-center justify-end gap-3">
+                        <div className="mt-7 flex items-center justify-end gap-3">
                             <button
                                 onClick={() => {
                                     setDeleteModal(false);
@@ -635,8 +635,7 @@ export default function ProjectOverviewPage() {
                                 )}
                             </button>
                         </div>
-                    </div>
-                </div>
+                </Modal>
             )}
         </div>
     );

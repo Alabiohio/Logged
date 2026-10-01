@@ -62,6 +62,7 @@ function parseSettings(allSettings: { key: string; value: string }[]) {
   let billingEnabled = false;
   let paymentProvider = "paystack";
   let paystackPlusPlanCode = "";
+  let paygAllowedPlans: "plus" | "free_plus" = "plus";
 
   for (const s of allSettings) {
     switch (s.key) {
@@ -74,10 +75,15 @@ function parseSettings(allSettings: { key: string; value: string }[]) {
       case "paystack_plus_plan_code":
         paystackPlusPlanCode = s.value;
         break;
+      case "payg_allowed_plans":
+        if (s.value === "plus" || s.value === "free_plus") {
+          paygAllowedPlans = s.value;
+        }
+        break;
     }
   }
 
-  return { billingEnabled, paymentProvider, paystackPlusPlanCode };
+  return { billingEnabled, paymentProvider, paystackPlusPlanCode, paygAllowedPlans };
 }
 
 export async function GET() {
@@ -116,6 +122,10 @@ export async function PATCH(request: Request) {
 
     if (typeof body.paystackPlusPlanCode === "string") {
       await upsertSetting("paystack_plus_plan_code", body.paystackPlusPlanCode.trim());
+    }
+
+    if (body.paygAllowedPlans === "plus" || body.paygAllowedPlans === "free_plus") {
+      await upsertSetting("payg_allowed_plans", body.paygAllowedPlans);
     }
 
     const allSettings = await db.select().from(settings);

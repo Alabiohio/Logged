@@ -2,7 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { billingEvents, subscriptions, users } from "@/db/schema";
 import { setSubscriptionPlan, expireSubscription } from "@/lib/billing/subscription";
+import { syncUserProjectLimits } from "@/lib/billing/entitlements";
 import { getPaymentProvider } from "@/lib/billing/providers";
+import { creditWalletDeposit } from "@/lib/billing/wallet";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
@@ -73,17 +75,48 @@ export async function POST(request: NextRequest) {
     if (userId) {
       switch (eventType) {
         case "charge.success": {
-          await setSubscriptionPlan(userId, "plus", {
-            customerCode: parsedEvent.customerCode,
-            subscriptionCode: parsedEvent.subscriptionCode,
-            planCode: parsedEvent.planCode,
-            periodStart: new Date(),
-            periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          });
+          if (parsedEvent.metadata?.type === "wallet_deposit") {
+            const providerReference = (parsedEvent.raw as { data?: { reference?: string } })?.data?.reference;
+            const metadataAmount = Number(parsedEvent.metadata.amount);
+            const rawAmount = (parsedEvent.raw as { data?: { amount?: number } })?.data?.amount;
+            const amount = Number.isInteger(metadataAmount) && metadataAmount > 0
+              ? metadataAmount
+              : typeof rawAmount === "number" ? Math.floor(rawAmount / 100) : 0;
+
+            if (amount > 0 && providerReference) {
+              await creditWalletDeposit({
+                userId,
+                amount,
+                providerReference,
+                idempotencyKey: `deposit:${provider.name}:${providerReference}`,
+              });
+            }
+            break;
+          }
+
+          // A successful charge may be a wallet deposit or another payment.
+          // Only the explicit Plus checkout metadata is allowed to change plans.
+          if (parsedEvent.metadata?.planId === "plus" && parsedEvent.metadata.userId === userId) {
+            await setSubscriptionPlan(userId, "plus", {
+              customerCode: parsedEvent.customerCode,
+              subscriptionCode: parsedEvent.subscriptionCode,
+              planCode: parsedEvent.planCode,
+              periodStart: new Date(),
+              periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            });
+            await syncUserProjectLimits(userId);
+          } else {
+            console.info(`Ignoring non-Plus Paystack charge.success event: ${providerEventId}`);
+          }
           break;
         }
 
         case "subscription.create": {
+          if (parsedEvent.metadata?.planId !== "plus" || parsedEvent.metadata.userId !== userId) {
+            console.info(`Ignoring non-Plus Paystack subscription.create event: ${providerEventId}`);
+            break;
+          }
+
           await setSubscriptionPlan(userId, "plus", {
             customerCode: parsedEvent.customerCode,
             subscriptionCode: parsedEvent.subscriptionCode,
@@ -91,6 +124,7 @@ export async function POST(request: NextRequest) {
             periodStart: new Date(),
             periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           });
+          await syncUserProjectLimits(userId);
           break;
         }
 
@@ -100,11 +134,13 @@ export async function POST(request: NextRequest) {
             .update(subscriptions)
             .set({ status: "past_due", updatedAt: new Date() })
             .where(eq(subscriptions.userId, userId));
+          await syncUserProjectLimits(userId);
           break;
         }
 
         case "subscription.disable": {
           await expireSubscription(userId);
+          await syncUserProjectLimits(userId);
           break;
         }
       }
@@ -122,4 +158,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: false, error: "Internal processing error" }, { status: 200 });
   }
 }
-

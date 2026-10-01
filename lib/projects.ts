@@ -44,6 +44,7 @@ export async function getProjectsForUser(userId: string) {
             name: projects.name,
             description: projects.description,
             website: projects.website,
+            isArchived: projects.isArchived,
             createdAt: projects.createdAt,
             updatedAt: projects.updatedAt,
             logCount: sql<number>`cast(count(${logs.id}) as integer)`,

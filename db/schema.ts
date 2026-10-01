@@ -64,6 +64,7 @@ export const projects = pgTable("project", {
     name: text("name").notNull(),
     description: text("description"),
     website: text("website"),
+    isArchived: boolean("is_archived").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 });
@@ -166,6 +167,38 @@ export const subscriptions = pgTable("subscriptions", {
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 }, (table) => [
     uniqueIndex("subscriptions_user_id_idx").on(table.userId)
+]);
+
+export const walletAccounts = pgTable("wallet_accounts", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id),
+    balance: integer("balance").notNull().default(0),
+    currency: text("currency").notNull().default("NGN"),
+    status: text("status").notNull().default("active"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+}, (table) => [
+    uniqueIndex("wallet_accounts_user_id_idx").on(table.userId)
+]);
+
+export const walletTransactions = pgTable("wallet_transactions", {
+    id: text("id").primaryKey(),
+    walletId: text("wallet_id").notNull().references(() => walletAccounts.id),
+    userId: text("user_id").notNull().references(() => users.id),
+    type: text("type").notNull(),
+    amount: integer("amount").notNull(),
+    balanceBefore: integer("balance_before").notNull(),
+    balanceAfter: integer("balance_after").notNull(),
+    currency: text("currency").notNull().default("NGN"),
+    status: text("status").notNull(),
+    provider: text("provider"),
+    providerReference: text("provider_reference"),
+    idempotencyKey: text("idempotency_key").notNull(),
+    metadata: text("metadata"),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+}, (table) => [
+    uniqueIndex("wallet_transactions_idempotency_idx").on(table.idempotencyKey),
+    uniqueIndex("wallet_transactions_provider_reference_idx").on(table.providerReference)
 ]);
 
 export const usage = pgTable("usage", {

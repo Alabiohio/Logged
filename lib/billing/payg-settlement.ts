@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { paygUsage, subscriptions, plans, users } from "@/db/schema";
 import { getUserSubscription } from "./subscription";
-import { getCurrentPeriod, getCurrentUsage, getPaygAccrual } from "./usage";
+import { getPreviousPeriod, getUsageForPeriod, getPaygAccrualForPeriod } from "./usage";
 import { getPaymentProvider } from "./providers";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
@@ -12,7 +12,7 @@ export async function settlePaygForUser(userId: string) {
     return { status: "skipped", reason: "No active subscription" };
   }
 
-  const { periodStart, periodEnd } = getCurrentPeriod();
+  const { periodStart, periodEnd } = getPreviousPeriod();
 
   // Idempotency check: if charged for this period already, return existing
   const existingCharged = await db
@@ -25,8 +25,12 @@ export async function settlePaygForUser(userId: string) {
     return { status: "already_charged", paygUsage: existingCharged[0] };
   }
 
-  const currentUsage = await getCurrentUsage(userId);
-  const accrual = await getPaygAccrual(userId);
+  const periodUsage = await getUsageForPeriod(userId, periodStart);
+  if (!periodUsage) {
+    return { status: "skipped", reason: "No usage for previous period" };
+  }
+
+  const accrual = await getPaygAccrualForPeriod(userId, periodStart);
 
   if (accrual.extraLogs <= 0 || accrual.estimatedAmount <= 0) {
     return { status: "skipped", reason: "No extra logs to bill" };
@@ -42,7 +46,7 @@ export async function settlePaygForUser(userId: string) {
       periodStart,
       periodEnd,
       includedLogs: subWithPlan.plan.includedLogs,
-      actualLogs: currentUsage.logsCount,
+      actualLogs: periodUsage.logsCount,
       billableLogs: accrual.extraLogs,
       billableUnits: accrual.billableUnits.toFixed(4),
       amount: accrual.estimatedAmount,

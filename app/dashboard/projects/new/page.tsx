@@ -3,15 +3,24 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Frown } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { trackProjectCreated } from "@/lib/analytics";
+import { Modal } from "@/components/ui/Modal";
 
 export default function NewProjectPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [limitDetails, setLimitDetails] = useState<{
+    currentPlan?: "free" | "plus";
+    currentLimit?: number;
+    projectCount?: number;
+    nextPlan?: "plus";
+    nextLimit?: number;
+  } | null>(null);
+  const [upgradePending, setUpgradePending] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -38,7 +47,11 @@ export default function NewProjectPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || "Something went wrong.");
+          if (data.code === "PROJECT_LIMIT_REACHED") {
+            setLimitDetails(data);
+          } else {
+            setError(data.error || "Something went wrong.");
+          }
           return;
         }
 
@@ -50,8 +63,66 @@ export default function NewProjectPage() {
     });
   };
 
+  const handleUpgrade = async () => {
+    setUpgradePending(true);
+    try {
+      const res = await fetch("/api/billing/checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.authorizationUrl) {
+        window.location.assign(data.authorizationUrl);
+      } else {
+        setError(data.error || "Billing is not currently available.");
+        setLimitDetails(null);
+      }
+    } catch {
+      setError("Unable to start the upgrade. Please try again.");
+      setLimitDetails(null);
+    } finally {
+      setUpgradePending(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8">
+      {limitDetails && (
+        <Modal
+          title="You've reached your project's limit"
+          subtitle="Upgrade your plan to create more projects"
+          icon={<Frown className="h-5 w-5 text-primary" />}
+          onClose={() => setLimitDetails(null)}
+          labelledBy="project-limit-title"
+          iconContainerClassName="bg-primary/10"
+        >
+            <p className="mt-2 text-sm leading-6 text-text-secondary">
+              Your current plan allows up to {limitDetails.currentLimit ?? 0} project{limitDetails.currentLimit === 1 ? "" : "s"}. You currently have {limitDetails.projectCount ?? 0} active project{limitDetails.projectCount === 1 ? "" : "s"}.
+            </p>
+            {limitDetails.nextPlan && (
+              <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <p className="text-sm font-bold text-text capitalize">{limitDetails.nextPlan} plan</p>
+                <p className="mt-1 text-sm text-text-secondary">The {limitDetails.nextPlan} plan supports up to {limitDetails.nextLimit ?? 0} projects.</p>
+              </div>
+            )}
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setLimitDetails(null)}
+                className="flex-1 rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:bg-glass-hover"
+              >
+                Maybe later
+              </button>
+              {limitDetails.nextPlan && (
+                <button
+                  type="button"
+                  onClick={handleUpgrade}
+                  disabled={upgradePending}
+                  className="flex-1 rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60"
+                >
+                  {upgradePending ? "Opening..." : `Upgrade to ${limitDetails.nextPlan}`}
+                </button>
+              )}
+            </div>
+        </Modal>
+      )}
       <div>
         <Link
           href="/dashboard/projects"

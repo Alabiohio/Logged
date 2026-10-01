@@ -11,6 +11,7 @@ export interface PaystackTransaction {
   domain: string;
   status: string;
   reference: string;
+  metadata?: Record<string, unknown>;
   amount: number;
   gateway_response: string;
   paid_at: string;
