@@ -42,6 +42,7 @@ export interface PaystackTransaction {
 export async function initializeTransaction(params: {
   email: string;
   amount: number; // in kobo / lowest unit
+  currency?: string;
   planCode?: string;
   callbackUrl?: string;
   metadata?: Record<string, unknown>;
@@ -51,6 +52,9 @@ export async function initializeTransaction(params: {
     amount: params.amount,
   };
 
+  if (params.currency) {
+    body.currency = params.currency;
+  }
   if (params.planCode) {
     body.plan = params.planCode;
   }
@@ -73,6 +77,7 @@ export async function chargeAuthorization(params: {
   authorizationCode: string;
   email: string;
   amount: number; // in kobo
+  currency?: string;
   metadata?: Record<string, unknown>;
 }): Promise<PaystackTransaction> {
   const body: Record<string, unknown> = {
@@ -80,6 +85,9 @@ export async function chargeAuthorization(params: {
     email: params.email,
     amount: params.amount,
   };
+  if (params.currency) {
+    body.currency = params.currency;
+  }
   if (params.metadata) {
     body.metadata = params.metadata;
   }

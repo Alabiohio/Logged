@@ -166,6 +166,9 @@ export const plans = pgTable("plans", {
     name: text("name").notNull().unique(),
     displayName: text("display_name").notNull(),
     description: text("description"),
+    isActive: boolean("is_active").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    paygEnabled: boolean("payg_enabled").notNull().default(false),
     price: integer("price").notNull(),
     currency: text("currency").notNull().default("NGN"),
     interval: text("interval"),
@@ -268,4 +271,3 @@ export const billingEvents = pgTable("billing_events", {
 }, (table) => [
     index("billing_events_provider_event_id_idx").on(table.providerEventId)
 ]);
-

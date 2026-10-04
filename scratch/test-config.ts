@@ -3,7 +3,7 @@ dotenv.config({ path: ".env.local" });
 
 async function verifyBillingConfig() {
   console.log("🔍 Verifying billing configuration...");
-  const { getBillingEnabled, getBillingConfig, BILLING_DEFAULTS } = await import("../lib/billing/config");
+  const { getBillingEnabled, getBillingConfig } = await import("../lib/billing/config");
 
   const enabled = await getBillingEnabled();
   console.log("  getBillingEnabled():", enabled);
@@ -11,7 +11,13 @@ async function verifyBillingConfig() {
   const config = await getBillingConfig();
   console.log("  getBillingConfig():", JSON.stringify(config, null, 2));
 
-  if (enabled === false && config.billingEnabled === false && config.plans.free.projects === 2 && config.plans.plus.projects === 10) {
+  if (
+    enabled === config.billingEnabled &&
+    Number.isSafeInteger(config.plans.free.projects) &&
+    Number.isSafeInteger(config.plans.plus.projects) &&
+    config.payg.logsPerUnit > 0 &&
+    config.payg.pricePerUnit > 0
+  ) {
     console.log("✅ All billing config assertions passed!");
     process.exit(0);
   } else {

@@ -1,18 +1,17 @@
 import { db } from "@/lib/db";
-import { projects, usage, paygUsage } from "@/db/schema";
+import { projects, plans, usage } from "@/db/schema";
 import { getBillingEnabled, getBillingConfig } from "./config";
 import { getUserSubscription, ensureFreeSub } from "./subscription";
 import { getUserBillingPreferences } from "./preferences";
-import { eq, and, gte, lte, count, sql } from "drizzle-orm";
+import { eq, and, gte, count, asc, gt } from "drizzle-orm";
 
-export async function getUserPlan(userId: string): Promise<"free" | "plus"> {
+export async function getUserPlan(userId: string): Promise<string> {
   const subWithPlan = await getUserSubscription(userId);
   if (!subWithPlan || subWithPlan.subscription.status !== "active") {
     return "free";
   }
 
-  const planName = subWithPlan.plan.name.toLowerCase();
-  return planName === "plus" ? "plus" : "free";
+  return subWithPlan.plan.name.toLowerCase();
 }
 
 export async function getUserLimits(userId: string) {
@@ -26,14 +25,18 @@ export async function getUserLimits(userId: string) {
     getBillingConfig(),
     getUserBillingPreferences(userId),
   ]);
-  const planName: "free" | "plus" = subWithPlan?.plan.name.toLowerCase() === "plus" ? "plus" : "free";
-  const planConfig = config.plans[planName];
+  const activePlan = subWithPlan?.subscription.status === "active" ? subWithPlan.plan : undefined;
+  const planName = activePlan?.name.toLowerCase() ?? "free";
+  const planConfig = config.plans[planName] ?? config.plans.free;
+  if (!planConfig) {
+    throw new Error(`Billing configuration for plan "${planName}" is missing.`);
+  }
 
-  const maxProjects = subWithPlan?.plan.projectLimit ?? planConfig.projects;
-  const maxLogsPerMonth = subWithPlan?.plan.includedLogs ?? planConfig.logsPerMonth;
-  const retentionDays = subWithPlan?.plan.retentionDays ?? planConfig.retentionDays;
+  const maxProjects = activePlan?.projectLimit ?? planConfig.projects;
+  const maxLogsPerMonth = activePlan?.includedLogs ?? planConfig.logsPerMonth;
+  const retentionDays = activePlan?.retentionDays ?? planConfig.retentionDays;
 
-  const paygAvailable = planName === "plus" || config.paygAllowedPlans === "free_plus";
+  const paygAvailable = activePlan?.paygEnabled ?? planConfig.paygEnabled;
   const paygEnabled = paygAvailable && billingPreferences.paygEnabled;
   const paygSpendingLimit = billingPreferences.paygSpendingLimit;
 
@@ -95,10 +98,10 @@ export async function canAcceptLog(
 
 export async function canCreateProject(userId: string): Promise<{
   allowed: boolean;
-  currentPlan?: "free" | "plus";
+  currentPlan?: string;
   currentLimit?: number;
   projectCount?: number;
-  nextPlan?: "plus";
+  nextPlan?: string;
   nextLimit?: number;
 }> {
   const billingEnabled = await getBillingEnabled();
@@ -114,15 +117,23 @@ export async function canCreateProject(userId: string): Promise<{
     .where(and(eq(projects.userId, userId), eq(projects.isArchived, false)));
 
   const activeProjectCount = result[0]?.count ?? 0;
-  const nextPlan = limits.planName === "free" ? "plus" : undefined;
-  const nextLimit = nextPlan ? (await getBillingConfig()).plans[nextPlan].projects : undefined;
+  const [nextPlan] = limits.planName === "free"
+    ? await db
+        .select({ name: plans.name, projectLimit: plans.projectLimit })
+        .from(plans)
+        .where(and(eq(plans.isActive, true), gt(plans.price, 0)))
+        .orderBy(asc(plans.sortOrder), asc(plans.price))
+        .limit(1)
+    : [];
+  const nextPlanName = nextPlan?.name;
+  const nextLimit = nextPlan?.projectLimit;
 
   return {
     allowed: activeProjectCount < limits.maxProjects,
     currentPlan: limits.planName,
     currentLimit: limits.maxProjects,
     projectCount: activeProjectCount,
-    ...(nextPlan ? { nextPlan, nextLimit } : {}),
+    ...(nextPlanName ? { nextPlan: nextPlanName, nextLimit } : {}),
   };
 }
 

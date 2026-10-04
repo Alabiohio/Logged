@@ -4,6 +4,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { verifyTransaction } from "@/lib/paystack/transactions";
 import { setSubscriptionPlan } from "@/lib/billing/subscription";
 import { creditWalletDeposit } from "@/lib/billing/wallet";
+import { getBillingPeriodEnd } from "@/lib/billing/config";
+import { syncUserProjectLimits } from "@/lib/billing/entitlements";
+import { db } from "@/lib/db";
+import { plans } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -53,22 +58,49 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      if (metadata.planId !== "plus") {
-        return NextResponse.json({ error: "Transaction is not a Plus checkout" }, { status: 400 });
+      if (typeof metadata.planId !== "string") {
+        return NextResponse.json({ error: "Transaction does not contain a configured plan." }, { status: 400 });
       }
 
-      await setSubscriptionPlan(session.user.id, "plus", {
+      const [selectedPlan] = await db
+        .select()
+        .from(plans)
+        .where(eq(plans.id, metadata.planId))
+        .limit(1);
+      if (!selectedPlan || selectedPlan.price <= 0) {
+        return NextResponse.json({ error: "The purchased plan is no longer available." }, { status: 409 });
+      }
+
+      const expectedPrice = typeof metadata.planPrice === "number"
+        ? metadata.planPrice
+        : selectedPlan.price;
+      const expectedCurrency = typeof metadata.currency === "string"
+        ? metadata.currency.toUpperCase()
+        : selectedPlan.currency.toUpperCase();
+      if (tx.amount !== expectedPrice || tx.currency.toUpperCase() !== expectedCurrency) {
+        return NextResponse.json({ error: "The verified payment does not match the selected plan." }, { status: 400 });
+      }
+
+      const interval = typeof metadata.interval === "string"
+        ? metadata.interval
+        : selectedPlan.interval;
+      if (!interval) {
+        return NextResponse.json({ error: "The purchased plan has no billing interval configured." }, { status: 409 });
+      }
+      const periodStart = new Date();
+      await setSubscriptionPlan(session.user.id, selectedPlan.id, {
         customerCode: tx.customer?.customer_code,
         planCode: tx.plan_object?.plan_code,
-        periodStart: new Date(),
-        periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        periodStart,
+        periodEnd: getBillingPeriodEnd(periodStart, interval),
       });
+      await syncUserProjectLimits(session.user.id);
 
       return NextResponse.json({
         success: true,
-        type: "plus_subscription",
+        type: "subscription",
         message: "Subscription upgraded successfully",
-        plan: "plus",
+        plan: selectedPlan.displayName,
       });
     }
 

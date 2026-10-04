@@ -14,10 +14,10 @@ export default function NewProjectPage() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [limitDetails, setLimitDetails] = useState<{
-    currentPlan?: "free" | "plus";
+    currentPlan?: string;
     currentLimit?: number;
     projectCount?: number;
-    nextPlan?: "plus";
+    nextPlan?: string;
     nextLimit?: number;
   } | null>(null);
   const [upgradePending, setUpgradePending] = useState(false);

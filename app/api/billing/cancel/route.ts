@@ -17,9 +17,13 @@ export async function POST() {
     const userId = session.user.id;
     const subWithPlan = await getUserSubscription(userId);
 
-    if (!subWithPlan || subWithPlan.plan.name !== "plus") {
+    if (
+      !subWithPlan ||
+      subWithPlan.plan.price <= 0 ||
+      !["active", "past_due"].includes(subWithPlan.subscription.status)
+    ) {
       return NextResponse.json(
-        { error: "No active Plus subscription to cancel" },
+        { error: "No paid subscription to cancel." },
         { status: 400 }
       );
     }
@@ -27,10 +31,12 @@ export async function POST() {
     const provider = await getPaymentProvider();
     const paystackSubCode = subWithPlan.subscription.paystackSubscriptionCode;
     if (paystackSubCode) {
-      try {
-        await provider.cancelSubscription(paystackSubCode, "");
-      } catch (err) {
-        console.error(`Failed to cancel subscription on ${provider.name}:`, err);
+      const cancelled = await provider.cancelSubscription(paystackSubCode, "");
+      if (!cancelled) {
+        return NextResponse.json(
+          { error: `The ${provider.name} subscription could not be cancelled. Please try again.` },
+          { status: 502 }
+        );
       }
     }
 
@@ -47,4 +53,3 @@ export async function POST() {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-

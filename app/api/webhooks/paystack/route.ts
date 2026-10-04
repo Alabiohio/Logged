@@ -1,13 +1,37 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { billingEvents, subscriptions, users } from "@/db/schema";
+import { billingEvents, plans, subscriptions, users } from "@/db/schema";
 import { setSubscriptionPlan, expireSubscription } from "@/lib/billing/subscription";
 import { syncUserProjectLimits } from "@/lib/billing/entitlements";
 import { getPaymentProvider } from "@/lib/billing/providers";
 import { creditWalletDeposit } from "@/lib/billing/wallet";
+import { getBillingPeriodEnd } from "@/lib/billing/config";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
+
+async function applyPlanPayment(
+  userId: string,
+  planId: string,
+  interval?: string,
+  paymentDetails?: { customerCode?: string; subscriptionCode?: string; planCode?: string }
+) {
+  const [plan] = await db.select().from(plans).where(eq(plans.id, planId)).limit(1);
+  const billingInterval = interval || plan?.interval;
+  if (!plan || plan.price <= 0 || !billingInterval) {
+    console.warn(`Ignoring payment for missing or invalid plan "${planId}".`);
+    return false;
+  }
+
+  const periodStart = new Date();
+  await setSubscriptionPlan(userId, plan.id, {
+    ...paymentDetails,
+    periodStart,
+    periodEnd: getBillingPeriodEnd(periodStart, billingInterval),
+  });
+  await syncUserProjectLimits(userId);
+  return true;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,37 +118,41 @@ export async function POST(request: NextRequest) {
             break;
           }
 
-          // A successful charge may be a wallet deposit or another payment.
-          // Only the explicit Plus checkout metadata is allowed to change plans.
-          if (parsedEvent.metadata?.planId === "plus" && parsedEvent.metadata.userId === userId) {
-            await setSubscriptionPlan(userId, "plus", {
+          if (
+            parsedEvent.metadata?.userId === userId &&
+            typeof parsedEvent.metadata.planId === "string"
+          ) {
+            const interval = typeof parsedEvent.metadata.interval === "string"
+              ? parsedEvent.metadata.interval
+              : undefined;
+            await applyPlanPayment(userId, parsedEvent.metadata.planId, interval, {
               customerCode: parsedEvent.customerCode,
               subscriptionCode: parsedEvent.subscriptionCode,
               planCode: parsedEvent.planCode,
-              periodStart: new Date(),
-              periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             });
-            await syncUserProjectLimits(userId);
           } else {
-            console.info(`Ignoring non-Plus Paystack charge.success event: ${providerEventId}`);
+            console.info(`Ignoring Paystack charge.success without plan metadata: ${providerEventId}`);
           }
           break;
         }
 
         case "subscription.create": {
-          if (parsedEvent.metadata?.planId !== "plus" || parsedEvent.metadata.userId !== userId) {
-            console.info(`Ignoring non-Plus Paystack subscription.create event: ${providerEventId}`);
+          if (
+            parsedEvent.metadata?.userId !== userId ||
+            typeof parsedEvent.metadata.planId !== "string"
+          ) {
+            console.info(`Ignoring Paystack subscription.create without plan metadata: ${providerEventId}`);
             break;
           }
 
-          await setSubscriptionPlan(userId, "plus", {
+          const interval = typeof parsedEvent.metadata.interval === "string"
+            ? parsedEvent.metadata.interval
+            : undefined;
+          await applyPlanPayment(userId, parsedEvent.metadata.planId, interval, {
             customerCode: parsedEvent.customerCode,
             subscriptionCode: parsedEvent.subscriptionCode,
             planCode: parsedEvent.planCode,
-            periodStart: new Date(),
-            periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           });
-          await syncUserProjectLimits(userId);
           break;
         }
 

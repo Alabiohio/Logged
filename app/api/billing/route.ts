@@ -6,8 +6,8 @@ import { getUserLimits, getUserPlan, syncUserProjectLimits } from "@/lib/billing
 import { getCurrentUsage, getPaygAccrual } from "@/lib/billing/usage";
 import { getBillingEnabled } from "@/lib/billing/config";
 import { db } from "@/lib/db";
-import { projects } from "@/db/schema";
-import { and, count, eq } from "drizzle-orm";
+import { plans, projects } from "@/db/schema";
+import { and, asc, count, eq } from "drizzle-orm";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -27,7 +27,15 @@ export async function GET() {
       subWithPlan = await getUserSubscription(userId);
     }
 
-    const [planCode, limits, currentUsage, paygAccrual, billingEnabled, projectCountResult] = await Promise.all([
+    const [
+      planCode,
+      limits,
+      currentUsage,
+      paygAccrual,
+      billingEnabled,
+      projectCountResult,
+      configuredPlans,
+    ] = await Promise.all([
       getUserPlan(userId),
       getUserLimits(userId),
       getCurrentUsage(userId),
@@ -37,22 +45,44 @@ export async function GET() {
         .select({ count: count() })
         .from(projects)
         .where(and(eq(projects.userId, userId), eq(projects.isArchived, false))),
+      db.select().from(plans).orderBy(asc(plans.sortOrder), asc(plans.name)),
     ]);
 
     const projectCount = projectCountResult[0]?.count ?? 0;
+    const currentPlan = subWithPlan && subWithPlan.subscription.status !== "expired"
+      ? subWithPlan.plan
+      : configuredPlans.find((availablePlan) => availablePlan.name === "free");
+    const availablePlans = configuredPlans.filter(
+      (configuredPlan) => configuredPlan.isActive || configuredPlan.id === currentPlan?.id
+    );
 
     return NextResponse.json({
       plan: {
-        id: subWithPlan?.plan.id ?? "free",
-        name: subWithPlan?.plan.displayName ?? (planCode === "plus" ? "Plus Plan" : "Free Plan"),
+        id: currentPlan?.id ?? "free",
+        name: currentPlan?.displayName ?? "Plan unavailable",
         code: planCode,
-        priceMonthly: subWithPlan?.plan.price ?? (planCode === "plus" ? 5000 : 0),
-        currency: subWithPlan?.plan.currency ?? "NGN",
+        price: currentPlan?.price ?? null,
+        currency: currentPlan?.currency ?? null,
+        interval: currentPlan?.interval ?? null,
         maxLogsPerMonth: limits.maxLogsPerMonth,
         maxProjects: limits.maxProjects,
         retentionDays: limits.retentionDays,
         billingEnabled,
       },
+      availablePlans: availablePlans.map((plan) => ({
+        id: plan.id,
+        name: plan.name,
+        displayName: plan.displayName,
+        isActive: plan.isActive,
+        description: plan.description,
+        price: plan.price,
+        currency: plan.currency,
+        interval: plan.interval,
+        includedLogs: plan.includedLogs,
+        projectLimit: plan.projectLimit,
+        retentionDays: plan.retentionDays,
+        paygEnabled: plan.paygEnabled,
+      })),
       subscription: subWithPlan
         ? {
             id: subWithPlan.subscription.id,

@@ -40,6 +40,7 @@ type DashboardData = {
         name: string;
         description: string | null;
         updatedAt: string;
+        isArchived: boolean;
     }[];
 };
 
@@ -340,12 +341,21 @@ export default function DashboardPage() {
                                             <Link
                                                 href={`/dashboard/projects/${project.id}`}
                                                 onClick={() => trackProjectOpened(project.id, project.name)}
-                                                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background p-4 transition hover:bg-glass-hover group"
+                                                className={`flex items-center justify-between gap-3 rounded-2xl border bg-background p-4 transition hover:bg-glass-hover group ${
+                                                    project.isArchived ? "border-warning/30 bg-warning/5" : "border-border"
+                                                }`}
                                             >
                                                 <div className="min-w-0">
+                                                <div className="flex flex-wrap items-center gap-2">
                                                     <p className="font-semibold text-text truncate group-hover:text-primary transition-colors">
                                                         {project.name}
                                                     </p>
+                                                    {project.isArchived && (
+                                                        <span className="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning">
+                                                            Archived
+                                                        </span>
+                                                    )}
+                                                </div>
                                                     <p className="mt-1 text-xs text-text-muted flex items-center gap-1.5">
                                                         <Activity className="h-3 w-3" />
                                                         {timeAgo(project.updatedAt)}
@@ -371,4 +381,3 @@ export default function DashboardPage() {
         </motion.div>
     );
 }
-

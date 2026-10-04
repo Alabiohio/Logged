@@ -132,8 +132,8 @@ function calculatePaygAccrual(
   config: Awaited<ReturnType<typeof getBillingConfig>>
 ) {
   const extraLogs = Math.max(0, logsCount - includedLogs);
-  const logsPerUnit = config.payg.logsPerUnit || 10_000;
-  const pricePerUnit = config.payg.pricePerUnit || 500;
+  const logsPerUnit = config.payg.logsPerUnit;
+  const pricePerUnit = config.payg.pricePerUnit;
 
   const billableUnits = extraLogs / logsPerUnit;
   const estimatedAmount = Math.ceil(billableUnits) * pricePerUnit;
@@ -142,7 +142,7 @@ function calculatePaygAccrual(
     extraLogs,
     billableUnits,
     estimatedAmount,
-    currency: "NGN",
+    currency: config.wallet.currency,
   };
 }
 
@@ -162,4 +162,3 @@ export async function isOverPaygSpendingLimit(userId: string, additionalLogs = 0
   );
   return accrual.estimatedAmount >= limits.paygSpendingLimit;
 }
-

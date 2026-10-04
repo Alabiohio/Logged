@@ -7,6 +7,7 @@ export interface CustomerParams {
 export interface CheckoutParams {
   email: string;
   amount: number; // in kobo / lowest currency unit
+  currency?: string;
   planCode?: string;
   callbackUrl?: string;
   metadata?: Record<string, unknown>;
@@ -16,6 +17,7 @@ export interface ChargeAuthorizationParams {
   authorizationCode: string;
   email: string;
   amount: number; // in kobo / lowest currency unit
+  currency?: string;
   metadata?: Record<string, unknown>;
 }
 

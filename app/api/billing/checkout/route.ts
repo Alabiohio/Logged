@@ -9,7 +9,7 @@ import { subscriptions, plans, settings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { billingProfileUrl, getBillingProfile, isBillingProfileComplete } from "@/lib/billing/profile";
 
-export async function POST() {
+export async function POST(request: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -19,6 +19,20 @@ export async function POST() {
   }
 
   try {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "A plan id is required." }, { status: 400 });
+    }
+    const planId = (body as Record<string, unknown>).planId;
+    if (typeof planId !== "string" || !planId.trim()) {
+      return NextResponse.json({ error: "A plan id is required." }, { status: 400 });
+    }
+
     const billingEnabled = await getBillingEnabled();
     if (!billingEnabled) {
       return NextResponse.json({
@@ -33,12 +47,51 @@ export async function POST() {
       await ensureFreeSub(userId);
       subWithPlan = await getUserSubscription(userId);
     }
+    if (!subWithPlan) {
+      throw new Error(`No subscription record is available for user ${userId}.`);
+    }
 
-    if (subWithPlan?.plan.name === "plus" && subWithPlan.subscription.status === "active") {
+    if (
+      subWithPlan?.plan.id === planId &&
+      subWithPlan.subscription.status === "active"
+    ) {
       return NextResponse.json({
         available: true,
-        message: "Already on Plus plan.",
+        message: `Already on the ${subWithPlan.plan.displayName} plan.`,
       });
+    }
+    if (
+      subWithPlan.subscription.status !== "expired" &&
+      subWithPlan.plan.price > 0
+    ) {
+      return NextResponse.json(
+        { error: "Cancel your current subscription before changing plans." },
+        { status: 409 }
+      );
+    }
+
+    const [selectedPlan] = await db
+      .select()
+      .from(plans)
+      .where(eq(plans.id, planId))
+      .limit(1);
+    if (!selectedPlan || !selectedPlan.isActive || selectedPlan.price <= 0) {
+      return NextResponse.json({ error: "The selected paid plan is unavailable." }, { status: 400 });
+    }
+    if (!selectedPlan.interval?.trim()) {
+      return NextResponse.json({ error: "The selected plan has no billing interval configured." }, { status: 409 });
+    }
+    const [legacyPlanCodeSetting] = selectedPlan.name === "plus"
+      ? await db.select({ value: settings.value }).from(settings)
+          .where(eq(settings.key, "paystack_plus_plan_code")).limit(1)
+      : [];
+    const resolvedPlanCode =
+      selectedPlan.paystackPlanCode?.trim() || legacyPlanCodeSetting?.value.trim();
+    if (!resolvedPlanCode) {
+      return NextResponse.json(
+        { error: "The selected plan is missing its Paystack plan code." },
+        { status: 409 }
+      );
     }
 
     const billingProfile = await getBillingProfile(userId);
@@ -54,54 +107,35 @@ export async function POST() {
 
     const provider = await getPaymentProvider();
 
-    // Get Plus plan details
-    const plusPlanRows = await db.select().from(plans).where(eq(plans.id, "plus")).limit(1);
-    if (plusPlanRows.length === 0) {
-      return NextResponse.json({ error: "Plus plan configuration not found" }, { status: 500 });
-    }
-    const plusPlan = plusPlanRows[0];
-
     // Ensure customer code exists
-    let customerCode = subWithPlan?.subscription.paystackCustomerCode;
+    let customerCode = subWithPlan.subscription.paystackCustomerCode;
     if (!customerCode) {
-      try {
-        const custRes = await provider.createCustomer({
-          email: billingProfile.email!,
-          name: billingProfile.fullName!,
-          phone: billingProfile.phone ?? undefined,
-        });
-        customerCode = custRes.customerCode;
+      const custRes = await provider.createCustomer({
+        email: billingProfile.email!,
+        name: billingProfile.fullName!,
+        phone: billingProfile.phone ?? undefined,
+      });
+      customerCode = custRes.customerCode;
 
-        await db
-          .update(subscriptions)
-          .set({ paystackCustomerCode: customerCode, updatedAt: new Date() })
-          .where(eq(subscriptions.id, subWithPlan!.subscription.id));
-      } catch (err) {
-        console.error("Failed to create customer on payment provider:", err);
-      }
+      await db
+        .update(subscriptions)
+        .set({ paystackCustomerCode: customerCode, updatedAt: new Date() })
+        .where(eq(subscriptions.id, subWithPlan.subscription.id));
     }
-
-    // Read plan code from admin-configured DB setting first, fall back to plans table row.
-    // Only pass it if it's a real non-empty value — sending an invalid code causes a Paystack 404.
-    const planCodeSettingRow = await db
-      .select()
-      .from(settings)
-      .where(eq(settings.key, "paystack_plus_plan_code"))
-      .limit(1);
-
-    const dbSettingCode = planCodeSettingRow[0]?.value?.trim() ?? "";
-    const planTableCode = (plusPlan.paystackPlanCode ?? "").trim();
-    const resolvedPlanCode = (dbSettingCode || planTableCode) || undefined;
 
     const baseUrl = process.env.APP_URL || "http://localhost:3000";
     const transaction = await provider.initializeCheckout({
       email: billingProfile.email!,
-      amount: plusPlan.price,
-      planCode: resolvedPlanCode,        // undefined = one-time charge, fine — webhook upgrades the account
+      amount: selectedPlan.price,
+      currency: selectedPlan.currency,
+      planCode: resolvedPlanCode,
       callbackUrl: `${baseUrl}/dashboard/settings/billing?checkout=success`,
       metadata: {
         userId,
-        planId: "plus",
+        planId: selectedPlan.id,
+        planPrice: selectedPlan.price,
+        currency: selectedPlan.currency,
+        interval: selectedPlan.interval,
         subscriptionId: subWithPlan?.subscription.id,
       },
     });
@@ -111,7 +145,6 @@ export async function POST() {
       authorizationUrl: transaction.authorizationUrl,
       checkoutUrl: transaction.authorizationUrl,
       reference: transaction.reference,
-      planCodeUsed: resolvedPlanCode ?? null,   // helpful for debugging
     });
   } catch (error) {
     console.error("Error creating checkout transaction:", error);

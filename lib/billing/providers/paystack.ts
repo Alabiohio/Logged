@@ -28,6 +28,7 @@ export class PaystackPaymentProvider implements PaymentProvider {
     const res = await paystackInitializeTransaction({
       email: params.email,
       amount: params.amount,
+      currency: params.currency,
       planCode: params.planCode,
       callbackUrl: params.callbackUrl,
       metadata: params.metadata,
@@ -45,6 +46,7 @@ export class PaystackPaymentProvider implements PaymentProvider {
       authorizationCode: params.authorizationCode,
       email: params.email,
       amount: params.amount,
+      currency: params.currency,
       metadata: params.metadata,
     });
     return { reference: res.reference };

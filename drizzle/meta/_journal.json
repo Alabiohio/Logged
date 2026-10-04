@@ -43,6 +43,13 @@
       "when": 1791104282846,
       "tag": "0006_billing_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791107911384,
+      "tag": "0007_plan_lifecycle_payg",
+      "breakpoints": true
     }
   ]
 }

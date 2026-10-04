@@ -2,23 +2,28 @@ import { db } from "@/lib/db";
 import { walletAccounts, walletTransactions } from "@/db/schema";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-
-export const PAYG_UNIT_AMOUNT = 500;
+import { getBillingConfig } from "./config";
 
 export async function getOrCreateWallet(userId: string) {
+  const config = await getBillingConfig();
   const existing = await db
     .select()
     .from(walletAccounts)
     .where(eq(walletAccounts.userId, userId))
     .limit(1);
 
-  if (existing[0]) return existing[0];
+  if (existing[0]) {
+    if (existing[0].currency !== config.wallet.currency) {
+      throw new Error("Wallet currency differs from the configured billing currency.");
+    }
+    return existing[0];
+  }
 
   const wallet = {
     id: uuidv4(),
     userId,
     balance: 0,
-    currency: "NGN",
+    currency: config.wallet.currency,
     status: "active",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -88,9 +93,12 @@ export async function creditWalletDeposit(params: {
 export async function debitWalletForPaygUnit(params: {
   userId: string;
   idempotencyKey: string;
-  amount?: number;
+  amount: number;
 }) {
-  const amount = params.amount ?? PAYG_UNIT_AMOUNT;
+  const amount = params.amount;
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    throw new Error("PAYG debit amount must be a positive whole number.");
+  }
   const wallet = await getOrCreateWallet(params.userId);
   return db.transaction(async (tx) => {
     const existing = await tx

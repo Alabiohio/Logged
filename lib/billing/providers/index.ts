@@ -18,35 +18,26 @@ export function registerPaymentProvider(provider: PaymentProvider): void {
 }
 
 /**
- * Get configured payment provider by name or from settings/env fallback (defaults to 'paystack').
+ * Get the explicitly requested provider or the provider configured in Neon.
  */
 export async function getPaymentProvider(name?: string): Promise<PaymentProvider> {
   let providerName = name?.toLowerCase();
 
   if (!providerName) {
-    try {
-      const dbRow = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.key, "payment_provider"))
-        .limit(1);
-
-      if (dbRow.length > 0 && dbRow[0].value) {
-        providerName = dbRow[0].value.toLowerCase();
-      }
-    } catch {
-      // Fallback silently if DB query fails
-    }
+    const [configuredProvider] = await db
+      .select({ value: settings.value })
+      .from(settings)
+      .where(eq(settings.key, "payment_provider"))
+      .limit(1);
+    providerName = configuredProvider?.value.trim().toLowerCase();
   }
 
   if (!providerName) {
-    providerName = (process.env.PAYMENT_PROVIDER || "paystack").toLowerCase();
+    throw new Error("No payment provider is configured in billing settings.");
   }
-
   const provider = providersRegistry.get(providerName);
   if (!provider) {
-    console.warn(`Payment provider '${providerName}' not found in registry. Falling back to Paystack.`);
-    return defaultPaystack;
+    throw new Error(`Configured payment provider "${providerName}" is not implemented.`);
   }
 
   return provider;

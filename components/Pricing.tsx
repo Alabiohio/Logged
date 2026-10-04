@@ -1,53 +1,37 @@
-"use client";
-
 import { Check } from "lucide-react";
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    description: "Perfect for personal projects and learning.",
-    highlighted: false,
-    features: [
-      "1 Project",
-      "10,000 logs / month",
-      "7-day retention",
-      "Basic search",
-      "Community support",
-    ],
-  },
-  {
-    name: "Pro",
-    price: "$19",
-    description: "For startups and growing teams.",
-    highlighted: true,
-    features: [
-      "Unlimited projects",
-      "1M logs / month",
-      "90-day retention",
-      "Advanced search",
-      "Real-time alerts",
-      "Analytics",
-      "Priority support",
-    ],
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    description: "Built for large organizations.",
-    highlighted: false,
-    features: [
-      "Unlimited everything",
-      "Custom retention",
-      "SSO",
-      "Audit logs",
-      "Dedicated support",
-      "Custom integrations",
-    ],
-  },
-];
+interface PricingPlan {
+  id: string;
+  displayName: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  interval: string | null;
+  includedLogs: number;
+  projectLimit: number;
+  retentionDays: number;
+  paygEnabled: boolean;
+}
 
-export default function Pricing() {
+function formatPrice(amount: number, currency: string): string | null {
+  try {
+    const formatter = new Intl.NumberFormat(undefined, { style: "currency", currency });
+    const divisor = 10 ** (formatter.resolvedOptions().maximumFractionDigits ?? 2);
+    return formatter.format(amount / divisor);
+  } catch {
+    return null;
+  }
+}
+
+export default function Pricing({ plans }: { plans: PricingPlan[] }) {
+  if (plans.length === 0) {
+    return (
+      <section className="mx-auto max-w-7xl px-6 py-20 text-center text-text-muted lg:py-32">
+        Pricing offers are currently unavailable.
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
 
@@ -65,52 +49,43 @@ export default function Pricing() {
 
       <div className="mt-16 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:mt-20 lg:grid-cols-3">
 
-        {plans.map((plan) => (
+        {plans.map((plan) => {
+          const price = formatPrice(plan.price, plan.currency);
+          return (
           <div
-            key={plan.name}
-            className={`glass relative p-7 sm:p-8 ${
-              plan.highlighted
-                ? "border-2 border-primary sm:scale-[1.03]"
-                : ""
-            }`}
+            key={plan.id}
+            className="glass relative p-7 sm:p-8"
           >
-            {plan.highlighted && (
-              <span className="absolute right-6 top-6 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
-                Most Popular
-              </span>
-            )}
+            <h3 className="text-2xl font-bold">{plan.displayName}</h3>
 
-            <h3 className="text-2xl font-bold">{plan.name}</h3>
-
-            <p className="mt-3 text-text-muted">
-              {plan.description}
-            </p>
+            {plan.description && <p className="mt-3 text-text-muted">{plan.description}</p>}
 
             <div className="mt-8 flex items-end gap-2">
               <span className="text-4xl font-black sm:text-5xl">
-                {plan.price}
+                {price ?? "Price unavailable"}
               </span>
 
-              {plan.price !== "Custom" && (
+              {plan.interval && (
                 <span className="pb-2 text-text-muted">
-                  /month
+                  /{plan.interval}
                 </span>
               )}
             </div>
 
-            <button
-              className={`mt-8 w-full rounded-full py-4 font-semibold transition ${
-                plan.highlighted
-                  ? "bg-primary text-white hover:bg-primary-hover"
-                  : "bg-glass-hover hover:bg-white"
-              }`}
+            <a
+              href="/dashboard/settings/billing"
+              className="mt-8 block w-full rounded-full bg-primary py-4 text-center font-semibold text-white transition hover:bg-primary-hover"
             >
               Get Started
-            </button>
+            </a>
 
             <div className="mt-10 space-y-4">
-
-              {plan.features.map((feature) => (
+              {[
+                `${plan.includedLogs.toLocaleString()} included logs / month`,
+                `${plan.projectLimit.toLocaleString()} projects`,
+                `${plan.retentionDays.toLocaleString()}-day retention`,
+                ...(plan.paygEnabled ? ["PAYG eligible"] : []),
+              ].map((feature) => (
                 <div
                   key={feature}
                   className="flex items-center gap-3"
@@ -126,11 +101,10 @@ export default function Pricing() {
 
                 </div>
               ))}
-
             </div>
-
           </div>
-        ))}
+          );
+        })}
 
       </div>
 

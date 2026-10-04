@@ -4,18 +4,31 @@ import { NextResponse } from "next/server";
 import { getPaymentProvider } from "@/lib/billing/providers";
 import { getOrCreateWallet } from "@/lib/billing/wallet";
 import { billingProfileUrl, getBillingProfile, isBillingProfileComplete } from "@/lib/billing/profile";
+import { getBillingConfig, toCurrencyMinorUnits } from "@/lib/billing/config";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const wallet = await getOrCreateWallet(session.user.id);
-  return NextResponse.json({
-    id: wallet.id,
-    balance: wallet.balance,
-    currency: wallet.currency,
-    status: wallet.status,
-  });
+  try {
+    const [wallet, config] = await Promise.all([
+      getOrCreateWallet(session.user.id),
+      getBillingConfig(),
+    ]);
+    return NextResponse.json({
+      id: wallet.id,
+      balance: wallet.balance,
+      currency: wallet.currency,
+      status: wallet.status,
+      minimumDeposit: config.wallet.minimumDeposit,
+    });
+  } catch (error) {
+    console.error("Error fetching billing wallet:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to load billing wallet." },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -25,8 +38,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const amount = body.amount;
-    if (!Number.isInteger(amount) || amount < 500) {
-      return NextResponse.json({ error: "Deposit amount must be at least NGN 500." }, { status: 400 });
+    const config = await getBillingConfig();
+    if (!Number.isSafeInteger(amount) || amount < config.wallet.minimumDeposit) {
+      return NextResponse.json(
+        {
+          error: `Deposit amount must be at least ${config.wallet.currency} ${config.wallet.minimumDeposit.toLocaleString()}.`,
+        },
+        { status: 400 }
+      );
     }
 
     const billingProfile = await getBillingProfile(session.user.id);
@@ -47,7 +66,8 @@ export async function POST(request: Request) {
     const baseUrl = process.env.APP_URL || "http://localhost:3000";
     const transaction = await provider.initializeCheckout({
       email: billingProfile.email!,
-      amount: amount * 100,
+      amount: toCurrencyMinorUnits(amount, wallet.currency),
+      currency: wallet.currency,
       callbackUrl: `${baseUrl}/dashboard/settings/billing?wallet=success`,
       metadata: {
         type: "wallet_deposit",

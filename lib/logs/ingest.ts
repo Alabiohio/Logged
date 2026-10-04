@@ -68,7 +68,7 @@ async function insertLogsAndUsage(
         .limit(1);
     const currentLogs = currentRows[0]?.logsCount ?? 0;
     const projectedLogs = currentLogs + records.length;
-    const logsPerUnit = config.payg.logsPerUnit || 10_000;
+    const logsPerUnit = config.payg.logsPerUnit;
     const currentUnits = Math.ceil(Math.max(0, currentLogs - limits.maxLogsPerMonth) / logsPerUnit);
     const projectedUnits = Math.ceil(Math.max(0, projectedLogs - limits.maxLogsPerMonth) / logsPerUnit);
     const newUnits = billingEnabled && limits.paygEnabled
@@ -91,7 +91,7 @@ async function insertLogsAndUsage(
             .limit(1);
         if (!wallet[0]) throw new Error("PAYG wallet is not available");
 
-        const amount = config.payg.pricePerUnit || 500;
+        const amount = config.payg.pricePerUnit;
         const updated = await tx
             .update(walletAccounts)
             .set({ balance: sql`${walletAccounts.balance} - ${amount}`, updatedAt: new Date() })
@@ -136,4 +136,3 @@ async function insertLogsAndUsage(
             },
         });
 }
-

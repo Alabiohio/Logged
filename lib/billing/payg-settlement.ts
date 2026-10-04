@@ -4,6 +4,7 @@ import { getUserSubscription } from "./subscription";
 import { getPreviousPeriod, getUsageForPeriod, getPaygAccrualForPeriod } from "./usage";
 import { getPaymentProvider } from "./providers";
 import { getBillingProfile, isBillingProfileComplete } from "./profile";
+import { toCurrencyMinorUnits } from "./config";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -72,11 +73,12 @@ export async function settlePaygForUser(userId: string) {
     }
 
     const provider = await getPaymentProvider();
-    const amountKobo = accrual.estimatedAmount * 100;
+    const amountMinorUnits = toCurrencyMinorUnits(accrual.estimatedAmount, accrual.currency);
     const chargeRes = await provider.chargeAuthorization({
       authorizationCode: customerCode,
       email: billingProfile.email,
-      amount: amountKobo,
+      amount: amountMinorUnits,
+      currency: accrual.currency,
       metadata: {
         userId,
         settlementType: "payg",
@@ -117,7 +119,7 @@ export async function settleAllPaygUsers() {
     .select({ userId: subscriptions.userId })
     .from(subscriptions)
     .innerJoin(plans, eq(subscriptions.planId, plans.id))
-    .where(and(eq(plans.name, "plus"), eq(subscriptions.status, "active")));
+    .where(and(eq(plans.paygEnabled, true), eq(subscriptions.status, "active")));
 
   let totalSettled = 0;
   let failed = 0;

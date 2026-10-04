@@ -31,22 +31,30 @@ function getSubscriptionPayment(
       && customer?.customer_code === subscriptionCustomerCode,
     );
     if (
-      (metadata?.planId !== "plus" && !isCurrentSubscriptionCustomer)
+      (typeof metadata?.planId !== "string" && !isCurrentSubscriptionCustomer)
       || metadata?.type === "wallet_deposit"
     ) return null;
     if (transaction.status !== undefined && transaction.status !== "success") return null;
     if (typeof transaction.amount !== "number" || !Number.isFinite(transaction.amount)) return null;
+    const currency = typeof transaction.currency === "string"
+      ? transaction.currency
+      : typeof metadata?.currency === "string"
+        ? metadata.currency
+        : null;
+    if (!currency) return null;
 
     const paidAt = typeof transaction.paid_at === "string" ? transaction.paid_at : null;
     const providerCreatedAt = typeof transaction.createdAt === "string" ? transaction.createdAt : null;
     const date = paidAt ?? providerCreatedAt ?? event.createdAt.toISOString();
+    const formatter = new Intl.NumberFormat("en", { style: "currency", currency });
+    const divisor = 10 ** (formatter.resolvedOptions().maximumFractionDigits ?? 2);
 
     return {
       id: event.id,
       kind: "subscription" as const,
       type: "subscription",
-      amount: Math.floor(transaction.amount / 100),
-      currency: typeof transaction.currency === "string" ? transaction.currency : "NGN",
+      amount: transaction.amount / divisor,
+      currency,
       status: "success",
       providerReference: typeof transaction.reference === "string" ? transaction.reference : null,
       createdAt: date,

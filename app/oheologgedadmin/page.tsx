@@ -8,6 +8,7 @@ import { verifyAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { feedbacks, logs, projects, users } from "@/db/schema";
 import AdminBillingControl from "@/components/admin/AdminBillingControl";
+import AdminPlanControl from "@/components/admin/AdminPlanControl";
 import AdminUsersControl from "@/components/admin/AdminUsersControl";
 
 async function getOverviewStats() {
@@ -143,6 +144,10 @@ export default async function OheoLoggedAdminPage() {
                 {/* Billing & Gateway Controls */}
                 <section className="mb-8">
                     <AdminBillingControl />
+                </section>
+
+                <section className="mb-8">
+                    <AdminPlanControl />
                 </section>
 
                 {/* Users & Subscriptions Management */}

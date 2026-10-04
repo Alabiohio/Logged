@@ -32,6 +32,7 @@ type Project = {
     name: string;
     description: string | null;
     website: string | null;
+    isArchived: boolean;
     apiKeys: { id: string; environment: string; key: string }[];
     stats?: { total: number; error: number; warn: number; info: number };
     recentLogs?: LogRecord[];
@@ -301,6 +302,29 @@ export default function ProjectOverviewPage() {
                     </button>
                 </div>
             </div>
+
+            {project.isArchived && (
+                <div
+                    role="status"
+                    className="flex flex-col gap-3 rounded-2xl border border-warning/30 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+                        <div>
+                            <p className="text-sm font-bold text-text">This project is archived</p>
+                            <p className="mt-1 text-sm text-text-secondary">
+                                It is over your current plan&apos;s project limit and will not accept new logs. Upgrade your plan to reactivate it.
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        href="/dashboard/settings/billing"
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-warning/40 bg-background/50 px-4 py-2 text-xs font-bold text-text transition hover:bg-background"
+                    >
+                        View billing plans <ChevronRight className="h-4 w-4" />
+                    </Link>
+                </div>
+            )}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

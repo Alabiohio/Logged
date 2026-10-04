@@ -1,310 +1,273 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import {
-  CreditCard,
-  CheckCircle2,
-  AlertCircle,
-  Globe,
-  Power,
-  Hash,
-  Save,
-} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2, CreditCard, Power, Save } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 
 interface AdminBillingSettings {
-  billingEnabled: boolean;
-  paymentProvider: string;
-  paystackPlusPlanCode: string;
-  paygAllowedPlans: "plus" | "free_plus";
+  billingEnabled: boolean | null;
+  paymentProvider: string | null;
+  paygLogsPerUnit: number | null;
+  paygPricePerUnit: number | null;
+  walletCurrency: string | null;
+  minimumWalletDeposit: number | null;
+  providerCredentialConfigured: boolean;
+  configurationIssues: string[];
+  billingReady: boolean;
+  readinessIssue: string | null;
 }
 
-const PROVIDERS = [
-  { id: "paystack", name: "Paystack", badge: "Default", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
-  { id: "stripe", name: "Stripe", badge: "Pluggable", color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20" },
-  { id: "flutterwave", name: "Flutterwave", badge: "Pluggable", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-];
+const inputClassName =
+  "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-text outline-none focus:border-primary";
 
 export default function AdminBillingControl() {
   const [settings, setSettings] = useState<AdminBillingSettings | null>(null);
+  const [form, setForm] = useState({
+    paygLogsPerUnit: "",
+    paygPricePerUnit: "",
+    walletCurrency: "",
+    minimumWalletDeposit: "",
+  });
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Editable fields state
-  const [planCodeInput, setPlanCodeInput] = useState("");
-  const [savingPlanConfig, setSavingPlanConfig] = useState(false);
+  const applySettings = (data: AdminBillingSettings) => {
+    setSettings(data);
+    setForm({
+      paygLogsPerUnit: data.paygLogsPerUnit?.toString() ?? "",
+      paygPricePerUnit: data.paygPricePerUnit?.toString() ?? "",
+      walletCurrency: data.walletCurrency ?? "",
+      minimumWalletDeposit: data.minimumWalletDeposit?.toString() ?? "",
+    });
+  };
 
   const fetchSettings = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch("/api/admin/billing");
-      if (res.ok) {
-        const data = await res.json() as AdminBillingSettings;
-        setSettings(data);
-        setPlanCodeInput(data.paystackPlusPlanCode ?? "");
-      } else {
-        const err = await res.json().catch(() => ({}));
-        setError((err as { error?: string }).error || "Failed to load admin billing settings");
+      const response = await fetch("/api/admin/billing");
+      const data = await response.json() as AdminBillingSettings & { error?: string };
+      if (!response.ok) {
+        setError(data.error || "Failed to load billing settings.");
+        return;
       }
+      applySettings(data);
     } catch {
-      setError("Network error loading admin billing settings.");
+      setError("Network error loading billing settings.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void fetchSettings();
+    void Promise.resolve().then(fetchSettings);
   }, [fetchSettings]);
 
-  const handleUpdate = async (updates: Partial<AdminBillingSettings>) => {
-    setUpdating(true);
+  const updateSettings = async (updates: Record<string, unknown>) => {
+    setSaving(true);
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch("/api/admin/billing", {
+      const response = await fetch("/api/admin/billing", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
-      const data = await res.json() as AdminBillingSettings & { success?: boolean; error?: string };
-      if (res.ok && data.success) {
-        setSettings({
-          billingEnabled: data.billingEnabled,
-          paymentProvider: data.paymentProvider,
-          paystackPlusPlanCode: data.paystackPlusPlanCode,
-          paygAllowedPlans: data.paygAllowedPlans,
-        });
-        setSuccess("Billing configuration saved.");
-      } else {
-        setError(data.error || "Failed to update settings");
+      const data = await response.json() as AdminBillingSettings & { success?: boolean; error?: string };
+      if (!response.ok || !data.success) {
+        setError(data.error || "Failed to update billing settings.");
+        return;
       }
+      applySettings(data);
+      setSuccess("Billing configuration saved.");
     } catch {
-      setError("Failed to communicate with admin billing API");
+      setError("Failed to communicate with the billing settings API.");
     } finally {
-      setUpdating(false);
+      setSaving(false);
     }
   };
 
-  const handleSavePlanConfig = async () => {
-    setSavingPlanConfig(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const res = await fetch("/api/admin/billing", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paystackPlusPlanCode: planCodeInput,
-        }),
-      });
-      const data = await res.json() as AdminBillingSettings & { success?: boolean; error?: string };
-      if (res.ok && data.success) {
-        setSettings((prev) => prev ? {
-          ...prev,
-          paystackPlusPlanCode: data.paystackPlusPlanCode,
-        } : prev);
-        setSuccess("Paystack plan configuration saved successfully.");
-      } else {
-        setError(data.error || "Failed to save plan configuration");
-      }
-    } catch {
-      setError("Failed to communicate with admin billing API");
-    } finally {
-      setSavingPlanConfig(false);
+  const savePaymentSettings = () => {
+    const values = {
+      paygLogsPerUnit: Number(form.paygLogsPerUnit),
+      paygPricePerUnit: Number(form.paygPricePerUnit),
+      minimumWalletDeposit: Number(form.minimumWalletDeposit),
+    };
+    if (!/^[A-Za-z]{3}$/.test(form.walletCurrency.trim())) {
+      setError("Enter a supported three-letter wallet currency code.");
+      return;
     }
+    if (Object.values(values).some((value) => !Number.isSafeInteger(value) || value <= 0)) {
+      setError("Enter a positive whole-number value for each payment setting.");
+      return;
+    }
+    void updateSettings({ ...values, walletCurrency: form.walletCurrency.trim().toUpperCase() });
   };
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-border bg-glass p-6 shadow-sm backdrop-blur-sm space-y-4">
-        <div className="h-6 w-48 rounded bg-border animate-pulse" />
-        <div className="h-20 w-full rounded-xl bg-border/50 animate-pulse" />
+      <div className="space-y-4 rounded-2xl border border-border bg-glass p-6 shadow-sm backdrop-blur-sm">
+        <div className="h-6 w-48 animate-pulse rounded bg-border" />
+        <div className="h-20 w-full animate-pulse rounded-xl bg-border/50" />
       </div>
     );
   }
 
-  const isEnabled = settings?.billingEnabled ?? false;
-  const currentProvider = settings?.paymentProvider ?? "paystack";
+  const billingEnabled = settings?.billingEnabled === true;
 
   return (
-    <div className="rounded-2xl border border-border bg-glass p-6 shadow-sm backdrop-blur-sm space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
-            <CreditCard className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-black tracking-tight text-text">Billing & Gateway Controls</h2>
-            <p className="text-xs text-text-secondary">Global payment switch, gateway strategy & Paystack plan codes</p>
-          </div>
+    <div className="space-y-6 rounded-2xl border border-border bg-glass p-6 shadow-sm backdrop-blur-sm">
+      <header className="flex items-center gap-3 border-b border-border pb-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+          <CreditCard className="h-5 w-5" />
         </div>
-        {updating && (
-          <Cardio size="28" color="currentColor" speed="1.5" stroke="3" bgOpacity="0.1" />
-        )}
-      </div>
+        <div>
+          <h2 className="text-lg font-black tracking-tight text-text">Billing & payment settings</h2>
+          <p className="text-xs text-text-secondary">Manage billing availability, provider, and PAYG rates.</p>
+        </div>
+      </header>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-error/20 bg-error/10 p-3 text-xs text-error font-medium">
+        <div role="alert" className="flex items-center gap-3 rounded-xl border border-error/20 bg-error/10 p-3 text-xs font-medium text-error">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
-
       {success && (
-        <div className="flex items-center gap-3 rounded-xl border border-success/20 bg-success/10 p-3 text-xs text-success font-medium">
+        <div role="status" className="flex items-center gap-3 rounded-xl border border-success/20 bg-success/10 p-3 text-xs font-medium text-success">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{success}</span>
         </div>
       )}
 
-      {/* Master Billing Switch */}
-      <div className="p-4 rounded-xl border border-border/60 bg-background/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {settings?.configurationIssues.map((issue) => (
+        <div key={issue} className="rounded-xl border border-warning/20 bg-warning/10 p-3 text-xs text-warning">
+          {issue}
+        </div>
+      ))}
+
+      <section className="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-background/30 p-4 sm:flex-row sm:items-center">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Power className={`h-4 w-4 ${isEnabled ? "text-success" : "text-text-muted"}`} />
-            <h3 className="text-sm font-bold text-text">Master Billing Mode</h3>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-              isEnabled ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"
-            }`}>
-              {isEnabled ? "LIVE BILLING ON" : "FREE PREVIEW MODE"}
+            <Power className={`h-4 w-4 ${billingEnabled ? "text-success" : "text-text-muted"}`} />
+            <h3 className="text-sm font-bold text-text">Master billing switch</h3>
+            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-bold">
+              {billingEnabled ? "ON" : settings?.billingEnabled === null ? "NOT CONFIGURED" : "OFF"}
             </span>
           </div>
           <p className="text-xs text-text-secondary">
-            {isEnabled
-              ? "Paid subscriptions, checkout redirects, and PAYG charges are ACTIVE."
-              : "Billing is DISABLED. All users operate under Free plan limits without charge."}
+            {settings?.billingReady
+              ? "Billing can be enabled after active paid plans are configured."
+              : settings?.readinessIssue || "Complete the billing configuration before enabling billing."}
           </p>
         </div>
-
         <button
-          onClick={() => handleUpdate({ billingEnabled: !isEnabled })}
-          disabled={updating}
-          className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            isEnabled ? "bg-success" : "bg-border"
+          type="button"
+          aria-label={billingEnabled ? "Disable billing" : "Enable billing"}
+          aria-pressed={billingEnabled}
+          onClick={() => void updateSettings({ billingEnabled: !billingEnabled })}
+          disabled={saving || (!billingEnabled && !settings?.billingReady)}
+          className={`inline-flex h-9 items-center justify-center rounded-xl px-4 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            billingEnabled ? "bg-error hover:bg-error/80" : "bg-success hover:bg-success/80"
           }`}
         >
-          <span
-            className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-              isEnabled ? "translate-x-5" : "translate-x-0"
-            }`}
-          />
+          {saving ? <Cardio size="20" color="white" speed="1.5" stroke="3" bgOpacity="0.1" /> : billingEnabled ? "Disable billing" : "Enable billing"}
         </button>
-      </div>
+      </section>
 
-      {/* Payment Gateway Strategy Selector */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-bold text-text">Active Payment Provider Strategy</h3>
-        </div>
+      <section className="space-y-3">
+        <h3 className="text-sm font-bold text-text">Implemented payment provider</h3>
         <p className="text-xs text-text-secondary">
-          Select which payment gateway strategy processes checkouts and webhooks. Switching requires zero core code changes.
+          Only implemented providers are selectable. Provider secret keys stay in deployment environment variables.
         </p>
-
-        <div className="grid gap-3 sm:grid-cols-3 pt-1">
-          {PROVIDERS.map((provider) => {
-            const isActive = currentProvider === provider.id;
-            return (
-              <button
-                key={provider.id}
-                onClick={() => handleUpdate({ paymentProvider: provider.id })}
-                disabled={updating}
-                className={`flex flex-col justify-between p-3.5 rounded-xl border text-left transition-all ${
-                  isActive
-                    ? "border-primary bg-primary/10 shadow-sm"
-                    : "border-border/60 bg-background/20 hover:border-primary/40 hover:bg-glass"
-                }`}
-              >
-                <div className="flex items-center justify-between w-full mb-2">
-                  <span className="text-sm font-bold text-text">{provider.name}</span>
-                  {isActive ? (
-                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  ) : (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${provider.color}`}>
-                      {provider.badge}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[11px] text-text-secondary">
-                  {isActive ? "Currently Active Gateway" : `Switch to ${provider.name}`}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Paystack Plan Configuration */}
-      <div className="space-y-4 pt-2 border-t border-border/50">
-        <div className="flex items-center gap-2">
-          <Hash className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-bold text-text">Paystack Plan Configuration</h3>
-        </div>
-        <p className="text-xs text-text-secondary">
-          Configure the Paystack plan code for the Plus subscription. Get this from your{" "}
-          <a href="https://dashboard.paystack.com/#/plans" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2">
-            Paystack Plans dashboard
-          </a>.
-        </p>
-
-        <div className="space-y-3">
-          {/* Plus Plan Code */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
-              <Hash className="h-3.5 w-3.5" /> Plus Plan Code
-            </label>
-            <input
-              id="paystackPlusPlanCode"
-              type="text"
-              value={planCodeInput}
-              onChange={(e) => setPlanCodeInput(e.target.value)}
-              placeholder="e.g. PLN_xxxxxxxxxxxx"
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-mono text-text outline-none focus:border-primary transition"
-            />
-            <p className="text-[10px] text-text-muted">
-              This is passed to Paystack on checkout so users are enrolled in the correct recurring plan.
+        <div className="flex flex-col justify-between gap-3 rounded-xl border border-primary/40 bg-primary/5 p-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-sm font-bold text-text">Paystack</p>
+            <p className="text-xs text-text-secondary">
+              {settings?.providerCredentialConfigured
+                ? "Deployment credential is configured."
+                : "PAYSTACK_SECRET_KEY is missing from the deployment environment."}
             </p>
           </div>
-
-          <button
-            onClick={handleSavePlanConfig}
-            disabled={savingPlanConfig}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-primary-hover transition disabled:opacity-50"
-          >
-            {savingPlanConfig ? (
-              <Cardio size="20" color="white" speed="1.5" stroke="3" bgOpacity="0.1" />
-            ) : (
-              <>
-                <Save className="h-3.5 w-3.5" /> Save Plan Configuration
-              </>
-            )}
-          </button>
+          {settings?.paymentProvider === "paystack" ? (
+            <span className="text-xs font-semibold text-success">Currently selected</span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void updateSettings({ paymentProvider: "paystack" })}
+              disabled={saving}
+              className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text hover:border-primary disabled:opacity-50"
+            >
+              Select Paystack
+            </button>
+          )}
         </div>
-      </div>
+      </section>
 
-      {/* PAYG Availability */}
-      <div className="space-y-3 pt-2 border-t border-border/50">
-        <div className="flex items-center gap-2">
-          <Power className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-bold text-text">PAYG Availability</h3>
+      <section className="space-y-4 border-t border-border/50 pt-5">
+        <div>
+          <h3 className="text-sm font-bold text-text">PAYG and wallet thresholds</h3>
+          <p className="mt-1 text-xs text-text-secondary">
+            PAYG prices and deposit minimums use the wallet currency&apos;s major unit. Plan prices are configured separately in minor units.
+          </p>
         </div>
-        <p className="text-xs text-text-secondary">
-          Choose which plans can use prepaid PAYG after their included log allowance is exhausted.
-        </p>
-        <select
-          value={settings?.paygAllowedPlans ?? "plus"}
-          onChange={(event) => handleUpdate({ paygAllowedPlans: event.target.value as "plus" | "free_plus" })}
-          disabled={updating}
-          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-text outline-none focus:border-primary transition"
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <label className="space-y-1.5 text-xs font-semibold text-text-secondary">
+            Logs per PAYG unit
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={form.paygLogsPerUnit}
+              onChange={(event) => setForm((current) => ({ ...current, paygLogsPerUnit: event.target.value }))}
+              className={inputClassName}
+            />
+          </label>
+          <label className="space-y-1.5 text-xs font-semibold text-text-secondary">
+            Price per PAYG unit
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={form.paygPricePerUnit}
+              onChange={(event) => setForm((current) => ({ ...current, paygPricePerUnit: event.target.value }))}
+              className={inputClassName}
+            />
+          </label>
+          <label className="space-y-1.5 text-xs font-semibold text-text-secondary">
+            Wallet currency
+            <input
+              type="text"
+              maxLength={3}
+              value={form.walletCurrency}
+              onChange={(event) => setForm((current) => ({ ...current, walletCurrency: event.target.value.toUpperCase() }))}
+              className={inputClassName}
+            />
+          </label>
+          <label className="space-y-1.5 text-xs font-semibold text-text-secondary">
+            Minimum wallet deposit ({form.walletCurrency || "currency units"})
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={form.minimumWalletDeposit}
+              onChange={(event) => setForm((current) => ({ ...current, minimumWalletDeposit: event.target.value }))}
+              className={inputClassName}
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={savePaymentSettings}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50"
         >
-          <option value="plus">Plus users only</option>
-          <option value="free_plus">Free and Plus users</option>
-        </select>
-      </div>
+          {saving ? <Cardio size="18" color="white" speed="1.5" stroke="3" bgOpacity="0.1" /> : <Save className="h-3.5 w-3.5" />}
+          Save payment settings
+        </button>
+      </section>
     </div>
   );
 }

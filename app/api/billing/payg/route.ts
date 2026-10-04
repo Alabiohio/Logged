@@ -7,7 +7,7 @@ import { getBillingConfig } from "@/lib/billing/config";
 import { db } from "@/lib/db";
 import { userBillingPreferences } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getOrCreateWallet, PAYG_UNIT_AMOUNT } from "@/lib/billing/wallet";
+import { getOrCreateWallet } from "@/lib/billing/wallet";
 import { ensureUserBillingPreferences } from "@/lib/billing/preferences";
 import { billingProfileUrl, getBillingProfile, isBillingProfileComplete } from "@/lib/billing/profile";
 
@@ -38,6 +38,7 @@ export async function GET() {
       billableUnits: accrual.billableUnits,
       estimatedAmount: accrual.estimatedAmount,
       currency: accrual.currency,
+      minimumDeposit: config.wallet.minimumDeposit,
       billingProfileComplete: isBillingProfileComplete(billingProfile),
       rate: {
         logsPerUnit: config.payg.logsPerUnit,
@@ -90,9 +91,12 @@ export async function PATCH(request: Request) {
       }
       if (body.paygEnabled) {
         const wallet = await getOrCreateWallet(userId);
-        if (wallet.status !== "active" || wallet.balance < PAYG_UNIT_AMOUNT) {
+        const config = await getBillingConfig();
+        if (wallet.status !== "active" || wallet.balance < config.wallet.minimumDeposit) {
           return NextResponse.json(
-            { error: `Deposit at least NGN ${PAYG_UNIT_AMOUNT} to enable PAYG.` },
+            {
+              error: `Deposit at least ${config.wallet.currency} ${config.wallet.minimumDeposit.toLocaleString()} to enable PAYG.`,
+            },
             { status: 403 }
           );
         }
@@ -133,6 +137,7 @@ export async function PATCH(request: Request) {
       billableUnits: accrual.billableUnits,
       estimatedAmount: accrual.estimatedAmount,
       currency: accrual.currency,
+      minimumDeposit: config.wallet.minimumDeposit,
       rate: {
         logsPerUnit: config.payg.logsPerUnit,
         pricePerUnit: config.payg.pricePerUnit,

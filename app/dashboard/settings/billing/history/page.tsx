@@ -16,7 +16,7 @@ interface BillingHistoryTransaction {
 }
 
 function getTransactionLabel(transaction: BillingHistoryTransaction) {
-  if (transaction.kind === "subscription") return "Plus subscription";
+  if (transaction.kind === "subscription") return "Subscription payment";
   if (transaction.type === "deposit") return "Wallet deposit";
   if (transaction.type === "payg_debit") return "PAYG usage";
   return transaction.type.replaceAll("_", " ");
@@ -88,7 +88,7 @@ export default function BillingHistoryPage() {
           <div>
             <h1 className="text-2xl font-black tracking-tight text-text sm:text-3xl">Billing history</h1>
             <p className="mt-0.5 text-xs text-text-secondary sm:text-sm">
-              Wallet activity and Plus subscription payments.
+              Wallet activity and subscription payments.
             </p>
           </div>
         </div>
