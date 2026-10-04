@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CreditCard,
   CheckCircle2,
@@ -69,6 +69,7 @@ interface PaygAccrual {
 
 interface PaygInfo {
   enabled: boolean;
+  billingProfileComplete?: boolean;
   spendingLimit: number | null;
   accrual: PaygAccrual;
   extraLogs?: number;
@@ -106,7 +107,25 @@ interface BillingHistoryTransaction {
   createdAt: string;
 }
 
+interface BillingProfileInfo {
+  billingType: "individual" | "business";
+  fullName: string;
+  email: string;
+  phone: string;
+  companyName: string;
+  taxId: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  region: string;
+  postalCode: string;
+  country: string;
+}
+
+type BillingAction = "checkout" | "deposit" | "payg";
+
 export default function BillingPage() {
+  const router = useRouter();
   const [data, setData] = useState<BillingData | null>(null);
   const [paygDetails, setPaygDetails] = useState<PaygInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,6 +138,9 @@ export default function BillingPage() {
   const [depositLoading, setDepositLoading] = useState(false);
   const [billingTransactions, setBillingTransactions] = useState<BillingHistoryTransaction[]>([]);
   const [billingHistoryError, setBillingHistoryError] = useState<string | null>(null);
+  const [billingProfile, setBillingProfile] = useState<BillingProfileInfo | null>(null);
+  const [pendingBillingAction, setPendingBillingAction] = useState<BillingAction | null>(null);
+  const [pendingDepositAmount, setPendingDepositAmount] = useState<number | null>(null);
 
   // PAYG limit edit state
   const [editingLimit, setEditingLimit] = useState(false);
@@ -131,9 +153,10 @@ export default function BillingPage() {
   const fetchBilling = useCallback(async () => {
     try {
       setError(null);
-      const [resBilling, resPayg] = await Promise.all([
+      const [resBilling, resPayg, resProfile] = await Promise.all([
         fetch("/api/billing"),
         fetch("/api/billing/payg"),
+        fetch("/api/billing/profile"),
       ]);
 
       if (resBilling.ok) {
@@ -148,6 +171,14 @@ export default function BillingPage() {
         const paygJson = await resPayg.json();
         setPaygDetails(paygJson);
         setLimitInput(paygJson.spendingLimit !== null ? String(paygJson.spendingLimit) : "");
+      }
+
+      if (resProfile.ok) {
+        const profileJson = await resProfile.json();
+        setBillingProfile(profileJson.profile);
+      } else {
+        const profileError = await resProfile.json().catch(() => ({}));
+        setError(profileError.error || "Failed to load saved billing details.");
       }
 
       const resWallet = await fetch("/api/billing/wallet");
@@ -173,8 +204,33 @@ export default function BillingPage() {
     }
   }, []);
 
-  const handleDeposit = async () => {
-    const amount = Number(depositAmount);
+  const redirectToBillingDetails = (url: string, resume: string) => {
+    window.sessionStorage.setItem("billing-resume", resume);
+    router.push(url);
+  };
+
+  const queueBillingAction = (action: BillingAction, amount?: number) => {
+    if (!paygDetails?.billingProfileComplete || !billingProfile) {
+      const returnTo = `/dashboard/settings/billing?resume=${action}${
+        action === "deposit" && amount !== undefined ? `&amount=${amount}` : ""
+      }`;
+      const detailsUrl = `/dashboard/settings/billing/details?returnTo=${encodeURIComponent(returnTo)}`;
+      redirectToBillingDetails(detailsUrl, action);
+      return;
+    }
+
+    if (action === "deposit") {
+      setPendingDepositAmount(amount ?? Number(depositAmount));
+    }
+    setPendingBillingAction(action);
+  };
+
+  const handleDeposit = async (amountOverride?: number, confirmed = false) => {
+    const amount = amountOverride ?? Number(depositAmount);
+    if (!confirmed) {
+      queueBillingAction("deposit", amount);
+      return;
+    }
     if (!Number.isInteger(amount) || amount < 500) {
       setError("Deposit amount must be at least NGN 500.");
       return;
@@ -189,6 +245,10 @@ export default function BillingPage() {
         body: JSON.stringify({ amount }),
       });
       const json = await res.json();
+      if (res.status === 428 && json.billingDetailsUrl) {
+        redirectToBillingDetails(json.billingDetailsUrl, "deposit");
+        return;
+      }
       if (json.authorizationUrl) {
         window.location.assign(json.authorizationUrl);
       } else {
@@ -248,7 +308,11 @@ export default function BillingPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (confirmed = false) => {
+    if (!confirmed) {
+      queueBillingAction("checkout");
+      return;
+    }
     setActionLoading(true);
     setError(null);
     try {
@@ -258,6 +322,10 @@ export default function BillingPage() {
         body: JSON.stringify({ planCode: "plus" }),
       });
       const json = await res.json();
+      if (res.status === 428 && json.billingDetailsUrl) {
+        redirectToBillingDetails(json.billingDetailsUrl, "checkout");
+        return;
+      }
       if (!res.ok || json.error) {
         setError(json.error || "Checkout initiation failed");
         setActionLoading(false);
@@ -298,7 +366,11 @@ export default function BillingPage() {
     }
   };
 
-  const handleTogglePayg = async (enabled: boolean) => {
+  const handleTogglePayg = async (enabled: boolean, confirmed = false) => {
+    if (enabled && !confirmed) {
+      queueBillingAction("payg");
+      return;
+    }
     setPaygUpdating(true);
     setError(null);
     try {
@@ -308,6 +380,10 @@ export default function BillingPage() {
         body: JSON.stringify({ paygEnabled: enabled }),
       });
       const json = await res.json();
+      if (res.status === 428 && json.billingDetailsUrl) {
+        redirectToBillingDetails(json.billingDetailsUrl, "payg");
+        return;
+      }
       if (!res.ok || json.error || typeof json.enabled !== "boolean") {
         setError(json.error || "Failed to update PAYG settings");
       } else {
@@ -354,6 +430,58 @@ export default function BillingPage() {
       setPaygUpdating(false);
     }
   };
+
+  const continueBillingAction = () => {
+    const action = pendingBillingAction;
+    setPendingBillingAction(null);
+    if (action === "checkout") void handleCheckout(true);
+    else if (action === "deposit") void handleDeposit(pendingDepositAmount ?? undefined, true);
+    else if (action === "payg") void handleTogglePayg(true, true);
+  };
+
+  const getPendingBillingEditUrl = () => {
+    const action = pendingBillingAction;
+    if (!action) return "/dashboard/settings/billing/details";
+
+    const returnTo = `/dashboard/settings/billing?resume=${action}${
+      action === "deposit" && pendingDepositAmount !== null
+        ? `&amount=${pendingDepositAmount}`
+        : ""
+    }`;
+    return `/dashboard/settings/billing/details?returnTo=${encodeURIComponent(returnTo)}`;
+  };
+
+  useEffect(() => {
+    const resume = searchParams.get("resume");
+    if (!resume || !["checkout", "deposit", "payg"].includes(resume)) return;
+    if (window.sessionStorage.getItem("billing-resume") !== resume) return;
+
+    const amount = Number(searchParams.get("amount"));
+    const timeout = window.setTimeout(() => {
+      if (window.sessionStorage.getItem("billing-resume") !== resume) return;
+      if (loading) return;
+
+      if (!paygDetails?.billingProfileComplete || !billingProfile) {
+        const returnTo = `/dashboard/settings/billing?resume=${resume}${
+          resume === "deposit" && Number.isInteger(amount) ? `&amount=${amount}` : ""
+        }`;
+        const detailsUrl = `/dashboard/settings/billing/details?returnTo=${encodeURIComponent(returnTo)}`;
+        router.push(detailsUrl);
+        return;
+      }
+
+      window.sessionStorage.removeItem("billing-resume");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("resume");
+      url.searchParams.delete("amount");
+      window.history.replaceState({}, "", url.toString());
+
+      if (resume === "deposit") setPendingDepositAmount(amount);
+      setPendingBillingAction(resume as BillingAction);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [billingProfile, loading, paygDetails?.billingProfileComplete, router, searchParams]);
 
   if (loading) {
     return (
@@ -489,7 +617,7 @@ export default function BillingPage() {
           />
           <button
             type="button"
-            onClick={handleDeposit}
+            onClick={() => void handleDeposit()}
             disabled={depositLoading || wallet?.status !== "active"}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50"
           >
@@ -792,7 +920,7 @@ export default function BillingPage() {
               </div>
             ) : (
               <button
-                onClick={handleCheckout}
+                onClick={() => void handleCheckout()}
                 disabled={actionLoading}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover active:scale-98 transition shadow-sm disabled:opacity-50"
               >
@@ -882,7 +1010,7 @@ export default function BillingPage() {
               </button>
             ) : !canFundPayg ? (
               <button
-                onClick={handleDeposit}
+                onClick={() => void handleDeposit()}
                 disabled={depositLoading || wallet?.status !== "active"}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
               >
@@ -1085,6 +1213,103 @@ export default function BillingPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {pendingBillingAction && billingProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close billing confirmation"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setPendingBillingAction(null)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="billing-confirmation-title"
+            className="relative glass w-full max-w-lg space-y-5 rounded-[var(--radius-lg)] p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div>
+              <h2 id="billing-confirmation-title" className="text-lg font-black text-text">
+                Confirm billing details
+              </h2>
+              <p className="mt-1 text-sm text-text-secondary">
+                Please confirm these details before continuing. You can edit them if anything has changed.
+              </p>
+            </div>
+
+            <dl className="grid gap-x-6 gap-y-4 rounded-2xl border border-border/70 bg-background/30 p-4 text-sm sm:grid-cols-2">
+              {billingProfile.billingType === "business" && billingProfile.companyName && (
+                <div>
+                  <dt className="text-xs font-semibold text-text-muted">Company</dt>
+                  <dd className="mt-1 font-medium text-text">{billingProfile.companyName}</dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-xs font-semibold text-text-muted">Billing contact</dt>
+                <dd className="mt-1 font-medium text-text">{billingProfile.fullName}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold text-text-muted">Billing email</dt>
+                <dd className="mt-1 break-all font-medium text-text">{billingProfile.email}</dd>
+              </div>
+              {billingProfile.phone && (
+                <div>
+                  <dt className="text-xs font-semibold text-text-muted">Phone</dt>
+                  <dd className="mt-1 font-medium text-text">{billingProfile.phone}</dd>
+                </div>
+              )}
+              <div className="sm:col-span-2">
+                <dt className="text-xs font-semibold text-text-muted">Billing address</dt>
+                <dd className="mt-1 font-medium text-text">
+                  {[billingProfile.addressLine1, billingProfile.addressLine2, billingProfile.city, billingProfile.region, billingProfile.postalCode, billingProfile.country]
+                    .filter(Boolean)
+                    .join(", ")}
+                </dd>
+              </div>
+              {billingProfile.billingType === "business" && billingProfile.taxId && (
+                <div>
+                  <dt className="text-xs font-semibold text-text-muted">Tax / VAT ID</dt>
+                  <dd className="mt-1 font-medium text-text">{billingProfile.taxId}</dd>
+                </div>
+              )}
+            </dl>
+
+            <div className="flex items-center justify-between gap-3">
+              <Link
+                href={getPendingBillingEditUrl()}
+                onClick={() => {
+                  if (pendingBillingAction) {
+                    window.sessionStorage.setItem("billing-resume", pendingBillingAction);
+                  }
+                }}
+                className="text-sm font-semibold text-primary transition hover:text-primary-hover"
+              >
+                Edit billing details
+              </Link>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPendingBillingAction(null)}
+                  className="rounded-xl border border-border bg-background/30 px-4 py-2.5 text-xs font-semibold text-text transition hover:bg-glass-hover"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={continueBillingAction}
+                  disabled={actionLoading || depositLoading || paygUpdating}
+                  className="rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50"
+                >
+                  Confirm and continue
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-text-muted">
+              This confirms your billing contact details only. Payment method details remain with the payment provider.
+            </p>
           </div>
         </div>
       )}

@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
-import { paygUsage, subscriptions, plans, users } from "@/db/schema";
+import { paygUsage, subscriptions, plans } from "@/db/schema";
 import { getUserSubscription } from "./subscription";
 import { getPreviousPeriod, getUsageForPeriod, getPaygAccrualForPeriod } from "./usage";
 import { getPaymentProvider } from "./providers";
+import { getBillingProfile, isBillingProfileComplete } from "./profile";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,7 +37,7 @@ export async function settlePaygForUser(userId: string) {
     return { status: "skipped", reason: "No extra logs to bill" };
   }
 
-  let paygRecordId = existingCharged.length > 0 ? existingCharged[0].id : uuidv4();
+  const paygRecordId = existingCharged.length > 0 ? existingCharged[0].id : uuidv4();
 
   if (existingCharged.length === 0) {
     await db.insert(paygUsage).values({
@@ -58,20 +59,23 @@ export async function settlePaygForUser(userId: string) {
   }
 
   // Look up user email for payment provider charge
-  const userRows = await db.select({ email: users.email }).from(users).where(eq(users.id, userId)).limit(1);
-  const userEmail = userRows[0]?.email;
+  const billingProfile = await getBillingProfile(userId);
   const customerCode = subWithPlan.subscription.paystackCustomerCode;
 
   try {
-    if (!customerCode || !userEmail) {
-      throw new Error("Missing customer code or user email for settlement charge");
+    if (!isBillingProfileComplete(billingProfile)) {
+      return { status: "skipped", reason: "Billing information required before PAYG settlement" };
+    }
+
+    if (!customerCode || !billingProfile?.email) {
+      throw new Error("Missing customer code or billing email for settlement charge");
     }
 
     const provider = await getPaymentProvider();
     const amountKobo = accrual.estimatedAmount * 100;
     const chargeRes = await provider.chargeAuthorization({
       authorizationCode: customerCode,
-      email: userEmail,
+      email: billingProfile.email,
       amount: amountKobo,
       metadata: {
         userId,
@@ -132,4 +136,3 @@ export async function settleAllPaygUsers() {
 
   return { totalSettled, failed, skipped, processedCount: plusSubs.length };
 }
-

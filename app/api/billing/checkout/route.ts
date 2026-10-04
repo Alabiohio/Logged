@@ -7,6 +7,7 @@ import { getPaymentProvider } from "@/lib/billing/providers";
 import { db } from "@/lib/db";
 import { subscriptions, plans, settings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { billingProfileUrl, getBillingProfile, isBillingProfileComplete } from "@/lib/billing/profile";
 
 export async function POST() {
   const session = await auth.api.getSession({
@@ -40,6 +41,17 @@ export async function POST() {
       });
     }
 
+    const billingProfile = await getBillingProfile(userId);
+    if (!isBillingProfileComplete(billingProfile)) {
+      return NextResponse.json(
+        {
+          error: "Complete your billing information before starting checkout.",
+          billingDetailsUrl: billingProfileUrl("/dashboard/settings/billing?resume=checkout"),
+        },
+        { status: 428 }
+      );
+    }
+
     const provider = await getPaymentProvider();
 
     // Get Plus plan details
@@ -54,8 +66,9 @@ export async function POST() {
     if (!customerCode) {
       try {
         const custRes = await provider.createCustomer({
-          email: session.user.email,
-          name: session.user.name,
+          email: billingProfile.email!,
+          name: billingProfile.fullName!,
+          phone: billingProfile.phone ?? undefined,
         });
         customerCode = custRes.customerCode;
 
@@ -82,7 +95,7 @@ export async function POST() {
 
     const baseUrl = process.env.APP_URL || "http://localhost:3000";
     const transaction = await provider.initializeCheckout({
-      email: session.user.email,
+      email: billingProfile.email!,
       amount: plusPlan.price,
       planCode: resolvedPlanCode,        // undefined = one-time charge, fine — webhook upgrades the account
       callbackUrl: `${baseUrl}/dashboard/settings/billing?checkout=success`,
@@ -105,4 +118,3 @@ export async function POST() {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-

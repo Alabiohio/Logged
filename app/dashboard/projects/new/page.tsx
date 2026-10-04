@@ -65,21 +65,8 @@ export default function NewProjectPage() {
 
   const handleUpgrade = async () => {
     setUpgradePending(true);
-    try {
-      const res = await fetch("/api/billing/checkout", { method: "POST" });
-      const data = await res.json();
-      if (data.authorizationUrl) {
-        window.location.assign(data.authorizationUrl);
-      } else {
-        setError(data.error || "Billing is not currently available.");
-        setLimitDetails(null);
-      }
-    } catch {
-      setError("Unable to start the upgrade. Please try again.");
-      setLimitDetails(null);
-    } finally {
-      setUpgradePending(false);
-    }
+    window.sessionStorage.setItem("billing-resume", "checkout");
+    router.push("/dashboard/settings/billing?resume=checkout");
   };
 
   return (

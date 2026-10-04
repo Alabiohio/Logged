@@ -1,6 +1,7 @@
 export interface CustomerParams {
   email: string;
   name?: string;
+  phone?: string;
 }
 
 export interface CheckoutParams {

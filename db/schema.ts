@@ -67,6 +67,24 @@ export const userBillingPreferences = pgTable("user_billing_preferences", {
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 });
 
+export const billingProfiles = pgTable("billing_profiles", {
+    userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+    billingType: text("billing_type").notNull().default("individual"),
+    fullName: text("full_name"),
+    email: text("email"),
+    phone: text("phone"),
+    companyName: text("company_name"),
+    taxId: text("tax_id"),
+    addressLine1: text("address_line_1"),
+    addressLine2: text("address_line_2"),
+    city: text("city"),
+    region: text("region"),
+    postalCode: text("postal_code"),
+    country: text("country"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
 export const projects = pgTable("project", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull().references(() => users.id),
@@ -250,5 +268,4 @@ export const billingEvents = pgTable("billing_events", {
 }, (table) => [
     index("billing_events_provider_event_id_idx").on(table.providerEventId)
 ]);
-
 

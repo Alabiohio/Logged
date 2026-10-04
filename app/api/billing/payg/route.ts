@@ -9,6 +9,7 @@ import { userBillingPreferences } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getOrCreateWallet, PAYG_UNIT_AMOUNT } from "@/lib/billing/wallet";
 import { ensureUserBillingPreferences } from "@/lib/billing/preferences";
+import { billingProfileUrl, getBillingProfile, isBillingProfileComplete } from "@/lib/billing/profile";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -23,10 +24,11 @@ export async function GET() {
     const userId = session.user.id;
     await ensureUserBillingPreferences(userId);
 
-    const [limits, accrual, config] = await Promise.all([
+    const [limits, accrual, config, billingProfile] = await Promise.all([
       getUserLimits(userId),
       getPaygAccrual(userId),
       getBillingConfig(),
+      getBillingProfile(userId),
     ]);
 
     return NextResponse.json({
@@ -36,6 +38,7 @@ export async function GET() {
       billableUnits: accrual.billableUnits,
       estimatedAmount: accrual.estimatedAmount,
       currency: accrual.currency,
+      billingProfileComplete: isBillingProfileComplete(billingProfile),
       rate: {
         logsPerUnit: config.payg.logsPerUnit,
         pricePerUnit: config.payg.pricePerUnit,
@@ -59,6 +62,18 @@ export async function PATCH(request: Request) {
   try {
     const userId = session.user.id;
     const body = await request.json();
+    if (body.paygEnabled === true) {
+      const billingProfile = await getBillingProfile(userId);
+      if (!isBillingProfileComplete(billingProfile)) {
+        return NextResponse.json(
+          {
+            error: "Complete your billing information before enabling PAYG.",
+            billingDetailsUrl: billingProfileUrl("/dashboard/settings/billing?resume=payg"),
+          },
+          { status: 428 }
+        );
+      }
+    }
     const preferences = await ensureUserBillingPreferences(userId);
 
     const updateData: Partial<typeof userBillingPreferences.$inferInsert> = {

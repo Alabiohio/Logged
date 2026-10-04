@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getPaymentProvider } from "@/lib/billing/providers";
 import { getOrCreateWallet } from "@/lib/billing/wallet";
+import { billingProfileUrl, getBillingProfile, isBillingProfileComplete } from "@/lib/billing/profile";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -28,11 +29,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Deposit amount must be at least NGN 500." }, { status: 400 });
     }
 
+    const billingProfile = await getBillingProfile(session.user.id);
+    if (!isBillingProfileComplete(billingProfile)) {
+      return NextResponse.json(
+        {
+          error: "Complete your billing information before starting a deposit.",
+          billingDetailsUrl: billingProfileUrl(
+            `/dashboard/settings/billing?resume=deposit&amount=${amount}`
+          ),
+        },
+        { status: 428 }
+      );
+    }
+
     const wallet = await getOrCreateWallet(session.user.id);
     const provider = await getPaymentProvider();
     const baseUrl = process.env.APP_URL || "http://localhost:3000";
     const transaction = await provider.initializeCheckout({
-      email: session.user.email,
+      email: billingProfile.email!,
       amount: amount * 100,
       callbackUrl: `${baseUrl}/dashboard/settings/billing?wallet=success`,
       metadata: {

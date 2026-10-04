@@ -13,6 +13,7 @@ export interface PaystackCustomer {
 export async function createCustomer(params: {
   email: string;
   name?: string;
+  phone?: string;
 }): Promise<{ customerCode: string; customer: PaystackCustomer }> {
   let firstName = "";
   let lastName = "";
@@ -26,6 +27,7 @@ export async function createCustomer(params: {
     email: params.email,
     first_name: firstName,
     last_name: lastName,
+    phone: params.phone,
   });
 
   return {
