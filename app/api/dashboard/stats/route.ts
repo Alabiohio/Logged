@@ -21,7 +21,7 @@ export async function GET() {
         // Load project metadata only. Counting every project's logs here makes the dashboard
         // wait on the full logs table before it can render its bounded recent-log preview.
         const userProjects = await db
-            .select({ id: projects.id, name: projects.name })
+            .select({ id: projects.id, name: projects.name, updatedAt: projects.updatedAt })
             .from(projects)
             .where(eq(projects.userId, userId));
 

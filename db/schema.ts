@@ -8,6 +8,7 @@ export const users = pgTable("user", {
 	image: text("image"),
 	username: text("username").unique(),
 	displayUsername: text("display_username"),
+	role: text("role").notNull().default("user"),
 	createdAt: timestamp("created_at").notNull(),
 	updatedAt: timestamp("updated_at").notNull()
 });
@@ -54,6 +55,14 @@ export const userPreferences = pgTable("user_preferences", {
     errorAlerts: boolean("error_alerts").notNull().default(true),
     weeklyDigest: boolean("weekly_digest").notNull().default(false),
     logRetentionDays: integer("log_retention_days").notNull().default(90),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+export const userBillingPreferences = pgTable("user_billing_preferences", {
+    userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+    paygEnabled: boolean("payg_enabled").notNull().default(true),
+    paygSpendingLimit: integer("payg_spending_limit"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 });
@@ -161,8 +170,6 @@ export const subscriptions = pgTable("subscriptions", {
     currentPeriodStart: timestamp("current_period_start"),
     currentPeriodEnd: timestamp("current_period_end"),
     cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
-    paygEnabled: boolean("payg_enabled").notNull().default(true),
-    paygSpendingLimit: integer("payg_spending_limit"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 }, (table) => [
@@ -243,6 +250,5 @@ export const billingEvents = pgTable("billing_events", {
 }, (table) => [
     index("billing_events_provider_event_id_idx").on(table.providerEventId)
 ]);
-
 
 

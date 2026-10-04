@@ -60,6 +60,19 @@ export default function SDKTestPage() {
     ]);
   };
 
+  const handleRedactionTest = () => {
+    logger.log("Authorization: Bearer sk_live_abc123 failed for user token=secret-token", {
+      password: "hunter2",
+      accessToken: "abc123",
+      apiKey: "super-secret-key",
+      nested: {
+        refreshToken: "xyz789",
+        safeValue: "still visible",
+      },
+      arr: ["safe", { sessionId: "abc-session" }],
+    });
+  };
+
   if (!mounted) {
     return <div>Loading...</div>;
   }
@@ -107,6 +120,13 @@ export default function SDKTestPage() {
           className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
         >
           logger.table()
+        </button>
+
+        <button
+          onClick={handleRedactionTest}
+          className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+        >
+          Redaction Test
         </button>
       </div>
 

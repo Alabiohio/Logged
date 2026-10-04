@@ -4,11 +4,11 @@ import { NextResponse } from "next/server";
 import { getUserLimits } from "@/lib/billing/entitlements";
 import { getPaygAccrual } from "@/lib/billing/usage";
 import { getBillingConfig } from "@/lib/billing/config";
-import { ensureFreeSub } from "@/lib/billing/subscription";
 import { db } from "@/lib/db";
-import { subscriptions } from "@/db/schema";
+import { userBillingPreferences } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getOrCreateWallet, PAYG_UNIT_AMOUNT } from "@/lib/billing/wallet";
+import { ensureUserBillingPreferences } from "@/lib/billing/preferences";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -21,7 +21,7 @@ export async function GET() {
 
   try {
     const userId = session.user.id;
-    await ensureFreeSub(userId);
+    await ensureUserBillingPreferences(userId);
 
     const [limits, accrual, config] = await Promise.all([
       getUserLimits(userId),
@@ -59,9 +59,9 @@ export async function PATCH(request: Request) {
   try {
     const userId = session.user.id;
     const body = await request.json();
-    const sub = await ensureFreeSub(userId);
+    const preferences = await ensureUserBillingPreferences(userId);
 
-    const updateData: Partial<typeof subscriptions.$inferInsert> = {
+    const updateData: Partial<typeof userBillingPreferences.$inferInsert> = {
       updatedAt: new Date(),
     };
 
@@ -99,11 +99,10 @@ export async function PATCH(request: Request) {
       }
     }
 
-    const updated = await db
-      .update(subscriptions)
+    await db
+      .update(userBillingPreferences)
       .set(updateData)
-      .where(eq(subscriptions.id, sub.id))
-      .returning();
+      .where(eq(userBillingPreferences.userId, preferences.userId));
 
     const [limits, accrual, config] = await Promise.all([
       getUserLimits(userId),

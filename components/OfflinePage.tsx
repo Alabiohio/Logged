@@ -68,19 +68,6 @@ export function OfflinePage() {
             Open dashboard
           </Link>
         </div>
-
-        <div className="mt-7 rounded-2xl border border-border bg-background/50 p-4">
-          <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="text-text-secondary">PWA status</span>
-            <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1 text-[11px] font-medium text-warning">
-              Offline mode
-            </span>
-          </div>
-          <p className="mt-3 text-sm leading-6 text-text-secondary">
-            This page is cached for installed app usage, so the experience remains clear even
-            when the device is disconnected.
-          </p>
-        </div>
       </div>
     </main>
   );

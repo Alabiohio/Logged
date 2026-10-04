@@ -95,12 +95,14 @@ interface WalletInfo {
   status: string;
 }
 
-interface WalletTransaction {
+interface BillingHistoryTransaction {
   id: string;
+  kind: "wallet" | "subscription";
   type: string;
   amount: number;
-  balanceAfter: number;
+  currency: string;
   status: string;
+  providerReference: string | null;
   createdAt: string;
 }
 
@@ -115,7 +117,8 @@ export default function BillingPage() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [depositAmount, setDepositAmount] = useState("500");
   const [depositLoading, setDepositLoading] = useState(false);
-  const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
+  const [billingTransactions, setBillingTransactions] = useState<BillingHistoryTransaction[]>([]);
+  const [billingHistoryError, setBillingHistoryError] = useState<string | null>(null);
 
   // PAYG limit edit state
   const [editingLimit, setEditingLimit] = useState(false);
@@ -123,6 +126,7 @@ export default function BillingPage() {
 
   // Cancel sub modal state
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showPaygPlanModal, setShowPaygPlanModal] = useState(false);
 
   const fetchBilling = useCallback(async () => {
     try {
@@ -150,12 +154,19 @@ export default function BillingPage() {
       if (resWallet.ok) {
         setWallet(await resWallet.json());
       }
-      const resWalletTransactions = await fetch("/api/billing/wallet/transactions");
-      if (resWalletTransactions.ok) {
-        const walletData = await resWalletTransactions.json();
-        setWalletTransactions(walletData.transactions ?? []);
+      const resBillingHistory = await fetch("/api/billing/history");
+      if (resBillingHistory.ok) {
+        const historyData = await resBillingHistory.json();
+        setBillingTransactions(historyData.transactions ?? []);
+        setBillingHistoryError(null);
+      } else {
+        const historyError = await resBillingHistory.json().catch(() => ({}));
+        const message = historyError.error || "Failed to load billing activity.";
+        setBillingHistoryError(message);
+        setError(message);
       }
     } catch {
+      setBillingHistoryError("Network error loading billing activity.");
       setError("Network error loading billing data.");
     } finally {
       setLoading(false);
@@ -297,11 +308,14 @@ export default function BillingPage() {
         body: JSON.stringify({ paygEnabled: enabled }),
       });
       const json = await res.json();
-      if (!res.ok || json.error) {
+      if (!res.ok || json.error || typeof json.enabled !== "boolean") {
         setError(json.error || "Failed to update PAYG settings");
       } else {
         setPaygDetails((prev) => (prev ? { ...prev, enabled: json.enabled } : prev));
-        setSuccess(`PAYG ${enabled ? "enabled" : "disabled"} successfully.`);
+        setData((prev) => (
+          prev ? { ...prev, payg: { ...prev.payg, enabled: json.enabled } } : prev
+        ));
+        setSuccess(`PAYG ${json.enabled ? "enabled" : "disabled"} successfully.`);
       }
     } catch {
       setError("Failed to update PAYG settings");
@@ -482,23 +496,40 @@ export default function BillingPage() {
             {depositLoading ? "Opening checkout..." : "Deposit funds"}
           </button>
         </div>
-        {walletTransactions.length > 0 && (
-          <div className="mt-5 border-t border-border/50 pt-4">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">Recent wallet activity</p>
+        <div className="mt-5 border-t border-border/50 pt-4">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Recent billing activity</p>
+            <Link
+              href="/dashboard/settings/billing/history"
+              className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary transition hover:text-primary-hover"
+            >
+              View history
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          {billingTransactions.length > 0 ? (
             <div className="space-y-2">
-              {walletTransactions.slice(0, 5).map((transaction) => (
+              {billingTransactions.slice(0, 5).map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between text-xs">
                   <span className="text-text-secondary">
-                    {transaction.type === "deposit" ? "Wallet deposit" : "PAYG usage"}
+                    {transaction.kind === "subscription"
+                      ? "Plus subscription"
+                      : transaction.type === "deposit"
+                        ? "Wallet deposit"
+                        : "PAYG usage"}
                   </span>
                   <span className={transaction.amount >= 0 ? "font-mono font-bold text-success" : "font-mono font-bold text-text"}>
-                    {transaction.amount >= 0 ? "+" : ""}NGN {Math.abs(transaction.amount).toLocaleString()}
+                    {transaction.amount >= 0 ? "+" : ""}{transaction.currency} {Math.abs(transaction.amount).toLocaleString()}
                   </span>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-xs text-text-muted">
+              {billingHistoryError ? "Unable to load billing activity." : "No billing activity yet."}
+            </p>
+          )}
+        </div>
       </section>
 
       {/* Master Billing OFF Notice */}
@@ -832,25 +863,10 @@ export default function BillingPage() {
               </button>
             ) : !limits?.paygAvailable ? (
               <button
-                onClick={handleCheckout}
-                disabled={actionLoading}
+                onClick={() => setShowPaygPlanModal(true)}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover active:scale-98 transition shadow-sm disabled:opacity-50"
               >
-                {actionLoading ? (
-                  <Cardio size="28" color="white" speed="1.5" stroke="3" bgOpacity="0.1" />
-                ) : (
-                  <>
-                    Upgrade to Enable PAYG <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            ) : !canFundPayg ? (
-              <button
-                onClick={handleDeposit}
-                disabled={depositLoading || wallet?.status !== "active"}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
-              >
-                Deposit to Enable PAYG
+                Upgrade to Enable PAYG <ArrowRight className="h-4 w-4" />
               </button>
             ) : payg?.enabled ? (
               <button
@@ -862,6 +878,18 @@ export default function BillingPage() {
                   <Cardio size="28" color="currentColor" speed="1.5" stroke="3" bgOpacity="0.1" />
                 ) : (
                   "Disable PAYG Mode"
+                )}
+              </button>
+            ) : !canFundPayg ? (
+              <button
+                onClick={handleDeposit}
+                disabled={depositLoading || wallet?.status !== "active"}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
+              >
+                {depositLoading ? (
+                  <Cardio size="28" color="white" speed="1.5" stroke="3" bgOpacity="0.1" />
+                ) : (
+                  "Deposit to Enable PAYG"
                 )}
               </button>
             ) : (
@@ -902,12 +930,37 @@ export default function BillingPage() {
             {/* Toggle Switch */}
             <div className="flex items-center gap-3">
               <span className="text-xs font-semibold text-text-secondary">
-                {payg?.enabled ? "PAYG Active" : "PAYG Disabled"}
+                {payg?.enabled
+                  ? "PAYG Active"
+                  : !limits?.paygAvailable
+                    ? "Upgrade to Enable PAYG"
+                    : !canFundPayg
+                      ? "Deposit to Enable PAYG"
+                      : "PAYG Disabled"}
               </span>
               <button
-                onClick={() => handleTogglePayg(!payg?.enabled)}
-                disabled={paygUpdating}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                type="button"
+                onClick={() => {
+                  if (!payg?.enabled && !limits?.paygAvailable) {
+                    setShowPaygPlanModal(true);
+                    return;
+                  }
+                  if (!payg?.enabled && !canFundPayg) return;
+                  void handleTogglePayg(!payg?.enabled);
+                }}
+                disabled={
+                  paygUpdating
+                  || (!payg?.enabled && limits?.paygAvailable && !canFundPayg)
+                }
+                aria-label={
+                  payg?.enabled
+                    ? "Disable PAYG"
+                    : !limits?.paygAvailable
+                      ? "Learn why PAYG is unavailable"
+                      : "Enable PAYG"
+                }
+                aria-pressed={payg?.enabled ?? false}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
                   payg?.enabled ? "bg-primary" : "bg-border"
                 }`}
               >
@@ -1031,6 +1084,59 @@ export default function BillingPage() {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPaygPlanModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close PAYG availability dialog"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowPaygPlanModal(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payg-plan-dialog-title"
+            className="relative glass w-full max-w-md space-y-5 rounded-[var(--radius-lg)] p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+                <ShieldAlert className="h-5 w-5 text-primary" />
+              </div>
+              <h2 id="payg-plan-dialog-title" className="text-lg font-black text-text">
+                Plus plan required
+              </h2>
+            </div>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              Pay-As-You-Go is currently available to Plus users only. Upgrade your plan to enable PAYG and continue accepting logs beyond your included allowance.
+            </p>
+            <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => setShowPaygPlanModal(false)}
+                className="flex-1 rounded-xl border border-border bg-background/30 px-4 py-2.5 text-xs font-semibold text-text transition hover:bg-glass-hover"
+              >
+                Maybe later
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPaygPlanModal(false);
+                  void handleCheckout();
+                }}
+                disabled={actionLoading}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50"
+              >
+                {actionLoading ? (
+                  <Cardio size="20" color="white" speed="1.5" stroke="3" bgOpacity="0.1" />
+                ) : (
+                  <>Upgrade to Plus <ArrowRight className="h-4 w-4" /></>
+                )}
+              </button>
             </div>
           </div>
         </div>

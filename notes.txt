@@ -1,1 +1,14 @@
 8/10/26 - added fork
+
+And I'd add a warning to Logged
+
+When someone creates a project:
+
+⚠️ Don't log sensitive information
+
+Logs may contain personal information, authentication tokens, passwords, API keys, or other confidential data. Logged automatically detects and redacts common secrets, but you should avoid sending sensitive data to your logs whenever possible.
+
+That protects users and makes Logged look much more professional.
+
+One particularly valuable feature for your product would be a PII/secret detection engine that scans incoming logs and automatically masks emails, phone numbers, API keys, JWTs, passwords, card numbers, etc. That could become a real differentiator for Logged rather than just being another log dashboard.
+

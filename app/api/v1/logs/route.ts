@@ -1,14 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { authenticateApiKey, hashApiKey } from "@/lib/auth/api-key";
+import { hashApiKey } from "@/lib/auth/api-key";
+import { authenticateApiKeyCached } from "@/lib/auth/api-key-cache";
 import { validateLog, validateBatch } from "@/lib/logs/validate";
 import { normalizeLog, normalizeBatch } from "@/lib/logs/normalize";
-import { ingestLog, ingestBatch } from "@/lib/logs/ingest";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { db } from "@/lib/db";
 import { userPreferences, users, projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { sendErrorAlertEmail } from "@/lib/email";
 import { canAcceptLog } from "@/lib/billing/entitlements";
+import { logQueue } from "@/lib/queue";
+import { ingestionWorker } from "@/lib/worker/ingestion-worker";
+import crypto from "crypto";
 
 // ------------------------------------------------------------------
 // Constants
@@ -16,6 +19,15 @@ import { canAcceptLog } from "@/lib/billing/entitlements";
 
 const MAX_BODY_BYTES = 100 * 1024; // 100 KB
 const MAX_BATCH_SIZE = 100;        // maximum logs per batch request
+
+function generateLogId(): string {
+    return `log_${crypto.randomUUID().replace(/-/g, "")}`;
+}
+
+// Ensure background worker is running for single-node / dev environments
+if (process.env.NODE_ENV !== "test") {
+    ingestionWorker.start();
+}
 
 // ------------------------------------------------------------------
 // CORS helpers
@@ -45,25 +57,14 @@ async function maybeSendErrorAlert(project: typeof projects.$inferSelect, level:
             }),
         ]);
 
-        if (!projectOwner?.email) {
-            console.log("No project owner email found for project:", project.id);
-            return;
-        }
+        if (!projectOwner?.email) return;
 
         const emailNotificationsEnabled = preferences?.emailNotifications ?? true;
         const errorAlertsEnabled = preferences?.errorAlerts ?? true;
 
-        if (!emailNotificationsEnabled || !errorAlertsEnabled) {
-            console.log("Error alerts disabled for user:", project.userId, {
-                emailNotifications: emailNotificationsEnabled,
-                errorAlerts: errorAlertsEnabled,
-            });
-            return;
-        }
+        if (!emailNotificationsEnabled || !errorAlertsEnabled) return;
 
         const logUrl = `${process.env.APP_URL || "http://localhost:3000"}/dashboard/projects/${project.id}/logs`;
-
-        console.log("Sending error alert email to:", projectOwner.email, "for project:", project.name, "logId:", logId);
 
         await sendErrorAlertEmail({
             to: projectOwner.email,
@@ -72,8 +73,6 @@ async function maybeSendErrorAlert(project: typeof projects.$inferSelect, level:
             errorMessage: message,
             logUrl,
         });
-
-        console.log("Error alert email sent successfully to:", projectOwner.email);
     } catch (error) {
         console.error("Failed to send error alert email:", error);
     }
@@ -122,8 +121,8 @@ export async function POST(request: NextRequest) {
     }
     const rawKey = match[1].trim();
 
-    // ── 3. Authenticate — look up project by hashed key ────────────
-    const authResult = await authenticateApiKey(rawKey);
+    // ── 3. Authenticate — fast cached lookup ───────────────────────
+    const authResult = await authenticateApiKeyCached(rawKey);
     if (!authResult) {
         return errorResponse(401, "INVALID_API_KEY", "Invalid or missing API key.");
     }
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
         return errorResponse(403, "PROJECT_ARCHIVED", "This project is archived due to plan limits. Upgrade your plan to reactivate it.");
     }
 
-    // ── 4. Rate limit (keyed on hash, not raw key) ──────────────────
+    // ── 4. Rate limit ───────────────────────────────────────────────
     const keyHash = hashApiKey(rawKey);
     const rl = checkRateLimit(keyHash);
     const rlHeaders = rateLimitHeaders(rl);
@@ -170,7 +169,7 @@ export async function POST(request: NextRequest) {
 
     const bodyObj = body as Record<string, unknown>;
 
-    // ── 6. Single vs. batch ─────────────────────────────────────────
+    // ── 6. Single vs. batch async ingestion ─────────────────────────
     if (Array.isArray(bodyObj.logs)) {
         // ── Batch path ───────────────────────────────────────────────
         const items = bodyObj.logs as unknown[];
@@ -203,31 +202,30 @@ export async function POST(request: NextRequest) {
         }
 
         const normalized = normalizeBatch(valid, project, environment, request);
-        const ids = await ingestBatch(normalized, project.userId).catch((error) => {
-            if (error instanceof Error && error.message === "PAYG wallet balance is insufficient") {
-                return "PAYG_WALLET_INSUFFICIENT";
+        const queueItems = normalized.map((log) => {
+            const logId = generateLogId();
+            if (log.level === "error") {
+                void maybeSendErrorAlert(project, log.level, log.message, logId);
             }
-            return null;
+            return {
+                id: logId,
+                log,
+                userId: project.userId,
+                receivedAt: Date.now(),
+            };
         });
 
-        if (ids === "PAYG_WALLET_INSUFFICIENT") {
-            return errorResponse(402, "PAYG_WALLET_INSUFFICIENT", "PAYG wallet balance is insufficient.", rlHeaders);
-        }
-
-        if (!ids) {
-            return NextResponse.json({ success: false, error: "Failed to store logs." }, { status: 500, headers: corsHeaders() });
-        }
-
-        for (let i = 0; i < normalized.length; i++) {
-            const log = normalized[i];
-            if (log.level === "error") {
-                void maybeSendErrorAlert(project, log.level, log.message, ids[i]);
-            }
-        }
+        const enqueueRes = await logQueue.enqueueBatch(queueItems);
 
         return NextResponse.json(
-            { success: true, accepted: ids.length, rejected: rejected.length },
-            { status: 201, headers: { ...corsHeaders(), ...rlHeaders } }
+            {
+                success: true,
+                accepted: queueItems.length,
+                rejected: rejected.length,
+                jobId: enqueueRes.jobId,
+                ids: queueItems.map((q) => q.id),
+            },
+            { status: 202, headers: { ...corsHeaders(), ...rlHeaders } }
         );
     } else {
         // ── Single log path ───────────────────────────────────────────
@@ -238,27 +236,24 @@ export async function POST(request: NextRequest) {
         }
 
         const normalized = normalizeLog(validation.data, project, environment, request);
-        const id = await ingestLog(normalized, project.userId).catch((error) => {
-            if (error instanceof Error && error.message === "PAYG wallet balance is insufficient") {
-                return "PAYG_WALLET_INSUFFICIENT";
-            }
-            return null;
-        });
+        const logId = generateLogId();
 
-        if (id === "PAYG_WALLET_INSUFFICIENT") {
-            return errorResponse(402, "PAYG_WALLET_INSUFFICIENT", "PAYG wallet balance is insufficient.", rlHeaders);
+        if (normalized.level === "error") {
+            void maybeSendErrorAlert(project, normalized.level, normalized.message, logId);
         }
 
-        if (!id) {
-            return NextResponse.json({ success: false, error: "Failed to store log." }, { status: 500, headers: corsHeaders() });
-        }
-
-        void maybeSendErrorAlert(project, normalized.level, normalized.message, id);
+        const enqueueRes = await logQueue.enqueueBatch([
+            {
+                id: logId,
+                log: normalized,
+                userId: project.userId,
+                receivedAt: Date.now(),
+            },
+        ]);
 
         return NextResponse.json(
-            { success: true, id },
-            { status: 201, headers: corsHeaders() }
+            { success: true, id: logId, jobId: enqueueRes.jobId },
+            { status: 202, headers: { ...corsHeaders(), ...rlHeaders } }
         );
     }
 }
-

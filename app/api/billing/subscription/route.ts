@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getUserSubscription, ensureFreeSub } from "@/lib/billing/subscription";
-import { getUserPlan } from "@/lib/billing/entitlements";
+import { getUserLimits, getUserPlan } from "@/lib/billing/entitlements";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -21,7 +21,10 @@ export async function GET() {
       subWithPlan = await getUserSubscription(userId);
     }
 
-    const plan = await getUserPlan(userId);
+    const [plan, limits] = await Promise.all([
+      getUserPlan(userId),
+      getUserLimits(userId),
+    ]);
 
     return NextResponse.json({
       plan,
@@ -29,8 +32,8 @@ export async function GET() {
       currentPeriodStart: subWithPlan?.subscription.currentPeriodStart ?? null,
       currentPeriodEnd: subWithPlan?.subscription.currentPeriodEnd ?? null,
       cancelAtPeriodEnd: subWithPlan?.subscription.cancelAtPeriodEnd ?? false,
-      paygEnabled: subWithPlan?.subscription.paygEnabled ?? true,
-      paygSpendingLimit: subWithPlan?.subscription.paygSpendingLimit ?? null,
+      paygEnabled: limits.paygEnabled,
+      paygSpendingLimit: limits.paygSpendingLimit,
     });
   } catch (error) {
     console.error("Error fetching subscription status:", error);

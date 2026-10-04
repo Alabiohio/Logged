@@ -1,4 +1,5 @@
 import { LogPayload, LoggedConfig } from "./types";
+import { redactLogPayload } from "./utils/redact";
 
 const LOGGED_ENDPOINT = "https://logged.oheo.site/api/v1/logs";
 
@@ -16,7 +17,8 @@ export class Transport {
   }
 
   send(payload: LogPayload): void {
-    this.queue.push(payload);
+    const sanitized = redactLogPayload(payload);
+    this.queue.push(sanitized);
 
     if (this.queue.length >= Transport.BATCH_SIZE) {
       if (this.flushTimer) clearTimeout(this.flushTimer);

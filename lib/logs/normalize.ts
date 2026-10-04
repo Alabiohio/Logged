@@ -1,4 +1,5 @@
 import type { ValidLogInput } from "./validate";
+import { redactLogInput } from "./redact";
 import type { projects } from "@/db/schema";
 
 type Project = typeof projects.$inferSelect;
@@ -34,6 +35,7 @@ export function normalizeLog(
     environment: string,
     request: Request
 ): NormalizedLog {
+    const redacted = redactLogInput(input);
     const userAgent = request.headers.get("user-agent") ?? null;
     const ipAddress =
         request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
@@ -41,28 +43,28 @@ export function normalizeLog(
         null;
 
     let timestamp: Date | null = null;
-    if (input.timestamp) {
-        const parsed = new Date(input.timestamp);
+    if (redacted.timestamp) {
+        const parsed = new Date(redacted.timestamp);
         // Only accept the client timestamp if it's a valid date and not absurdly in the future
         if (!isNaN(parsed.getTime()) && parsed.getTime() <= Date.now() + 60_000) {
             timestamp = parsed;
         }
     }
 
-    const resolvedEnvironment = input.environment ?? environment;
+    const resolvedEnvironment = redacted.environment ?? environment;
 
     return {
         projectId: project.id,
-        level: input.level,
-        message: input.message,
-        metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+        level: redacted.level,
+        message: redacted.message,
+        metadata: redacted.metadata ? JSON.stringify(redacted.metadata) : null,
         environment: resolvedEnvironment,
-        source: input.source ?? null,
-        url: input.url ?? null,
-        pathname: input.pathname ?? null,
+        source: redacted.source ?? null,
+        url: redacted.url ?? null,
+        pathname: redacted.pathname ?? null,
         userAgent,
         ipAddress,
-        stack: input.stack ?? null,
+        stack: redacted.stack ?? null,
         timestamp,
     };
 }

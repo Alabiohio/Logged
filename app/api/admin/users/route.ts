@@ -1,5 +1,4 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { verifyAdmin } from "@/lib/admin-auth";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, subscriptions, plans } from "@/db/schema";
@@ -7,40 +6,9 @@ import { eq, desc } from "drizzle-orm";
 import { expireSubscription } from "@/lib/billing/subscription";
 import { syncUserProjectLimits } from "@/lib/billing/entitlements";
 
-function getAdminEmails(): Set<string> {
-  const envValue = [
-    process.env.ADMIN_EMAILS,
-    process.env.DEVELOPER_EMAIL,
-    process.env.OHEO_LOGGED_ADMIN_EMAIL,
-  ]
-    .filter(Boolean)
-    .join(",");
-
-  const emails = envValue
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  return new Set(emails);
-}
-
-async function verifyAdmin() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || !session.user || !session.user.email) {
-    return false;
-  }
-
-  const userEmail = session.user.email.trim().toLowerCase();
-  const allowed = getAdminEmails();
-  return allowed.has(userEmail);
-}
-
 export async function GET() {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
+  const { authorized } = await verifyAdmin("API GET /api/admin/users");
+  if (!authorized) {
     return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
   }
 
@@ -98,8 +66,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
+  const { authorized } = await verifyAdmin("API POST /api/admin/users");
+  if (!authorized) {
     return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
   }
 

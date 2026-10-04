@@ -17,6 +17,7 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { StatCardSkeleton, LogRowSkeleton, ProjectCardSkeleton } from "@/components/dashboard/skeleton";
 import { motion } from "framer-motion";
 import { trackDashboardViewed, trackProjectOpened, trackLogViewed } from "@/lib/analytics";
+import { timeAgo } from "@/lib/utils";
 
 type DashboardData = {
     stats: {
@@ -42,16 +43,6 @@ type DashboardData = {
     }[];
 };
 
-function timeAgo(dateStr: string): string {
-    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (seconds < 60) return "just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-}
 
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);

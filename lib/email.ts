@@ -624,3 +624,67 @@ export async function sendWeeklyDigestEmail({
         throw error;
     }
 }
+
+export async function sendAdminUnauthorizedAlertEmail({
+    to,
+    attemptedPath,
+    ipAddress,
+    userEmail,
+    userId,
+    timestamp,
+}: {
+    to: string[];
+    attemptedPath: string;
+    ipAddress: string;
+    userEmail?: string;
+    userId?: string;
+    timestamp: string;
+}) {
+    const recipients = Array.from(new Set(to.map((e) => e.trim().toLowerCase()).filter(Boolean)));
+    if (recipients.length === 0) return;
+
+    try {
+        await resend.emails.send({
+            from: "Logged Security <logged@info.oheo.site>",
+            to: recipients,
+            subject: `🚨 [SECURITY ALERT] Unauthorized Admin Access Attempt (403 Forbidden)`,
+            html: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 20px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px;">
+                    <div style="margin-bottom: 24px;">
+                        <h2 style="color: #dc2626; margin: 0; font-size: 20px; font-weight: 700;">🚨 Security Alert: Unauthorized Admin Access</h2>
+                    </div>
+                    <p style="color: #374151; font-size: 15px; line-height: 1.5; margin-bottom: 20px;">
+                        An unauthorized access attempt to an administrative resource was detected and blocked with a <strong>403 Forbidden</strong> response.
+                    </p>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
+                        <tr>
+                            <td style="padding: 10px 12px; background-color: #f9fafb; font-weight: 600; color: #4b5563; border: 1px solid #e5e7eb; width: 35%;">Resource / Path</td>
+                            <td style="padding: 10px 12px; background-color: #ffffff; color: #111827; border: 1px solid #e5e7eb; font-family: monospace;">${attemptedPath}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; background-color: #f9fafb; font-weight: 600; color: #4b5563; border: 1px solid #e5e7eb;">IP Address</td>
+                            <td style="padding: 10px 12px; background-color: #ffffff; color: #111827; border: 1px solid #e5e7eb; font-family: monospace;">${ipAddress}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; background-color: #f9fafb; font-weight: 600; color: #4b5563; border: 1px solid #e5e7eb;">User Email</td>
+                            <td style="padding: 10px 12px; background-color: #ffffff; color: #111827; border: 1px solid #e5e7eb;">${userEmail || "Unauthenticated / Anonymous"}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; background-color: #f9fafb; font-weight: 600; color: #4b5563; border: 1px solid #e5e7eb;">User ID</td>
+                            <td style="padding: 10px 12px; background-color: #ffffff; color: #111827; border: 1px solid #e5e7eb; font-family: monospace;">${userId || "N/A"}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; background-color: #f9fafb; font-weight: 600; color: #4b5563; border: 1px solid #e5e7eb;">Timestamp</td>
+                            <td style="padding: 10px 12px; background-color: #ffffff; color: #111827; border: 1px solid #e5e7eb;">${timestamp}</td>
+                        </tr>
+                    </table>
+                    <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                        This is an automated security alert sent by Logged Admin Protection.
+                    </p>
+                </div>
+            `,
+        });
+    } catch (err) {
+        console.error("Failed to send admin unauthorized security alert email:", err);
+    }
+}

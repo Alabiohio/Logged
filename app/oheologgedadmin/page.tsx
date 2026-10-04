@@ -4,26 +4,11 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Database, FileText, FolderKanban, Mail, MessageSquareText, TriangleAlert, Users } from "lucide-react";
 import { count, desc, eq } from "drizzle-orm";
 
-import { auth } from "@/lib/auth";
+import { verifyAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { feedbacks, logs, projects, users } from "@/db/schema";
 import AdminBillingControl from "@/components/admin/AdminBillingControl";
 import AdminUsersControl from "@/components/admin/AdminUsersControl";
-
-function getAdminEmails(): string[] {
-    const envValue = [
-        process.env.ADMIN_EMAILS,
-        process.env.DEVELOPER_EMAIL,
-        process.env.OHEO_LOGGED_ADMIN_EMAIL,
-    ]
-        .filter(Boolean)
-        .join(",");
-
-    return envValue
-        .split(",")
-        .map((email) => email.trim().toLowerCase())
-        .filter(Boolean);
-}
 
 async function getOverviewStats() {
     const [
@@ -71,14 +56,9 @@ async function getOverviewStats() {
 }
 
 export default async function OheoLoggedAdminPage() {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const { authorized, user } = await verifyAdmin("OheoLoggedAdmin Page View");
 
-    const userEmail = session?.user?.email?.trim().toLowerCase();
-    const allowedEmails = new Set(getAdminEmails());
-
-    if (!session?.user || !userEmail || !allowedEmails.has(userEmail)) {
+    if (!authorized) {
         redirect("/error/403");
     }
 
@@ -206,7 +186,7 @@ export default async function OheoLoggedAdminPage() {
                         <div className="space-y-4 text-sm text-text-secondary">
                             <div className="flex items-center gap-3 rounded-xl border border-border bg-background-secondary p-3">
                                 <Mail className="h-4 w-4 text-primary" />
-                                <span className="truncate">{session.user.email}</span>
+                                <span className="truncate">{user?.email || "Admin User"}</span>
                             </div>
                             <div className="flex items-center gap-3 rounded-xl border border-border bg-background-secondary p-3">
                                 <Users className="h-4 w-4 text-info" />

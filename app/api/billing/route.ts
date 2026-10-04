@@ -73,6 +73,7 @@ export async function GET() {
         maxProjects: limits.maxProjects,
         projectCount,
         retentionDays: limits.retentionDays,
+        paygAvailable: limits.paygAvailable,
       },
       payg: {
         enabled: limits.paygEnabled,

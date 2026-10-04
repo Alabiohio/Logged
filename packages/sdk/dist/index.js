@@ -25,6 +25,63 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 
+// src/utils/redact.ts
+var REDACTION_PLACEHOLDER = "[REDACTED]";
+function normalizeSensitiveKey(key) {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+function isSensitiveKey(key) {
+  const normalized = normalizeSensitiveKey(key);
+  return /(?:password|passwd|secret|token|apikey|accesstoken|refreshtoken|authorization|bearer|cookie|sessionid|session|jwt|clientsecret|privatekey|credential|auth)/.test(normalized);
+}
+function replaceTokenLikeStrings(value) {
+  let next = value;
+  next = next.replace(
+    /(authorization\s*:\s*)(?:bearer\s*)?([A-Za-z0-9._~+\-/]{4,})/gi,
+    "$1[REDACTED]"
+  );
+  next = next.replace(/\bBearer\s+[A-Za-z0-9._~+\-/]{4,}/gi, REDACTION_PLACEHOLDER);
+  next = next.replace(
+    /((?:api[_-]?key|client[_-]?secret|secret|token|access[_-]?token|refresh[_-]?token|session[_-]?id|password|passwd|cookie|jwt|authorization|bearer)[\s:=]+)([A-Za-z0-9._~+\-/]+(?:-[A-Za-z0-9._~+\-/]+)*)/gi,
+    "$1[REDACTED]"
+  );
+  return next;
+}
+function redactValue(value, seen = /* @__PURE__ */ new WeakSet()) {
+  if (value === null || typeof value !== "object") {
+    if (typeof value === "string") {
+      return replaceTokenLikeStrings(value);
+    }
+    return value;
+  }
+  if (value instanceof Error) {
+    return {
+      name: value.name,
+      message: redactValue(value.message, seen),
+      stack: redactValue(value.stack ?? void 0, seen)
+    };
+  }
+  if (seen.has(value)) {
+    return "[Circular]";
+  }
+  seen.add(value);
+  if (Array.isArray(value)) {
+    return value.map((item) => redactValue(item, seen));
+  }
+  const output = {};
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (isSensitiveKey(key)) {
+      output[key] = REDACTION_PLACEHOLDER;
+      continue;
+    }
+    output[key] = redactValue(nestedValue, seen);
+  }
+  return output;
+}
+function redactLogPayload(payload) {
+  return redactValue(payload, /* @__PURE__ */ new WeakSet());
+}
+
 // src/transport.ts
 var LOGGED_ENDPOINT = "https://logged.oheo.site/api/v1/logs";
 var Transport = class _Transport {
@@ -38,7 +95,8 @@ var Transport = class _Transport {
     this.config = config;
   }
   send(payload) {
-    this.queue.push(payload);
+    const sanitized = redactLogPayload(payload);
+    this.queue.push(sanitized);
     if (this.queue.length >= _Transport.BATCH_SIZE) {
       if (this.flushTimer) clearTimeout(this.flushTimer);
       this.flushTimer = void 0;

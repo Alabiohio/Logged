@@ -57,8 +57,6 @@ export async function ensureFreeSub(userId: string): Promise<typeof subscription
     currentPeriodStart: new Date(),
     currentPeriodEnd: null,
     cancelAtPeriodEnd: false,
-    paygEnabled: true,
-    paygSpendingLimit: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

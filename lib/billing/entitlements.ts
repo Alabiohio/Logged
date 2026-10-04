@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { projects, usage, paygUsage } from "@/db/schema";
 import { getBillingEnabled, getBillingConfig } from "./config";
 import { getUserSubscription, ensureFreeSub } from "./subscription";
+import { getUserBillingPreferences } from "./preferences";
 import { eq, and, gte, lte, count, sql } from "drizzle-orm";
 
 export async function getUserPlan(userId: string): Promise<"free" | "plus"> {
@@ -21,7 +22,10 @@ export async function getUserLimits(userId: string) {
     subWithPlan = await getUserSubscription(userId);
   }
 
-  const config = await getBillingConfig();
+  const [config, billingPreferences] = await Promise.all([
+    getBillingConfig(),
+    getUserBillingPreferences(userId),
+  ]);
   const planName: "free" | "plus" = subWithPlan?.plan.name.toLowerCase() === "plus" ? "plus" : "free";
   const planConfig = config.plans[planName];
 
@@ -30,8 +34,8 @@ export async function getUserLimits(userId: string) {
   const retentionDays = subWithPlan?.plan.retentionDays ?? planConfig.retentionDays;
 
   const paygAvailable = planName === "plus" || config.paygAllowedPlans === "free_plus";
-  const paygEnabled = paygAvailable && (subWithPlan?.subscription.paygEnabled ?? true);
-  const paygSpendingLimit = subWithPlan?.subscription.paygSpendingLimit ?? null;
+  const paygEnabled = paygAvailable && billingPreferences.paygEnabled;
+  const paygSpendingLimit = billingPreferences.paygSpendingLimit;
 
   return {
     planName,
@@ -160,4 +164,3 @@ export async function syncUserProjectLimits(userId: string) {
     }
   }
 }
-

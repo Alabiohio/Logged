@@ -4,34 +4,14 @@ import Link from "next/link";
 import { ArrowLeft, MessageSquareText, ShieldAlert } from "lucide-react";
 import { desc } from "drizzle-orm";
 
-import { auth } from "@/lib/auth";
+import { verifyAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { feedbacks } from "@/db/schema";
 
-function getAdminEmails(): string[] {
-    const envValue = [
-        process.env.ADMIN_EMAILS,
-        process.env.DEVELOPER_EMAIL,
-        process.env.OHEO_LOGGED_ADMIN_EMAIL,
-    ]
-        .filter(Boolean)
-        .join(",");
-
-    return envValue
-        .split(",")
-        .map((email) => email.trim().toLowerCase())
-        .filter(Boolean);
-}
-
 export default async function OheoLoggedFeedbackPage() {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const { authorized } = await verifyAdmin("Admin Feedback Page View");
 
-    const userEmail = session?.user?.email?.trim().toLowerCase();
-    const allowedEmails = new Set(getAdminEmails());
-
-    if (!session?.user || !userEmail || !allowedEmails.has(userEmail)) {
+    if (!authorized) {
         redirect("/error/403");
     }
 
