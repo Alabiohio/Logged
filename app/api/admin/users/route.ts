@@ -1,8 +1,8 @@
 import { verifyAdmin } from "@/lib/admin-auth";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { users, subscriptions, plans } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { users, subscriptions, plans, logs, projects } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { expireSubscription } from "@/lib/billing/subscription";
 import { syncUserProjectLimits } from "@/lib/billing/entitlements";
 
@@ -13,29 +13,40 @@ export async function GET() {
   }
 
   try {
-    const userRows = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        emailVerified: users.emailVerified,
-        image: users.image,
-        createdAt: users.createdAt,
-        subscriptionId: subscriptions.id,
-        status: subscriptions.status,
-        planId: plans.id,
-        planName: plans.name,
-        planDisplayName: plans.displayName,
-        paystackCustomerCode: subscriptions.paystackCustomerCode,
-        paystackSubscriptionCode: subscriptions.paystackSubscriptionCode,
-        currentPeriodStart: subscriptions.currentPeriodStart,
-        currentPeriodEnd: subscriptions.currentPeriodEnd,
-        cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
-      })
-      .from(users)
-      .leftJoin(subscriptions, eq(users.id, subscriptions.userId))
-      .leftJoin(plans, eq(subscriptions.planId, plans.id))
-      .orderBy(desc(users.createdAt));
+    const [userRows, storageRows] = await Promise.all([
+      db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          emailVerified: users.emailVerified,
+          image: users.image,
+          createdAt: users.createdAt,
+          subscriptionId: subscriptions.id,
+          status: subscriptions.status,
+          planId: plans.id,
+          planName: plans.name,
+          planDisplayName: plans.displayName,
+          paystackCustomerCode: subscriptions.paystackCustomerCode,
+          paystackSubscriptionCode: subscriptions.paystackSubscriptionCode,
+          currentPeriodStart: subscriptions.currentPeriodStart,
+          currentPeriodEnd: subscriptions.currentPeriodEnd,
+          cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+        })
+        .from(users)
+        .leftJoin(subscriptions, eq(users.id, subscriptions.userId))
+        .leftJoin(plans, eq(subscriptions.planId, plans.id))
+        .orderBy(desc(users.createdAt)),
+      db
+        .select({
+          userId: projects.userId,
+          storageBytes: sql<number>`coalesce(sum(pg_column_size(${logs})), 0)::float8`,
+        })
+        .from(logs)
+        .innerJoin(projects, eq(logs.projectId, projects.id))
+        .groupBy(projects.userId),
+    ]);
+    const logStorageByUser = new Map(storageRows.map((row) => [row.userId, row.storageBytes]));
 
     const formatted = userRows.map((u) => ({
       id: u.id,
@@ -44,6 +55,7 @@ export async function GET() {
       emailVerified: u.emailVerified,
       image: u.image,
       createdAt: u.createdAt,
+      logStorageBytes: logStorageByUser.get(u.id) ?? 0,
       subscription: {
         id: u.subscriptionId,
         status: u.status || "active",

@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
         periodStart,
         periodEnd: getBillingPeriodEnd(periodStart, interval),
       });
-      await syncUserProjectLimits(session.user.id);
+      await syncUserProjectLimits(session.user.id, { restoreWithinPlanLimit: true });
 
       return NextResponse.json({
         success: true,

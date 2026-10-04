@@ -1,0 +1,2 @@
+git tag -a v0.1.18 -m "Release @oheoco/logged v0.1.18"
+git push Fork refs/tags/v0.1.18

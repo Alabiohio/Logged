@@ -29,7 +29,7 @@ async function applyPlanPayment(
     periodStart,
     periodEnd: getBillingPeriodEnd(periodStart, billingInterval),
   });
-  await syncUserProjectLimits(userId);
+  await syncUserProjectLimits(userId, { restoreWithinPlanLimit: true });
   return true;
 }
 

@@ -138,40 +138,44 @@ export async function canCreateProject(userId: string): Promise<{
 }
 
 /**
- * Syncs project archive status based on the user's current plan limits.
- * When billing is enabled or a plan downgrades, excess active projects
- * (beyond maxProjects) are automatically archived starting from the oldest.
+ * Archives active projects beyond the user's current limit. Existing archives
+ * are preserved unless a plan activation explicitly requests restoration.
  */
-export async function syncUserProjectLimits(userId: string) {
+export async function syncUserProjectLimits(
+  userId: string,
+  options: { restoreWithinPlanLimit?: boolean } = {}
+) {
   const billingEnabled = await getBillingEnabled();
   if (!billingEnabled) {
-    // If billing is disabled, unarchive all projects
-    await db
-      .update(projects)
-      .set({ isArchived: false, updatedAt: new Date() })
-      .where(eq(projects.userId, userId));
+    if (options.restoreWithinPlanLimit) {
+      await db
+        .update(projects)
+        .set({ isArchived: false, updatedAt: new Date() })
+        .where(eq(projects.userId, userId));
+    }
     return;
   }
 
   const limits = await getUserLimits(userId);
 
-  // Fetch all user projects ordered by creation date (oldest first)
+  // Explicit plan activation may restore archived projects that now fit within
+  // the upgraded limit. Routine syncs preserve existing archives.
   const userProjects = await db
     .select({ id: projects.id, isArchived: projects.isArchived })
     .from(projects)
-    .where(eq(projects.userId, userId))
+    .where(options.restoreWithinPlanLimit
+      ? eq(projects.userId, userId)
+      : and(eq(projects.userId, userId), eq(projects.isArchived, false)))
     .orderBy(projects.createdAt);
 
-  // First maxProjects remain active, remaining projects get archived
   for (let i = 0; i < userProjects.length; i++) {
-    const proj = userProjects[i];
+    const project = userProjects[i];
     const shouldBeArchived = i >= limits.maxProjects;
-
-    if (proj.isArchived !== shouldBeArchived) {
+    if (project.isArchived !== shouldBeArchived) {
       await db
         .update(projects)
         .set({ isArchived: shouldBeArchived, updatedAt: new Date() })
-        .where(eq(projects.id, proj.id));
+        .where(eq(projects.id, project.id));
     }
   }
 }

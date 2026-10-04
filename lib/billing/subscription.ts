@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { subscriptions, plans } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { subscriptions, plans, projects } from "@/db/schema";
+import { and, eq, gte, lte } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 export type SubscriptionWithPlan = {
@@ -142,23 +142,55 @@ export async function cancelSubscription(userId: string) {
 }
 
 export async function expireSubscription(userId: string) {
-  const sub = await getUserSubscription(userId);
-  if (!sub) {
-    return null;
-  }
+  return db.transaction(async (tx) => {
+    const [sub] = await tx
+      .select()
+      .from(subscriptions)
+      .innerJoin(plans, eq(subscriptions.planId, plans.id))
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
 
-  const updated = await db
-    .update(subscriptions)
-    .set({
-      status: "expired",
-      planId: "free",
-      cancelAtPeriodEnd: false,
-      paystackSubscriptionCode: null,
-      paystackPlanCode: null,
-      updatedAt: new Date(),
-    })
-    .where(eq(subscriptions.id, sub.subscription.id))
-    .returning();
+    if (!sub || sub.subscriptions.status === "expired" || sub.plans.price <= 0) {
+      return null;
+    }
 
-  return updated[0];
+    const now = new Date();
+    const updated = await tx
+      .update(subscriptions)
+      .set({
+        status: "expired",
+        planId: "free",
+        cancelAtPeriodEnd: false,
+        paystackSubscriptionCode: null,
+        paystackPlanCode: null,
+        updatedAt: now,
+      })
+      .where(and(
+        eq(subscriptions.id, sub.subscriptions.id),
+        eq(subscriptions.planId, sub.plans.id),
+        eq(subscriptions.status, sub.subscriptions.status),
+      ))
+      .returning();
+
+    if (updated.length === 0) {
+      return null;
+    }
+
+    const periodStart = sub.subscriptions.currentPeriodStart ?? sub.subscriptions.createdAt;
+    const periodEnd = sub.subscriptions.currentPeriodEnd;
+    const archiveThrough = periodEnd && periodEnd < now ? periodEnd : now;
+    if (periodStart <= archiveThrough) {
+      await tx
+        .update(projects)
+        .set({ isArchived: true, updatedAt: now })
+        .where(and(
+          eq(projects.userId, userId),
+          eq(projects.isArchived, false),
+          gte(projects.createdAt, periodStart),
+          lte(projects.createdAt, archiveThrough),
+        ));
+    }
+
+    return updated[0];
+  });
 }

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { logs, projects } from "@/db/schema";
+import { logs, plans, projects, subscriptions } from "@/db/schema";
 import { and, desc, eq, sql, gte } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -20,15 +20,41 @@ export async function GET() {
         // Get all user projects
         // Load project metadata only. Counting every project's logs here makes the dashboard
         // wait on the full logs table before it can render its bounded recent-log preview.
-        const userProjects = await db
-            .select({
-                id: projects.id,
-                name: projects.name,
-                updatedAt: projects.updatedAt,
-                isArchived: projects.isArchived,
-            })
-            .from(projects)
-            .where(eq(projects.userId, userId));
+        const [userProjects, subscriptionRows] = await Promise.all([
+            db
+                .select({
+                    id: projects.id,
+                    name: projects.name,
+                    updatedAt: projects.updatedAt,
+                    isArchived: projects.isArchived,
+                })
+                .from(projects)
+                .where(eq(projects.userId, userId)),
+            db
+                .select({
+                    id: subscriptions.id,
+                    status: subscriptions.status,
+                    currentPeriodEnd: subscriptions.currentPeriodEnd,
+                    cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+                    planName: plans.displayName,
+                    isPaid: sql<boolean>`${plans.price} > 0`,
+                })
+                .from(subscriptions)
+                .innerJoin(plans, eq(subscriptions.planId, plans.id))
+                .where(eq(subscriptions.userId, userId))
+                .limit(1),
+        ]);
+        const subscription = subscriptionRows[0] ?? null;
+        const subscriptionNotice = subscription
+            ? {
+                id: subscription.id,
+                status: subscription.status,
+                currentPeriodEnd: subscription.currentPeriodEnd,
+                cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+                planName: subscription.planName,
+                isPaid: subscription.isPaid,
+            }
+            : null;
 
         const projectIds = userProjects.map((p) => p.id);
 
@@ -42,6 +68,7 @@ export async function GET() {
                 },
                 recentLogs: [],
                 projects: [],
+                subscription: subscriptionNotice,
             });
         }
 
@@ -118,6 +145,7 @@ export async function GET() {
             },
             recentLogs: recentLogsWithProject,
             projects: userProjects,
+            subscription: subscriptionNotice,
         });
     } catch (error) {
         console.error("Error fetching dashboard stats:", error);

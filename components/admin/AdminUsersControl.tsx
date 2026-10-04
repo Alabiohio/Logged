@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Users, UserX, ShieldAlert, CheckCircle2, Search, Zap, Crown, UserCheck } from "lucide-react";
+import { Users, UserX, ShieldAlert, CheckCircle2, Search, Zap, Crown, UserCheck, Database } from "lucide-react";
 
 interface UserItem {
   id: string;
@@ -10,6 +10,7 @@ interface UserItem {
   emailVerified: boolean;
   image: string | null;
   createdAt: string;
+  logStorageBytes: number;
   subscription: {
     id: string | null;
     status: string;
@@ -22,6 +23,21 @@ interface UserItem {
     currentPeriodEnd: string | null;
     cancelAtPeriodEnd: boolean;
   };
+}
+
+function formatStorage(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return "Unavailable";
+  if (bytes < 1024) return `${bytes.toLocaleString()} B`;
+
+  const units = ["KB", "MB", "GB", "TB"];
+  let size = bytes / 1024;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${size.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${units[unitIndex] ?? "TB"}`;
 }
 
 export default function AdminUsersControl() {
@@ -103,6 +119,7 @@ export default function AdminUsersControl() {
   const plusUsersCount = users.filter(
     (u) => u.subscription.planId === "plus" && u.subscription.status === "active"
   ).length;
+  const totalLogStorageBytes = users.reduce((total, user) => total + user.logStorageBytes, 0);
 
   return (
     <div className="rounded-2xl border border-border bg-glass p-5 shadow-sm backdrop-blur-sm sm:p-6">
@@ -126,8 +143,18 @@ export default function AdminUsersControl() {
             <UserCheck className="h-3.5 w-3.5" />
             {users.length} Total Users
           </span>
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border border-info/20 bg-info/10 px-3 py-1 text-xs font-semibold text-info"
+            title="Approximate stored log-row size; excludes indexes and database overhead."
+          >
+            <Database className="h-3.5 w-3.5" />
+            {formatStorage(totalLogStorageBytes)} Log Data
+          </span>
         </div>
       </div>
+      <p className="mb-4 text-xs text-text-muted">
+        Approximate stored log-row size by user; excludes indexes and database overhead.
+      </p>
 
       {error && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-error/20 bg-error/10 p-3 text-sm text-error">
@@ -205,6 +232,7 @@ export default function AdminUsersControl() {
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Plan</th>
+                <th className="px-4 py-3">Log Storage</th>
                 <th className="px-4 py-3">Joined Date</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -258,6 +286,13 @@ export default function AdminUsersControl() {
                           Free
                         </span>
                       )}
+                    </td>
+
+                    <td
+                      className="px-4 py-3 text-xs text-text-secondary"
+                      title={`${user.logStorageBytes.toLocaleString()} bytes`}
+                    >
+                      {formatStorage(user.logStorageBytes)}
                     </td>
 
                     <td className="px-4 py-3 text-xs text-text-muted">

@@ -10,6 +10,7 @@ import {
     ChevronRight,
     Clock,
     Activity,
+    X,
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { LogLevelBadge } from "@/components/dashboard/log-level-badge";
@@ -42,8 +43,120 @@ type DashboardData = {
         updatedAt: string;
         isArchived: boolean;
     }[];
+    subscription: {
+        id: string;
+        status: string;
+        currentPeriodEnd: string | null;
+        cancelAtPeriodEnd: boolean;
+        planName: string;
+        isPaid: boolean;
+    } | null;
 };
 
+function SubscriptionEndingNotice({
+    subscription,
+}: {
+    subscription: NonNullable<DashboardData["subscription"]>;
+}) {
+    const periodEnd = subscription.currentPeriodEnd;
+    const noticeKey = `logged-subscription-ending-dismissed:${subscription.id}:${periodEnd ?? "unknown"}`;
+    const [dismissal, setDismissal] = useState<{
+        key: string;
+        dismissed: boolean;
+        checkedAt: number;
+    } | null>(null);
+
+    useEffect(() => {
+        let isCurrent = true;
+        void Promise.resolve().then(() => {
+            let wasDismissed = false;
+            try {
+                wasDismissed = window.localStorage.getItem(noticeKey) === "true";
+            } catch (error) {
+                console.warn("Unable to read subscription notice dismissal:", error);
+            } finally {
+                if (isCurrent) {
+                    setDismissal({ key: noticeKey, dismissed: wasDismissed, checkedAt: Date.now() });
+                }
+            }
+        });
+        return () => {
+            isCurrent = false;
+        };
+    }, [noticeKey]);
+
+    if (
+        !dismissal
+        || dismissal.key !== noticeKey
+        || dismissal.dismissed
+        || subscription.status !== "active"
+        || !subscription.isPaid
+        || !periodEnd
+    ) {
+        return null;
+    }
+
+    const endDate = new Date(periodEnd);
+    const remainingMilliseconds = endDate.getTime() - dismissal.checkedAt;
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    if (!Number.isFinite(endDate.getTime()) || remainingMilliseconds < 0 || remainingMilliseconds > sevenDays) {
+        return null;
+    }
+
+    const daysRemaining = Math.ceil(remainingMilliseconds / (24 * 60 * 60 * 1000));
+    const endingIn = daysRemaining === 0
+        ? "today"
+        : `in ${daysRemaining} ${daysRemaining === 1 ? "day" : "days"}`;
+    const endingDateLabel = endDate.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+
+    return (
+        <div
+            role="status"
+            aria-live="polite"
+            className="flex items-start gap-3 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-text sm:p-5"
+        >
+            <Clock className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+            <div className="min-w-0 flex-1">
+                <p className="font-bold">
+                    {subscription.cancelAtPeriodEnd
+                        ? `Your ${subscription.planName} subscription ends ${endingIn}.`
+                        : `Your ${subscription.planName} subscription period ends ${endingIn}.`}
+                </p>
+                <p className="mt-1 text-sm text-text-secondary">
+                    {subscription.cancelAtPeriodEnd
+                        ? `It is scheduled to end on ${endingDateLabel}. Renew or choose a plan before then to keep your paid features.`
+                        : `Your next billing date is ${endingDateLabel}. Review your subscription and billing details.`}
+                </p>
+                <Link
+                    href="/dashboard/settings/billing"
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                >
+                    Manage billing <ChevronRight className="h-4 w-4" />
+                </Link>
+            </div>
+            <button
+                type="button"
+                aria-label="Dismiss subscription reminder"
+                title="Dismiss reminder"
+                onClick={() => {
+                    try {
+                        window.localStorage.setItem(noticeKey, "true");
+                    } catch (error) {
+                        console.warn("Unable to save subscription notice dismissal:", error);
+                    }
+                    setDismissal({ key: noticeKey, dismissed: true, checkedAt: Date.now() });
+                }}
+                className="rounded-lg p-1 text-text-muted transition hover:bg-background/60 hover:text-text"
+            >
+                <X className="h-4 w-4" />
+            </button>
+        </div>
+    );
+}
 
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
@@ -129,6 +242,10 @@ export default function DashboardPage() {
                         </p>
                     </div>
                 </motion.div>
+
+                {!loading && data?.subscription && (
+                    <SubscriptionEndingNotice subscription={data.subscription} />
+                )}
 
                 {/* Stats grid */}
                 <motion.div
