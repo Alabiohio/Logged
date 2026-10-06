@@ -7,10 +7,6 @@ export const metadata: Metadata = {
     template: "%s | Logged",
   },
   description: "Manage your projects, view logs, and monitor your applications in real time.",
-  robots: {
-    index: false,
-    follow: false,
-  },
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
