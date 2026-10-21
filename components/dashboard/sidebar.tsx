@@ -136,7 +136,7 @@ export function Sidebar({
             </Link>
 
             <Link
-              href="/"
+              href="/home"
               onClick={() => {
                 setUserMenuOpen(false);
                 closeMenu();

@@ -57,7 +57,7 @@ void loop() {
   Serial.print("Front: "); Serial.print(frontDistance); Serial.println(" cm");
   Serial.print("Left: ");  Serial.print(leftDistance);  Serial.println(" cm");
   Serial.print("Right: "); Serial.print(rightDistance); Serial.println(" cm");
-  if (frontDistance > 20) {
+  if (frontDistance > 70) {
     forward();
   } else {
     stopRobot();
@@ -76,7 +76,7 @@ float takeSingleReading(int trigPin, int echoPin) {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
-  long duration = pulseIn(echoPin, HIGH, 12000);
+  long duration = pulseIn(echoPin, HIGH, 15000);
   if (duration == 0) {
     return 400.0;
   }
@@ -118,7 +118,7 @@ void avoidObstacle() {
   float rightDistance = getRightDistance();
 
   // CRITICAL ESCAPE: All sides trapped
-  if (frontDistance < 20 && leftDistance < 20 && rightDistance < 20) {
+  if (frontDistance < 70 && leftDistance < 70 && rightDistance < 70) {
     Serial.println("All sides blocked - Reversing...");
     reverseRobot();
 
@@ -128,17 +128,18 @@ void avoidObstacle() {
       
       leftDistance = getLeftDistance();
       rightDistance = getRightDistance();
-      if (leftDistance > 25 || rightDistance > 25) {
+      if (leftDistance > 70 || rightDistance > 70) {
         stopRobot();
         break;
       }
-      delay(20);
+      delay(50);
     }
 
     // Choose the side with more free space
     if (leftDistance > rightDistance) {
       Serial.println("Turning LEFT until front is clear or trapped again...");
       turnLeft();
+      delay(400);
 
       while (true) {
         frontDistance = getCenterDistance();
@@ -146,12 +147,12 @@ void avoidObstacle() {
         rightDistance = getRightDistance();
 
         // Stop if front becomes clear
-        if (frontDistance > 25) {
+        if (frontDistance > 70) {
           break;
         }
 
         // Stop if all sides get blocked again while turning
-        if (frontDistance < 20 && leftDistance < 20 && rightDistance < 20) {
+        if (frontDistance < 70 && leftDistance < 70 && rightDistance < 70) {
           Serial.println("Re-trapped while turning left!");
           stopRobot();
           return; // Exit function so main loop re-triggers avoidObstacle() -> reverseRobot()
@@ -163,6 +164,7 @@ void avoidObstacle() {
     } else {
       Serial.println("Turning RIGHT until front is clear or trapped again...");
       turnRight();
+      delay(400);
 
       while (true) {
         frontDistance = getCenterDistance();
@@ -170,12 +172,12 @@ void avoidObstacle() {
         rightDistance = getRightDistance();
 
         // Stop if front becomes clear
-        if (frontDistance > 25) {
+        if (frontDistance > 70) {
           break;
         }
 
         // Stop if all sides get blocked again while turning
-        if (frontDistance < 20 && leftDistance < 20 && rightDistance < 20) {
+        if (frontDistance < 70 && leftDistance < 70 && rightDistance < 70) {
           Serial.println("Re-trapped while turning right!");
           stopRobot();
           return; // Exit function so main loop re-triggers avoidObstacle() -> reverseRobot()
@@ -208,12 +210,12 @@ void avoidObstacle() {
       }
 
       // Left side became blocked
-      if (leftDistance < 20) {
+      if (leftDistance < 70) {
         Serial.println("LEFT BLOCKED - STOPPING TURN");
         stopRobot();
         delay(100);
 
-        if (rightDistance < 20) {
+        if (rightDistance < 70) {
           reverseRobot();
           delay(500);
           stopRobot();
@@ -244,12 +246,12 @@ void avoidObstacle() {
       }
 
       // Right side became blocked
-      if (rightDistance < 20) {
+      if (rightDistance < 50) {
         Serial.println("RIGHT BLOCKED - STOPPING TURN");
         stopRobot();
         delay(100);
 
-        if (leftDistance < 20) {
+        if (leftDistance < 50) {
           reverseRobot();
           delay(500);
           stopRobot();

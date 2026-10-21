@@ -14,6 +14,7 @@ const links = {
   Resources: [
     { label: "Status", href: "/status" },
     { label: "API Reference", href: "/api-reference" },
+    { label: "Feedback", href: "/feedback" },
     { label: "Support", href: "https://oheo.site/inquiry" },
   ],
   Company: [
@@ -170,7 +171,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-xs" style={{ color: "var(--text-disabled)" }}>
-            © {new Date().getFullYear()} Logged, Inc. All rights reserved.
+            © {new Date().getFullYear()} Oheo. All rights reserved.
           </p>
 
           <div className="flex items-center gap-4">
