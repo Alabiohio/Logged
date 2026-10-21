@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           </p>
 
           <p className="mt-4 text-sm leading-relaxed text-text-secondary">
-            This Privacy Policy describes how Logged (&quot;Logged&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), operated by <strong>Oheo</strong>, collects, processes, protects, and retains your information when you access our hosted service at <Link href="https://logged.oheo.site" className="text-primary hover:underline">logged.oheo.site</Link>, use our APIs, install the <code className="rounded bg-background-secondary px-1.5 py-0.5 font-mono text-xs text-text">@oheoco/logged</code> SDK, or otherwise interact with our error monitoring and observability platform.
+            This Privacy Policy describes how Logged (&quot;Logged&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), developed by <strong>Oheo</strong>, collects, processes, protects, and retains your information when you access our hosted service at <Link href="https://logged.oheo.site" className="text-primary hover:underline">logged.oheo.site</Link>, use our APIs, install the <code className="rounded bg-background-secondary px-1.5 py-0.5 font-mono text-xs text-text">@oheoco/logged</code> SDK, or otherwise interact with our error monitoring and observability platform.
           </p>
         </div>
 
