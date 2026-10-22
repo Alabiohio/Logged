@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
 import { CheckCircle2, AlertCircle } from "lucide-react";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 function ResetPasswordForm() {
     const searchParams = useSearchParams();
@@ -117,12 +118,11 @@ function ResetPasswordForm() {
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-bold text-text">New Password</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 required
                                 minLength={8}
                                 disabled={isLoading}
-                                className="mt-2 block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                inputClassName="mt-2 block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="••••••••"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -131,12 +131,11 @@ function ResetPasswordForm() {
 
                         <div>
                             <label className="text-sm font-bold text-text">Confirm New Password</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 required
                                 minLength={8}
                                 disabled={isLoading}
-                                className="mt-2 block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                inputClassName="mt-2 block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}

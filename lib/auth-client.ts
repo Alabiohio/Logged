@@ -1,8 +1,11 @@
 import { createAuthClient } from "better-auth/react";
-import { usernameClient } from "better-auth/client/plugins";
+import { usernameClient, twoFactorClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
     plugins: [
-        usernameClient()
+        usernameClient(),
+        twoFactorClient({
+            twoFactorPage: "/two-factor-verify"
+        })
     ]
 });

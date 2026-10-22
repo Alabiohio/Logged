@@ -9,6 +9,7 @@ export const users = pgTable("user", {
 	username: text("username").unique(),
 	displayUsername: text("display_username"),
 	role: text("role").notNull().default("user"),
+	twoFactorEnabled: boolean("two_factor_enabled").default(false),
 	createdAt: timestamp("created_at").notNull(),
 	updatedAt: timestamp("updated_at").notNull()
 });
@@ -48,6 +49,19 @@ export const verifications = pgTable("verification", {
 	createdAt: timestamp("created_at"),
 	updatedAt: timestamp("updated_at")
 });
+
+export const twoFactors = pgTable("two_factor", {
+	id: text("id").primaryKey(),
+	secret: text("secret").notNull(),
+	backupCodes: text("backup_codes").notNull(),
+	userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+	verified: boolean("verified").notNull().default(true),
+	failedVerificationCount: integer("failed_verification_count").notNull().default(0),
+	lockedUntil: timestamp("locked_until"),
+}, (table) => [
+	index("two_factor_user_id_idx").on(table.userId),
+	index("two_factor_secret_idx").on(table.secret),
+]);
 
 export const userPreferences = pgTable("user_preferences", {
     userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),

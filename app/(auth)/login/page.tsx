@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { GoogleSignInButton } from "@/components/ui/GoogleSignInButton";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 type LoadingMethod = "google" | "github" | "email" | "resend" | null;
 
@@ -65,6 +66,14 @@ function LoginForm() {
 
         if (data?.url) {
             window.location.replace(data.url);
+            return;
+        }
+
+        if ((data as { twoFactorRedirect?: boolean })?.twoFactorRedirect) {
+            const target = redirectPath
+                ? `/two-factor-verify?redirect=${encodeURIComponent(redirectPath)}`
+                : "/two-factor-verify";
+            window.location.replace(target);
             return;
         }
 
@@ -252,11 +261,10 @@ function LoginForm() {
                                 Forgot password?
                             </Link>
                         </div>
-                        <input
-                            type="password"
+                        <PasswordInput
                             required
                             disabled={isBusy}
-                            className="mt-2 block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            inputClassName="mt-2 block w-full rounded-xl border border-border bg-background-secondary px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}

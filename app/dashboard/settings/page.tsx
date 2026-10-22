@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import {
     User, Shield, Bell, Globe, Save, AlertCircle, CheckCircle2,
-    Monitor, Smartphone, Laptop, Trash2, LogOut, Link2, Clock,
-    Database, TriangleAlert, Key, Copy, Check, CreditCard
+    Monitor, Smartphone, Laptop, Tablet, Trash2, LogOut, Link2, Clock,
+    Database, TriangleAlert, Key, Copy, Check, CreditCard, MapPin
 } from "lucide-react";
 import Link from "next/link";
 import { Cardio } from "ldrs/react";
@@ -13,6 +13,8 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { trackSettingsSaved, trackSessionRevoked } from "@/lib/analytics";
 import { Modal } from "@/components/ui/Modal";
+import { TwoFactorSection } from "@/components/dashboard/TwoFactorSection";
+import { parseUserAgent, formatIpAddress, type ParsedDevice } from "@/lib/device";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -23,6 +25,8 @@ interface Session {
     expiresAt: string | Date;
     ipAddress?: string | null;
     userAgent?: string | null;
+    formattedIp?: string;
+    deviceInfo?: ParsedDevice;
 }
 
 interface ConnectedAccount {
@@ -33,18 +37,6 @@ interface ConnectedAccount {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function parseDevice(ua: string | null | undefined): { icon: React.ReactNode; label: string } {
-    if (!ua) return { icon: <Monitor className="h-4 w-4" />, label: "Unknown device" };
-    const lower = ua.toLowerCase();
-    if (lower.includes("iphone") || lower.includes("android") || lower.includes("mobile")) {
-        return { icon: <Smartphone className="h-4 w-4" />, label: "Mobile" };
-    }
-    if (lower.includes("chrome")) return { icon: <Globe className="h-4 w-4" />, label: "Chrome" };
-    if (lower.includes("firefox")) return { icon: <Monitor className="h-4 w-4" />, label: "Firefox" };
-    if (lower.includes("safari")) return { icon: <Monitor className="h-4 w-4" />, label: "Safari" };
-    return { icon: <Laptop className="h-4 w-4" />, label: "Desktop" };
-}
 
 const GoogleIcon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 48 48">
@@ -655,7 +647,7 @@ export default function SettingsPage() {
                                     type="button"
                                     onClick={handleRevokeAll}
                                     disabled={revokeAllLoading}
-                                    className="inline-flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-xs font-semibold text-warning transition-all hover:bg-warning/20 disabled:opacity-50"
+                                    className="w-fit shrink-0 inline-flex items-center gap-2 rounded-xl border border-error/30 bg-error/10 px-4 py-2 text-xs font-semibold text-error transition-all hover:bg-error/20 disabled:opacity-50"
                                 >
                                     {revokeAllLoading ? (
                                         <Cardio size="36" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
@@ -668,6 +660,8 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-6">
+                            <TwoFactorSection />
+
                             <div id="security-sessions" className="scroll-mt-24 rounded-2xl border border-border bg-background/20 px-3 py-4">
                                 <div className="mb-3 flex items-center justify-between">
                                     <h3 className="text-sm font-black uppercase tracking-[0.12em] text-text-secondary">Active Sessions</h3>
@@ -681,44 +675,72 @@ export default function SettingsPage() {
                                         <p className="text-sm text-text-muted text-center py-4">No sessions found</p>
                                     ) : (
                                         sessions.map((s) => {
-                                            const { icon, label } = parseDevice(s.userAgent);
+                                            const dev = s.deviceInfo || parseUserAgent(s.userAgent);
+                                            const ip = s.formattedIp || formatIpAddress(s.ipAddress);
                                             const isCurrent = s.token === currentToken;
                                             return (
                                                 <div
                                                     key={s.id}
-                                                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-border bg-background/30 px-3 py-4"
+                                                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border px-3.5 py-3.5 sm:px-4 sm:py-4 transition-all ${
+                                                        isCurrent
+                                                            ? "border-primary/40 bg-primary/5 shadow-sm"
+                                                            : "border-border bg-background/30 hover:border-border/80"
+                                                    }`}
                                                 >
-                                                    <div className="flex items-center gap-3 min-w-0">
-                                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-glass text-text-secondary">
-                                                            {icon}
+                                                    <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                                                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                                                            isCurrent ? "bg-primary/15 text-primary" : "bg-glass text-text-secondary"
+                                                        }`}>
+                                                            {dev.deviceType === "mobile" ? (
+                                                                <Smartphone className="h-5 w-5" />
+                                                            ) : dev.deviceType === "tablet" ? (
+                                                                <Tablet className="h-5 w-5" />
+                                                            ) : (
+                                                                <Laptop className="h-5 w-5" />
+                                                            )}
                                                         </div>
-                                                        <div className="min-w-0">
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="text-sm font-semibold text-text">{label}</p>
+                                                        <div className="min-w-0 space-y-1">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <p className="text-sm font-bold text-text truncate">
+                                                                    {dev.displayTitle}
+                                                                </p>
                                                                 {isCurrent && (
-                                                                    <span className="rounded-full bg-success/10 border border-success/20 px-2 py-0.5 text-[10px] font-bold text-success">
-                                                                        Current
+                                                                    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 border border-success/20 px-2 py-0.5 text-[10px] font-bold text-success">
+                                                                        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                                                                        Current Device
                                                                     </span>
                                                                 )}
+                                                                <span className="rounded-md border border-border/60 bg-background/50 px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
+                                                                    {dev.os}
+                                                                </span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 mt-0.5">
-                                                                {s.ipAddress && (
-                                                                    <p className="text-xs text-text-muted font-mono truncate">{s.ipAddress}</p>
-                                                                )}
+                                                            <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+                                                                <span className="font-medium text-text-secondary">
+                                                                    {dev.browser}
+                                                                </span>
                                                                 <span className="text-text-disabled">·</span>
-                                                                <p className="text-xs text-text-muted flex items-center gap-1">
-                                                                    <Clock className="h-3 w-3" />
-                                                                    {new Date(s.createdAt).toLocaleDateString()}
-                                                                </p>
+                                                                <span className="flex items-center gap-1 font-mono text-[11px]">
+                                                                    <Globe className="h-3 w-3 text-text-muted shrink-0" />
+                                                                    {ip}
+                                                                </span>
+                                                                <span className="text-text-disabled">·</span>
+                                                                <span className="flex items-center gap-1 text-[11px]">
+                                                                    <Clock className="h-3 w-3 shrink-0" />
+                                                                    {new Date(s.createdAt).toLocaleDateString(undefined, {
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                        year: "numeric",
+                                                                    })}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {!isCurrent && (
+                                                    {!isCurrent ? (
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRevokeSession(s.token)}
                                                             disabled={revokingToken === s.token}
-                                                            className="shrink-0 self-start sm:self-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-error/20 bg-error/5 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/15 disabled:opacity-50"
+                                                            className="shrink-0 self-start sm:self-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-error/20 bg-error/5 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/15 active:scale-95 disabled:opacity-50"
                                                         >
                                                             {revokingToken === s.token ? (
                                                                 <Cardio size="36" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
@@ -727,6 +749,10 @@ export default function SettingsPage() {
                                                             )}
                                                             Revoke
                                                         </button>
+                                                    ) : (
+                                                        <span className="shrink-0 self-start sm:self-auto text-xs font-semibold text-text-muted px-2 py-1">
+                                                            Active Now
+                                                        </span>
                                                     )}
                                                 </div>
                                             );
@@ -848,7 +874,7 @@ export default function SettingsPage() {
                                 type="button"
                                 onClick={handleRevokeAll}
                                 disabled={revokeAllLoading || sessions.length <= 1}
-                                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning transition-all hover:bg-warning/20 disabled:opacity-40"
+                                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-error/30 bg-error/10 px-4 py-2 text-sm font-semibold text-error transition-all hover:bg-error/20 disabled:opacity-40"
                             >
                                 {revokeAllLoading ? (
                                     <Cardio size="42" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />

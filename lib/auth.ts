@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { username } from "better-auth/plugins";
+import { username, twoFactor } from "better-auth/plugins";
 import { db } from "./db";
 import { APP_URL } from "./site-config";
 import * as schema from "./../db/schema";
@@ -16,7 +16,8 @@ export const auth = betterAuth({
             user: schema.users,
             session: schema.sessions,
             account: schema.accounts,
-            verification: schema.verifications
+            verification: schema.verifications,
+            twoFactor: schema.twoFactors
         }
     }),
     databaseHooks: {
@@ -53,7 +54,44 @@ export const auth = betterAuth({
         },
     },
     plugins: [
-        username()
+        username(),
+        twoFactor({
+            issuer: "Logged",
+            allowPasswordless: true,
+            otpOptions: {
+                sendOTP: async ({ user, otp }) => {
+                    const result = await resend.emails.send({
+                        from: "Logged <noreply@info.oheo.site>",
+                        to: user.email,
+                        subject: "Your Logged verification code",
+                        html: `
+                            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; background: #ffffff; color: #1a1a1a;">
+                                <img src="${APP_URL}/logo/logo.png" alt="Logged" width="120" style="display: block; margin-bottom: 24px;" />
+                                <h1 style="color: #111827; font-size: 22px; font-weight: 700; margin-bottom: 12px;">Two-Factor Authentication Code</h1>
+                                <p style="color: #4b5563; font-size: 15px; line-height: 1.5; margin-bottom: 24px;">
+                                    Use the one-time code below to verify your sign-in to Logged:
+                                </p>
+                                <div style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
+                                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #111827;">${otp}</span>
+                                </div>
+                                <p style="color: #6b7280; font-size: 13px; line-height: 1.5; margin-bottom: 8px;">
+                                    This code will expire in 3 minutes.
+                                </p>
+                                <p style="color: #9ca3af; font-size: 12px; line-height: 1.4;">
+                                    If you didn't attempt to sign in to Logged, someone else may know your password. Please secure your account.
+                                </p>
+                            </div>
+                        `,
+                    });
+
+                    if (result.error) {
+                        throw new Error(
+                            `Resend rejected the 2FA OTP email: ${result.error.message}`
+                        );
+                    }
+                },
+            },
+        }),
     ],
     baseURL: APP_URL,
     socialProviders: {
