@@ -632,7 +632,7 @@ export default function SettingsPage() {
                 {/* ── Security ─────────────────────────────────────────────── */}
                 <div id="security" className="space-y-6 scroll-mt-24">
                     <div className="glass rounded-[var(--radius-lg)] px-3 py-6 shadow-sm">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div className="flex flex-row items-center justify-between gap-3 mb-6 flex-wrap">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
                                     <Shield className="h-5 w-5 text-primary" />
@@ -749,11 +749,7 @@ export default function SettingsPage() {
                                                             )}
                                                             Revoke
                                                         </button>
-                                                    ) : (
-                                                        <span className="shrink-0 self-start sm:self-auto text-xs font-semibold text-text-muted px-2 py-1">
-                                                            Active Now
-                                                        </span>
-                                                    )}
+                                                    ) : null}
                                                 </div>
                                             );
                                         })
@@ -863,7 +859,7 @@ export default function SettingsPage() {
 
                     <div className="space-y-3">
                         {/* Sign out all sessions */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-border bg-background/30 p-4">
+                        <div className="flex flex-row items-start justify-between gap-4 rounded-2xl border border-border bg-background/30 p-4">
                             <div>
                                 <p className="text-sm font-semibold text-text">Sign out of all sessions</p>
                                 <p className="text-xs text-text-secondary mt-0.5">
@@ -874,7 +870,7 @@ export default function SettingsPage() {
                                 type="button"
                                 onClick={handleRevokeAll}
                                 disabled={revokeAllLoading || sessions.length <= 1}
-                                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-error/30 bg-error/10 px-4 py-2 text-sm font-semibold text-error transition-all hover:bg-error/20 disabled:opacity-40"
+                                className="w-fit shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-error/30 bg-error/10 px-4 py-2 text-sm font-semibold text-error transition-all hover:bg-error/20 disabled:opacity-40"
                             >
                                 {revokeAllLoading ? (
                                     <Cardio size="42" color="currentColor" speed="1.5" stroke="4" bgOpacity="0.1" />
@@ -886,7 +882,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Delete account */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-error/20 bg-error/5 p-4">
+                        <div className="flex flex-row items-start justify-between gap-4 rounded-2xl border border-error/20 bg-error/5 p-4">
                             <div>
                                 <p className="text-sm font-semibold text-error">Delete account</p>
                                 <p className="text-xs text-text-secondary mt-0.5">
@@ -896,7 +892,7 @@ export default function SettingsPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowDeleteModal(true)}
-                                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-error px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-red-600 active:scale-95"
+                                className="w-fit shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-error px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-red-600 active:scale-95"
                             >
                                 <Trash2 className="h-4 w-4" />
                                 Delete
