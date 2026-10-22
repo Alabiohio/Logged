@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 const links = {
   Product: [
     { label: "Features", href: "/features" },
+    { label: "Pricing", href: "/#pricing" },
     { label: "Documentation", href: "/docs" },
     { label: "Changelog", href: "/changelog" },
   ],

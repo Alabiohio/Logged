@@ -12,6 +12,7 @@ import InterestingFacts from "@/components/landing/InterestingFacts";
 import Comparison from "@/components/landing/Comparison";
 import QuickDemo from "@/components/landing/QuickDemo";
 import ProcessPipeline from "@/components/landing/ProcessPipeline";
+import Pricing from "@/components/landing/Pricing";
 
 export const metadata: Metadata = {
   title: {
@@ -40,6 +41,7 @@ export default function Home() {
       <Comparison />
       <QuickDemo />
       <HowItWorks />
+      <Pricing />
       <FAQ />
       <CTA />
       <Footer />
