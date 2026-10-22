@@ -110,8 +110,13 @@ export function TwoFactorSection() {
                 return;
             }
 
-            const uri = res?.data?.totpURI;
-            const codes = res?.data?.backupCodes || [];
+            if (!res?.data || res.data.method !== "totp") {
+                setModalError("Server did not return a TOTP URI");
+                return;
+            }
+
+            const uri = res.data.totpURI;
+            const codes = res.data.backupCodes || [];
 
             if (!uri) {
                 setModalError("Server did not return a TOTP URI");
