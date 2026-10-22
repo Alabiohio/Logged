@@ -153,16 +153,6 @@ export default function PricingClient({ initialPlans, paygRate: initialPaygRate 
 
       {/* Header section */}
       <div className="mx-auto max-w-3xl text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-bold tracking-wider text-primary uppercase"
-        >
-          <Zap size={13} className="fill-primary/20" />
-          TRANSPARENT PRICING
-        </motion.div>
 
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -216,7 +206,6 @@ export default function PricingClient({ initialPlans, paygRate: initialPaygRate 
                 <>
                   <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
                   <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white shadow-md shadow-primary/25">
-                    <Sparkles size={12} />
                     Popular
                   </div>
                 </>
