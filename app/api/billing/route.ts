@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getUserSubscription, ensureFreeSub } from "@/lib/billing/subscription";
 import { getUserLimits, getUserPlan, syncUserProjectLimits } from "@/lib/billing/entitlements";
-import { getCurrentUsage, getPaygAccrual } from "@/lib/billing/usage";
+import { getCurrentUsage, getPaygAccrual, syncUserUsage } from "@/lib/billing/usage";
 import { getBillingEnabled } from "@/lib/billing/config";
 import { db } from "@/lib/db";
 import { plans, projects } from "@/db/schema";
@@ -21,6 +21,7 @@ export async function GET() {
   try {
     const userId = session.user.id;
     await syncUserProjectLimits(userId);
+    await syncUserUsage(userId);
     let subWithPlan = await getUserSubscription(userId);
     if (!subWithPlan) {
       await ensureFreeSub(userId);

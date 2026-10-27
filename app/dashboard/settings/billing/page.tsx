@@ -16,7 +16,8 @@ import {
   FolderKanban,
   Clock,
   Check,
-  WalletCards
+  WalletCards,
+  ChevronLeft
 } from "lucide-react";
 import { Cardio } from "ldrs/react";
 import "ldrs/react/Cardio.css";
@@ -606,9 +607,13 @@ export default function BillingPage() {
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-2 border-b border-border/50 pb-6">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
-              <CreditCard className="h-5 w-5 text-primary" />
-            </div>
+            <Link
+              href="/dashboard/settings"
+              aria-label="Back to Settings"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl hover:bg-primary/10 transition active:scale-95"
+            >
+              <ChevronLeft className="h-6 w-6 text-primary" strokeWidth={4} />
+            </Link>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-text">
                 Billing & Subscription
@@ -618,14 +623,6 @@ export default function BillingPage() {
               </p>
             </div>
           </div>
-        </div>
-        <div>
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/30 px-3 py-2 text-xs font-semibold text-text-secondary hover:text-text transition"
-          >
-            ← Back to Settings
-          </Link>
         </div>
       </section>
 

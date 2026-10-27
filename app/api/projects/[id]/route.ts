@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { projects, apiKeys, logs } from "@/db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, count, gte, lte } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import {
@@ -11,6 +11,8 @@ import {
     ProjectForbiddenError,
     UnauthorizedProjectAccessError,
 } from "@/lib/projects";
+import { getCurrentPeriod, decrementUsage, syncUserUsage } from "@/lib/billing/usage";
+import { syncUserProjectLimits } from "@/lib/billing/entitlements";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await auth.api.getSession({
@@ -192,6 +194,19 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             throw error;
         }
 
+        const { periodStart, periodEnd } = getCurrentPeriod();
+        const [projectLogs] = await db
+            .select({ count: count() })
+            .from(logs)
+            .where(
+                and(
+                    eq(logs.projectId, id),
+                    gte(logs.createdAt, periodStart),
+                    lte(logs.createdAt, periodEnd)
+                )
+            );
+        const logsInPeriod = projectLogs?.count ?? 0;
+
         const deletedProject = await db
             .delete(projects)
             .where(projectOwnershipCondition(id, session.user.id))
@@ -200,6 +215,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         if (deletedProject.length === 0) {
             return NextResponse.json({ error: "Project not found" }, { status: 404 });
         }
+
+        if (logsInPeriod > 0) {
+            await decrementUsage(session.user.id, logsInPeriod);
+        }
+        await syncUserProjectLimits(session.user.id, { restoreWithinPlanLimit: true });
+        await syncUserUsage(session.user.id);
 
         return NextResponse.json({ message: "Project deleted successfully" });
     } catch (error) {

@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getUserLimits } from "@/lib/billing/entitlements";
-import { getPaygAccrual } from "@/lib/billing/usage";
+import { getPaygAccrual, syncUserUsage } from "@/lib/billing/usage";
 import { getBillingConfig } from "@/lib/billing/config";
 import { db } from "@/lib/db";
 import { userBillingPreferences } from "@/db/schema";
@@ -23,6 +23,7 @@ export async function GET() {
   try {
     const userId = session.user.id;
     await ensureUserBillingPreferences(userId);
+    await syncUserUsage(userId);
 
     const [limits, accrual, config, billingProfile] = await Promise.all([
       getUserLimits(userId),

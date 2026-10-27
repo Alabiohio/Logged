@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
     User, Shield, Bell, Globe, Save, AlertCircle, CheckCircle2,
     Monitor, Smartphone, Laptop, Tablet, Trash2, LogOut, Link2, Clock,
-    Database, TriangleAlert, Key, Copy, Check, CreditCard, MapPin
+    Database, TriangleAlert, Key, Copy, Check, CreditCard, MapPin, ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { Cardio } from "ldrs/react";
@@ -441,9 +441,10 @@ export default function SettingsPage() {
                             </div>
                             <Link
                                 href="/dashboard/settings/billing"
-                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:bg-primary-hover shadow-sm"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-md font-bold text-white transition hover:bg-primary-hover shadow-sm"
                             >
-                                Open Billing Portal →
+                                Open Billing
+                                <ChevronRight className="h-5 w-5" strokeWidth={4} />
                             </Link>
                         </div>
                     </div>

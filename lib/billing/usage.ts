@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
-import { usage } from "@/db/schema";
+import { usage, logs, projects } from "@/db/schema";
 import { getBillingConfig } from "./config";
 import { getUserLimits } from "./entitlements";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, count, gte, lte } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 export function getPeriodForDate(date: Date = new Date()): { periodStart: Date; periodEnd: Date } {
@@ -103,6 +103,59 @@ export async function incrementUsage(userId: string, count: number = 1): Promise
       });
   } catch (error) {
     console.error(`Failed to increment usage for user ${userId}:`, error);
+  }
+}
+
+export async function decrementUsage(userId: string, count: number = 1): Promise<void> {
+  if (count <= 0) return;
+
+  const { periodStart } = getCurrentPeriod();
+
+  try {
+    await db
+      .update(usage)
+      .set({
+        logsCount: sql`GREATEST(0, ${usage.logsCount} - ${count})`,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(usage.userId, userId), eq(usage.periodStart, periodStart)));
+  } catch (error) {
+    console.error(`Failed to decrement usage for user ${userId}:`, error);
+  }
+}
+
+export async function syncUserUsage(userId: string): Promise<void> {
+  const { periodStart, periodEnd } = getCurrentPeriod();
+
+  try {
+    const [result] = await db
+      .select({ count: count() })
+      .from(logs)
+      .innerJoin(projects, eq(logs.projectId, projects.id))
+      .where(
+        and(
+          eq(projects.userId, userId),
+          gte(logs.createdAt, periodStart),
+          lte(logs.createdAt, periodEnd)
+        )
+      );
+
+    const activeLogsCount = result?.count ?? 0;
+    const current = await getCurrentUsage(userId);
+
+    // If recorded usage in DB exceeds logs in active projects (e.g. project deleted),
+    // sync recorded usage to reflect active projects.
+    if (current.logsCount > activeLogsCount) {
+      await db
+        .update(usage)
+        .set({
+          logsCount: activeLogsCount,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(usage.userId, userId), eq(usage.periodStart, periodStart)));
+    }
+  } catch (error) {
+    console.error(`Failed to sync user usage for user ${userId}:`, error);
   }
 }
 

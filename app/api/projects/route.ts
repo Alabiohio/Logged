@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { getProjectsForUser } from "@/lib/projects";
 import { canCreateProject, syncUserProjectLimits } from "@/lib/billing/entitlements";
+import { syncUserUsage } from "@/lib/billing/usage";
 
 export async function GET() {
     const session = await auth.api.getSession({
@@ -18,6 +19,7 @@ export async function GET() {
 
     try {
         await syncUserProjectLimits(session.user.id);
+        await syncUserUsage(session.user.id);
         const userProjects = await getProjectsForUser(session.user.id);
 
         return NextResponse.json(userProjects);
