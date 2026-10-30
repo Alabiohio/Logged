@@ -106,10 +106,8 @@ export const auth = betterAuth({
         }),
     ],
     baseURL: APP_URL,
-    advanced: {
-        redirects: {
-            error: "/auth-error",
-        },
+    onAPIError: {
+        errorURL: "/auth-error",
     },
     socialProviders: {
         google: {
