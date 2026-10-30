@@ -12,3 +12,4 @@ That protects users and makes Logged look much more professional.
 
 One particularly valuable feature for your product would be a PII/secret detection engine that scans incoming logs and automatically masks emails, phone numbers, API keys, JWTs, passwords, card numbers, etc. That could become a real differentiator for Logged rather than just being another log dashboard.
 
+http://localhost:3000/api/auth/error?error=internal_server_error

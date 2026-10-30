@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { APP_URL } from "@/lib/site-config";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -686,5 +687,225 @@ export async function sendAdminUnauthorizedAlertEmail({
         });
     } catch (err) {
         console.error("Failed to send admin unauthorized security alert email:", err);
+    }
+}
+
+export async function sendWelcomeEmail({
+    to,
+    userName,
+}: {
+    to: string;
+    userName?: string | null;
+}) {
+    if (!process.env.RESEND_API_KEY) {
+        console.warn("RESEND_API_KEY is not set. Skipping welcome email.");
+        return { success: false, error: "RESEND_API_KEY is not configured" };
+    }
+
+    const appUrl = APP_URL || "https://logged.oheo.site";
+    const displayName = userName?.trim() ? userName.trim() : "there";
+    const currentYear = new Date().getFullYear();
+
+    try {
+        const result = await resend.emails.send({
+            from: "Logged <logged@info.oheo.site>",
+            to,
+            subject: "Welcome to Logged",
+            html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Welcome to Logged</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f4f5f7; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#111827;">
+
+    <!-- Outer wrapper -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5f7; margin:0; padding:0;">
+        <tr>
+            <td align="center" style="padding:48px 20px;">
+
+                <!-- Main container -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; margin:0 auto;">
+
+                    <!-- Brand Header -->
+                    <tr>
+                        <td style="padding:0 0 20px 4px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td valign="middle" style="padding-right:9px;">
+                                        <img
+                                            src="https://logged.oheo.site/logo/logo.png"
+                                            width="32"
+                                            height="32"
+                                            alt="Logged"
+                                            style="display:block; width:32px; height:32px; border:0; outline:none; text-decoration:none; border-radius:8px;"
+                                        >
+                                    </td>
+                                    <td valign="middle">
+                                        <span style="font-size:22px; line-height:28px; font-weight:800; letter-spacing:-0.5px; color:#424A55;">
+                                            Logged
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Main card -->
+                    <tr>
+                        <td style="background-color:#ffffff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+
+                            <!-- Header banner -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding:36px 36px 28px 36px; border-bottom:1px solid #f0f1f3; background: linear-gradient(180deg, #fbfcfe 0%, #ffffff 100%);">
+
+                                        <h1 style="margin:20px 0 8px 0; padding:0; font-size:26px; line-height:34px; font-weight:800; letter-spacing:-0.6px; color:#111827;">
+                                            Welcome to Logged, ${displayName}!
+                                        </h1>
+
+                                        <p style="margin:0; padding:0; font-size:15px; line-height:24px; color:#4b5563;">
+                                            We're excited to have you on board. Logged gives you centralized log streaming, instant error detection, and real-time observability across all your applications.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Content body -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding:32px 36px 36px 36px;">
+
+                                        <!-- Subtitle -->
+                                        <h2 style="margin:0 0 16px 0; font-size:16px; font-weight:700; color:#111827; letter-spacing:-0.2px;">
+                                            Quick Start Guide: Get Up &amp; Running in 3 Steps
+                                        </h2>
+
+                                        <!-- Steps Container -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+
+                                            <!-- Step 1 -->
+                                            <tr>
+                                                <td valign="top" style="padding-bottom:18px;">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td valign="top" style="width:32px;">
+                                                                <div style="width:24px; height:24px; border-radius:50%; background-color:#f1f5f9; border:1px solid #cbd5e1; text-align:center; line-height:24px; font-size:12px; font-weight:700; color:#475569;">1</div>
+                                                            </td>
+                                                            <td valign="top" style="padding-left:10px;">
+                                                                <p style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#111827;">Create your first project</p>
+                                                                <p style="margin:0; font-size:13px; line-height:20px; color:#6b7280;">Go to your dashboard, create a new project, and get an ingestion API key instantly.</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Step 2 -->
+                                            <tr>
+                                                <td valign="top" style="padding-bottom:18px;">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td valign="top" style="width:32px;">
+                                                                <div style="width:24px; height:24px; border-radius:50%; background-color:#f1f5f9; border:1px solid #cbd5e1; text-align:center; line-height:24px; font-size:12px; font-weight:700; color:#475569;">2</div>
+                                                            </td>
+                                                            <td valign="top" style="padding-left:10px;">
+                                                                <p style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#111827;">Install the SDK</p>
+                                                                <p style="margin:0; font-size:13px; line-height:20px; color:#6b7280;">Plug our lightweight library into your Node.js, Next.js, or browser apps.</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Step 3 -->
+                                            <tr>
+                                                <td valign="top">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td valign="top" style="width:32px;">
+                                                                <div style="width:24px; height:24px; border-radius:50%; background-color:#f1f5f9; border:1px solid #cbd5e1; text-align:center; line-height:24px; font-size:12px; font-weight:700; color:#475569;">3</div>
+                                                            </td>
+                                                            <td valign="top" style="padding-left:10px;">
+                                                                <p style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#111827;">Stream logs &amp; monitor in real time</p>
+                                                                <p style="margin:0; font-size:13px; line-height:20px; color:#6b7280;">Inspect live log streams, filter by severity, and receive automated alerts before users notice.</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+
+                                        </table>
+
+                                        <!-- Call to Action Button -->
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                            <tr>
+                                                <td align="center">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                        <tr>
+                                                            <td style="border-radius:8px; background-color:#111827;">
+                                                                <a
+                                                                    href="${appUrl}/dashboard"
+                                                                    style="display:inline-block; padding:14px 28px; font-size:15px; line-height:20px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:8px; letter-spacing:-0.2px;"
+                                                                >
+                                                                    Go to Dashboard →
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Help note -->
+                                        <p style="margin:28px 0 0 0; text-align:center; font-size:13px; line-height:20px; color:#6b7280;">
+                                            Need help or have questions? Check out our
+                                            <a href="${appUrl}/docs" style="color:#2563eb; text-decoration:underline;">documentation</a>
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:28px 0 0 0; text-align:center;">
+                            <p style="margin:0 0 8px 0; font-size:12px; line-height:18px; color:#9ca3af;">
+                                © ${currentYear} Logged. Offered by <a href="https://oheo.site" style="color:#525D6D; text-decoration:underline">Oheo</a>.
+                            </p>
+                            <p style="margin:0; font-size:12px; line-height:18px; color:#9ca3af;">
+                                You received this email because an account was registered with <strong style="color:#6b7280;">${to}</strong>.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+            `,
+        });
+
+        if (result.error) {
+            console.error("Resend error sending welcome email:", result.error);
+            return { success: false, error: result.error };
+        }
+
+        return { success: true, data: result.data };
+    } catch (error) {
+        console.error("Failed to send welcome email:", error);
+        return { success: false, error };
     }
 }

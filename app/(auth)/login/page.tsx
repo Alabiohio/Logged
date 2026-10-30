@@ -302,6 +302,12 @@ function LoginForm() {
                         Back to Home
                     </Link>
                 </div>
+                <p className="text-xs text-text-muted">
+                    Having troubles signing in?{" "}
+                    <a href="https://oheo.site/inquiry" target="_blank" rel="noopener noreferrer" className="font-semibold text-text-secondary hover:text-text transition-colors underline underline-offset-2">
+                        Contact us
+                    </a>
+                </p>
             </div>
         </div>
     );

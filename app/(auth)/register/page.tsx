@@ -132,10 +132,10 @@ export default function RegisterPage() {
                         <Mail className="h-8 w-8 text-primary" />
                     </motion.div>
                     <h2 className="text-2xl font-hero font-bold tracking-tight text-text">
-                        Check your email
+                        Welcome to Logged!
                     </h2>
                     <p className="text-sm font-bold text-text-secondary">
-                        We sent a verification link to <span className="font-semibold text-text">{email}</span>. Click the link to verify your account.
+                        We sent a welcome message and verification link to <span className="font-semibold text-text">{email}</span>. Please click the link to verify your account and get started.
                     </p>
                     <Link
                         href="/login"
@@ -283,6 +283,12 @@ export default function RegisterPage() {
                             Back to Home
                         </Link>
                     </div>
+                    <p className="text-xs text-text-muted">
+                        Having troubles signing in?{" "}
+                        <a href="https://oheo.site/inquiry" target="_blank" rel="noopener noreferrer" className="font-semibold text-text-secondary hover:text-text transition-colors underline underline-offset-2">
+                            Contact us
+                        </a>
+                    </p>
                 </div>
             </motion.div>
         </div>

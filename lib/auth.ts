@@ -6,6 +6,7 @@ import { APP_URL } from "./site-config";
 import * as schema from "./../db/schema";
 import { Resend } from "resend";
 import { ensureFreeSub } from "./billing/subscription";
+import { sendWelcomeEmail } from "./email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -28,6 +29,17 @@ export const auth = betterAuth({
                         await ensureFreeSub(user.id);
                     } catch (error) {
                         console.error(`Failed to create free subscription for user ${user.id}:`, error);
+                    }
+
+                    try {
+                        if (user.email) {
+                            await sendWelcomeEmail({
+                                to: user.email,
+                                userName: user.name,
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Failed to send welcome email to user ${user.id} (${user.email}):`, error);
                     }
                 },
             },
@@ -94,6 +106,11 @@ export const auth = betterAuth({
         }),
     ],
     baseURL: APP_URL,
+    advanced: {
+        redirects: {
+            error: "/auth-error",
+        },
+    },
     socialProviders: {
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -155,7 +172,7 @@ export const auth = betterAuth({
                 html: `
                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
                             <img src="${APP_URL}/logo/logo.png" alt="Logged" width="120" style="display: block; margin-bottom: 24px;" />
-                            <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 16px;">Welcome to <span class="color: #727D8F">Logged<span/></h1>
+                            <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 16px;">Welcome to <span style="color: #727D8F">Logged</span></h1>
                             <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
                                 Thanks for signing up! Please verify your email address to get started.
                             </p>
